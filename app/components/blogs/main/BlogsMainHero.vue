@@ -58,7 +58,7 @@ const localePath = useLocalePath()
                   size="sm"
                   target="_blank"
                   :aria-label="social.label"
-                  class="hover:text-primary-500 transition-colors"
+                  class="hover:text-primary-500 dark:text-gray-300 transition-colors"
                 />
               </UTooltip>
             </div>
