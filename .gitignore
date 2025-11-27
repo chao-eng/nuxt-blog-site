@@ -1,0 +1,32 @@
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+
+# VSC
+.history
+
+# 屏蔽根目录 data，不屏蔽 /app/data
+/data
+!/app/data
+
+static/
+.vscode
+
+.env.development
+.env.production

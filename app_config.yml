@@ -1,0 +1,47 @@
+navbarData:
+  homeTitle: '布吉岛'
+
+footerData:
+  author: '布吉岛'
+  aboutAuthor: '从事Java研发相关工作。'
+  authorInterest: '一个热衷折腾的后端工程师，欢迎联系我'
+  aboutTheSite: '这是一个使用Nuxt3、TailwindCSS 和Nuxt Icon构建的个人博客网站。'
+
+homePage:
+  title: '人生没有白走的路，每一步都算数'
+  description: '不追热点、不凑流量，仅随手记录可复用的干货与思考'
+
+blogsPage:
+  title: '查看文章'
+  description: '查看最新发布的文章，了解最新的技术动态。'
+
+tagsPage:
+  title: '标签分类'
+  description: '浏览所有文章标签，快速找到感兴趣的技术内容。'
+
+aboutPage:
+  title: '不羁C'
+  description: '软件工程师，问题解决者，网络爱好者。'
+  aboutMe: '你好！我是一名软件开发者，日常主要从事Java开发相关工作。工作中会接触各类前后端技术，也乐于在实践中积累和总结经验。如果有技术相关的交流想法，欢迎随时联系。'
+
+seoData:
+  title: '布吉岛的博客'
+  ogTitle: '让我们学习Javascript、Typescript、Vue、Nuxt来解决问题 —— 布吉岛的博客'
+  mailAddress: 'bujidec@gmail.com'
+
+socialLinks:
+  - icon: 'i-simple-icons-github'
+    to: 'https://github.com/chao-eng'
+    label: 'GitHub'
+  - icon: 'simple-icons:juejin'
+    to: 'https://juejin.cn/user/3659594442745069'
+    label: '掘金'
+  - icon: 'streamline-ultimate:bilibili-logo-bold'
+    to: 'https://space.bilibili.com/512112323'
+    label: '哔哩哔哩'
+  - icon: 'ri:zhihu-line'
+    to: 'https://www.zhihu.com/people/xiao-huo-zi-50-29'
+    label: '知乎'
+  - icon: 'simple-icons:tiktok'
+    to: 'https://www.douyin.com/user/MS4wLjABAAAAXph7uAKMQvLlMEPo16cjMHkErcfZqPbP6uAlRNfOUxU?from_tab_name=main'
+    label: '抖音'

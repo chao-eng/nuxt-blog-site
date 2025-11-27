@@ -1,0 +1,32 @@
+{
+  // https://nuxt.com/docs/guide/concepts/typescript
+  "files": [],
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": [
+        "./app/*"
+      ]
+    },
+    "types": [
+      "node",
+      "nuxt"
+    ],
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules"
+    ] // 搜索类型文件的目录
+  },
+  "include": [
+    "server/**/*",
+    "pages/**/*",
+    "app.vue"
+  ], // 包含服务端代码
+  "exclude": [
+    "node_modules"
+  ]
+}
