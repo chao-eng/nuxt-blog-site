@@ -51,7 +51,7 @@
 
 ### 前置要求
 - **Node.js**: >= 20.0.0
-- **包管理器**: pnpm (推荐), yarn, 或 npm
+- **包管理器**: yarn (推荐), pnpm, 或 npm
 
 ### 1. 获取代码
 ```bash
@@ -61,12 +61,12 @@ cd nuxt-blog-site
 
 ### 2. 安装依赖
 ```bash
-pnpm install
+yarn install
 ```
 
 ### 3. 启动开发环境
 ```bash
-pnpm dev
+yarn dev
 ```
 启动成功后，访问 `http://localhost:3000` 即可预览网站。
 
@@ -86,7 +86,7 @@ cp .env.development.example .env.development
 **关键配置项说明：**
 ```yml
 # 数据库文件存储路径
-NUXT_DB_PATH: /data/blog.db
+NUXT_DB_PATH: ‘/data/blog.db’
 
 # 文章存放路径
 NUXT_BASE_PATH: '/data/blog'
@@ -167,18 +167,24 @@ cp .env.production.example .env.production
 
 ```bash
 docker build -t nuxt-blog-site .
-docker run -d -p 3000:3000 -v $(pwd)/data:/app/data nuxt-blog-site
+docker run -d -p 3000:3000 \
+  -v $(pwd)/data:/data \
+  -v $(pwd)/data/blog:/data/blog \
+  -v $(pwd)/public/uploads:/uploads \
+  nuxt-blog-site
 ```
 
 ### 常规部署
-1. 构建生产包：
+1. 环境变量配置
+    ```bash
+    cp .env.production.example .env.production
+    ```
+2. 构建生产包：
    ```bash
-   pnpm build
+   yarn build
    ```
-2. 运行服务：
+3. 运行服务：
    ```bash
    node .output/server/index.mjs
    ```
-
----
 
