@@ -44,18 +44,23 @@ const localePath = useLocalePath()
 
             <!-- 社交链接 -->
             <div class="flex justify-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <UButton
+              <UTooltip
                 v-for="social in socialLinks"
                 :key="social.label"
-                :icon="social.icon"
-                :to="social.to"
-                variant="ghost"
-                color="gray"
-                size="sm"
-                target="_blank"
-                :aria-label="social.label"
-                class="hover:text-primary-500 transition-colors"
-              />
+                :text="social.label"
+                :popper="{ placement: 'top' }"
+              >
+                <UButton
+                  :icon="social.icon"
+                  :to="social.to"
+                  variant="ghost"
+                  color="gray"
+                  size="sm"
+                  target="_blank"
+                  :aria-label="social.label"
+                  class="hover:text-primary-500 transition-colors"
+                />
+              </UTooltip>
             </div>
 
             <!-- 查看更多按钮 -->

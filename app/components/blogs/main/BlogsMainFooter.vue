@@ -78,18 +78,23 @@ const { data: umamiStats } = await useFetch('/api/umami/stats', {
             </div>
             <!-- 社交图标 -->
             <div v-if="socialItems.length" class="flex items-center gap-2">
-              <UButton
+              <UTooltip
                 v-for="social in socialItems"
                 :key="social.label"
-                :to="social.to"
-                target="_blank"
-                size="sm"
-                variant="ghost"
-                color="gray"
-                square
+                :text="social.label"
+                :popper="{ placement: 'top' }"
               >
-                <UIcon :name="social.icon" class="w-5 h-5" />
-              </UButton>
+                <UButton
+                  :to="social.to"
+                  target="_blank"
+                  size="sm"
+                  variant="ghost"
+                  color="gray"
+                  square
+                >
+                  <UIcon :name="social.icon" class="w-5 h-5" />
+                </UButton>
+              </UTooltip>
             </div>
           </div>
           <div v-else>
