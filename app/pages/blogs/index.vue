@@ -118,41 +118,35 @@ useHead({
   <main class="container max-w-5xl mx-auto text-zinc-600">
     <UContainer class="py-8">
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <!-- 搜索头部 -->
-        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-          <div class="space-y-4">
-            <div class="flex justify-end gap-4">
-              <!-- 每页数量选择 -->
-              <USelectMenu
-                v-model="elementPerPage"
-                :items="pageSizeOptions"
-                :search-input="false"
-                value-key="value"
-                label-key="label"
-                size="lg"
-                class="min-w-[140px]"
-                :ui="{
-                  base: 'h-12 bg-gray-50 dark:bg-gray-900 border-0 focus:ring-2 focus:ring-primary-500'
-                }"
-              />
+        <!-- 统计与筛选栏 -->
+        <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+              <span v-if="searchStats.hasSearch">
+                {{ $t('blog.found') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ searchStats.filtered }}</span> {{ $t('blog.articles') }}
+                （{{ $t('blog.total') }} {{ searchStats.total }} {{ $t('blog.piece') }}）
+              </span>
+              <span v-else>
+                {{ $t('blog.total') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ searchStats.total }}</span> {{ $t('blog.articles') }}
+              </span>
+              <UBadge v-if="searchStats.hasSearch" variant="soft" color="primary" size="sm">
+                {{ $t('blog.searchResults') }}
+              </UBadge>
             </div>
-
-            <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 px-1">
-              <div class="flex items-center gap-4">
-                <span v-if="searchStats.hasSearch">
-                  {{ $t('blog.found') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ searchStats.filtered }}</span> {{ $t('blog.articles') }}
-                  （{{ $t('blog.total') }} {{ searchStats.total }} {{ $t('blog.piece') }}）
-                </span>
-                <span v-else>
-                  {{ $t('blog.total') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ searchStats.total }}</span> {{ $t('blog.articles') }}
-                </span>
-              </div>
-              <div v-if="searchStats.hasSearch">
-                <UBadge variant="soft" color="primary" size="sm">
-                  {{ $t('blog.searchResults') }}
-                </UBadge>
-              </div>
-            </div>
+            
+            <!-- 每页数量选择 -->
+            <USelectMenu
+              v-model="elementPerPage"
+              :items="pageSizeOptions"
+              :search-input="false"
+              value-key="value"
+              label-key="label"
+              size="md"
+              class="min-w-[120px]"
+              :ui="{
+                base: 'h-9  border-0 focus:ring-2 focus:ring-primary-500'
+              }"
+            />
           </div>
         </div>
 
