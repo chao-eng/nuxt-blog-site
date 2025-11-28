@@ -60,7 +60,7 @@ const hasImage = computed(() => {
       <!-- 主内容区域 -->
       <div class="flex gap-4 relative">
         <!-- 置顶标识 -->
-        <div v-if="isSticky" class="absolute top-0 right-0 z-10">
+        <div v-if="isSticky" class="absolute top-0 right-0">
           <UIcon name="i-lucide-pin" class="text-orange-500 w-4 h-4" />
         </div>
 
