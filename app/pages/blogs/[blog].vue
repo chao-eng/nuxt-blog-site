@@ -305,11 +305,11 @@ watch(() => $router.currentRoute.value.path, () => {
 
 <template>
   <div class="article-page">
-    <div class="page-content">
+    <div class="page-content ">
       <!-- 主要文章内容区域 -->
       <main class="article-content">
         <UContainer class="py-8">
-          <div class="article-container max-w-4xl mx-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
+          <div class="bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none article-container max-w-4xl mx-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
             <!-- 文章头部信息 -->
             <header class="px-6 lg:px-8 py-8 border-b border-gray-200 dark:border-gray-700">
               <!-- 标题 -->

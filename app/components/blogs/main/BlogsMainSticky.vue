@@ -74,7 +74,7 @@ const articles = computed(() => stickyData.value?.articles || [])
         :style="{ animationDelay: `${index * 100}ms` }"
         @click="navigateTo(post.to)"
       >
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1 border border-gray-100 dark:border-gray-700 relative">
+        <div class="bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1 border border-gray-100 dark:border-gray-700 relative">
           
           <!-- 头部区域 - 只有日期 -->
           <div class="p-6 pb-4">

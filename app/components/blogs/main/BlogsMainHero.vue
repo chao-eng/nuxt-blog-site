@@ -7,7 +7,7 @@ const localePath = useLocalePath()
 </script>
 
 <template>
-  <div class="container mx-auto py-8">
+  <div class="container mx-auto py-8 ">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
       <!-- 原有的标题区域 -->
       <div class="px-6">
@@ -20,8 +20,8 @@ const localePath = useLocalePath()
       </div>
 
       <!-- 新增的关于我区域 -->
-      <div class="px-6">
-        <UCard class="shadow-lg">
+      <div class="px-6 ">
+        <UCard class="shadow-lg bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none ">
           <div class="text-center space-y-6">
             <!-- 头像 -->
             <div class="flex justify-center">
@@ -44,18 +44,23 @@ const localePath = useLocalePath()
 
             <!-- 社交链接 -->
             <div class="flex justify-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <UButton
+              <UTooltip
                 v-for="social in socialLinks"
                 :key="social.label"
-                :icon="social.icon"
-                :to="social.to"
-                variant="ghost"
-                color="gray"
-                size="sm"
-                target="_blank"
-                :aria-label="social.label"
-                class="hover:text-primary-500 transition-colors"
-              />
+                :text="social.label"
+                :popper="{ placement: 'top' }"
+              >
+                <UButton
+                  :icon="social.icon"
+                  :to="social.to"
+                  variant="ghost"
+                  color="gray"
+                  size="sm"
+                  target="_blank"
+                  :aria-label="social.label"
+                  class="hover:text-primary-500 dark:text-gray-300 transition-colors"
+                />
+              </UTooltip>
             </div>
 
             <!-- 查看更多按钮 -->
