@@ -128,83 +128,82 @@ useHead({
         </p>
       </div>
 
-      <!-- 筛选控制区域 -->
-      <!-- 筛选控制区域 -->
-      <div class="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-        <div class="space-y-4">
-          <!-- 第一行：统计信息和返回按钮 -->
-          <div class="flex items-center justify-between">
-            <!-- 左侧：当前标签信息 -->
-            <div class="flex items-center gap-4">
-              <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500 dark:text-gray-400">{{ $t('blog.currentTag') }}</span>
-                <UBadge
-                  variant="solid"
-                  color="primary"
-                  size="md"
-                  class="font-semibold px-3 py-1"
-                >
-                  {{ decodeURIComponent(tag || '') }}
-                </UBadge>
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <!-- 筛选控制区域 -->
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="space-y-4">
+            <!-- 第一行：统计信息和返回按钮 -->
+            <div class="flex items-center justify-between">
+              <!-- 左侧：当前标签信息 -->
+              <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm text-gray-500 dark:text-gray-400">{{ $t('blog.currentTag') }}</span>
+                  <UBadge
+                    variant="solid"
+                    color="primary"
+                    size="md"
+                    class="font-semibold px-3 py-1"
+                  >
+                    {{ decodeURIComponent(tag || '') }}
+                  </UBadge>
+                </div>
+                <span class="text-sm text-gray-500 dark:text-gray-400">
+                  {{ $t('blog.total') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ tagStats.total }}</span> {{ $t('blog.articles') }}
+                </span>
               </div>
-              <span class="text-sm text-gray-500 dark:text-gray-400">
-                {{ $t('blog.total') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ tagStats.total }}</span> {{ $t('blog.articles') }}
-              </span>
+
+              <!-- 右侧：返回按钮 -->
+              <NuxtLink :to="localePath('/tags')">
+                <UButton
+                  variant="outline"
+                  color="neutral"
+                  icon="i-heroicons-arrow-left"
+                  class="hover:shadow-sm"
+                >
+                  {{ $t('blog.returnAllTags') }}
+                </UButton>
+              </NuxtLink>
             </div>
 
-            <!-- 右侧：返回按钮 -->
-            <NuxtLink :to="localePath('/tags')">
-              <UButton
-                variant="outline"
-                color="neutral"
-                icon="i-heroicons-arrow-left"
-                class="hover:shadow-sm"
-              >
-                {{ $t('blog.returnAllTags') }}
-              </UButton>
-            </NuxtLink>
-          </div>
-
-          <!-- 第二行：每页数量选择 -->
-          <div class="flex items-center justify-end">
-            <div class="flex items-center gap-3">
-              <label class="text-sm text-gray-600 dark:text-gray-400">{{ $t('blog.itemsPerPageLabel') }}</label>
-              <USelectMenu
-                v-model="elementPerPage"
-                :items="pageSizeOptions"
-                :search-input="false"
-                value-key="value"
-                label-key="label"
-                size="md"
-                class="min-w-[120px]"
-                :ui="{
-                  base: 'h-9 bg-white dark:bg-gray-800 border-0 focus:ring-2 focus:ring-primary-500 shadow-sm'
-                }"
-              />
+            <!-- 第二行：每页数量选择 -->
+            <div class="flex items-center justify-end">
+              <div class="flex items-center gap-3">
+                <label class="text-sm text-gray-600 dark:text-gray-400">{{ $t('blog.itemsPerPageLabel') }}</label>
+                <USelectMenu
+                  v-model="elementPerPage"
+                  :items="pageSizeOptions"
+                  :search-input="false"
+                  value-key="value"
+                  label-key="label"
+                  size="md"
+                  class="min-w-[120px]"
+                  :ui="{
+                    base: 'h-9 bg-gray-50 dark:bg-gray-900 border-0 focus:ring-2 focus:ring-primary-500'
+                  }"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- 文章列表 -->
-      <div class="space-y-6 mb-8">
-        <template v-for="post in paginatedData" :key="post.path">
-          <BlogsArchiveCard
-            :path="post.path"
-            :title="post.title"
-            :date="post.date"
-            :description="post.description"
-            :image="post.image"
-            :alt="post.alt"
-            :tags="post.tags"
-            :published="post.published"
+        <!-- 文章列表 -->
+        <div class="mb-0">
+          <template v-for="post in paginatedData" :key="post.path">
+            <BlogsArchiveCard
+              :path="post.path"
+              :title="post.title"
+              :date="post.date"
+              :description="post.description"
+              :image="post.image"
+              :alt="post.alt"
+              :tags="post.tags"
+              :published="post.published"
 
-          />
-        </template>
+            />
+          </template>
 
-        <!-- 无文章时显示 -->
-        <div v-if="paginatedData.length === 0" class="text-center py-12">
-          <UCard>
+          <!-- 无文章时显示 -->
+          <div v-if="paginatedData.length === 0" class="text-center py-12">
             <div class="flex flex-col items-center space-y-4">
               <UIcon
                 name="i-heroicons-document-text"
@@ -228,20 +227,20 @@ useHead({
                 </UButton>
               </NuxtLink>
             </div>
-          </UCard>
+          </div>
         </div>
-      </div>
 
-      <!-- 分页控件 -->
-      <div v-if="totalPage > 1" class="flex justify-center">
-        <UPagination
-          :page="pageNumber"
-          :total="blogsData?.total || 0"
-          :items-per-page="elementPerPage"
-          :sibling-count="1"
-          show-edges
-          @update:page="handlePageChange"
-        />
+        <!-- 分页控件 -->
+        <div v-if="totalPage > 1" class="flex justify-center py-6 border-t border-gray-100 dark:border-gray-800">
+          <UPagination
+            :page="pageNumber"
+            :total="blogsData?.total || 0"
+            :items-per-page="elementPerPage"
+            :sibling-count="1"
+            show-edges
+            @update:page="handlePageChange"
+          />
+        </div>
       </div>
 
       <!-- 底部统计信息 -->
