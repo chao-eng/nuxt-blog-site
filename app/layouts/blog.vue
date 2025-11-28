@@ -1,5 +1,5 @@
 <template>
-  <div class="gd-container font-spacegrotesk">
+  <div class="gd-container font-spacegrotesk bg-[#f5f5f7] dark:bg-slate-950">
     <header class="fixed w-full  dark:bg-slate-950 z-10">
       <BlogsMainHeader />
     </header>

@@ -79,7 +79,7 @@ useHead({
           class="block"
           :style="{ '--i': index }"
         >
-          <div class="h-full p-6 flex flex-col items-center justify-center text-center space-y-3 border border-gray-100 dark:border-gray-800 rounded-xl hover:border-primary-200 dark:hover:border-primary-800 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all duration-300 group">
+          <div class="h-full p-6 flex flex-col items-center justify-center text-center space-y-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm hover:border-primary-200 dark:hover:border-primary-800 hover:bg-primary-50/50 dark:hover:bg-primary-900/10 transition-all duration-300 group">
             <!-- 标签名称 -->
             <h3 class="text-lg font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
               #{{ tagItem.tag }}

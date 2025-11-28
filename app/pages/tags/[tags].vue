@@ -178,7 +178,7 @@ useHead({
                 size="md"
                 class="min-w-[120px]"
                 :ui="{
-                  base: 'h-9 bg-gray-50 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-primary-500'
+                  base: 'h-9 bg-white dark:bg-gray-800 border-0 focus:ring-2 focus:ring-primary-500 shadow-sm'
                 }"
               />
             </div>

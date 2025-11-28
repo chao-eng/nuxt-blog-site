@@ -123,104 +123,104 @@ useHead({
 <template>
   <main class="container max-w-5xl mx-auto text-zinc-600">
     <UContainer class="py-8">
-      <!-- 搜索头部 -->
-      <div class="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
-        <div class="space-y-4">
-          <div class="flex gap-4">
-            <div class="flex-1 max-w-2xl">
-              <UInput
-                v-model="searchTest"
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <!-- 搜索头部 -->
+        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+          <div class="space-y-4">
+            <div class="flex gap-4">
+              <div class="flex-1 max-w-2xl">
+                <UInput
+                  v-model="searchTest"
+                  size="lg"
+                  :placeholder="$t('blog.searchPlaceholder')"
+                  :ui="{
+                    base: 'w-full min-w-0 h-12 px-4 text-base bg-gray-50 dark:bg-gray-900 border-0 focus:ring-2 focus:ring-primary-500 transition-all duration-200'
+                  }"
+                  class="w-full"
+                >
+                  <!-- 前置图标插槽 -->
+                  <template #leading>
+                    <UIcon
+                      name="i-lucide-search"
+                      class="text-gray-400 dark:text-gray-500 w-5 h-5"
+                    />
+                  </template>
+
+                  <!-- 清除按钮 -->
+                  <template #trailing>
+                    <UButton
+                      v-if="searchTest"
+                      icon="i-lucide-x"
+                      variant="ghost"
+                      color="neutral"
+                      size="xs"
+                      class="hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      @click="clearSearch"
+                    />
+                  </template>
+                </UInput>
+              </div>
+
+              <!-- 每页数量选择 -->
+              <USelectMenu
+                v-model="elementPerPage"
+                :items="pageSizeOptions"
+                :search-input="false"
+                value-key="value"
+                label-key="label"
                 size="lg"
-                :placeholder="$t('blog.searchPlaceholder')"
+                class="min-w-[140px]"
                 :ui="{
-                  base: 'w-full min-w-0 h-12 px-4 text-base bg-gray-50 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-primary-500 focus:bg-white dark:focus:bg-gray-900 transition-all duration-200'
+                  base: 'h-12 bg-gray-50 dark:bg-gray-900 border-0 focus:ring-2 focus:ring-primary-500'
                 }"
-                class="w-full"
-              >
-                <!-- 前置图标插槽 -->
-                <template #leading>
-                  <UIcon
-                    name="i-lucide-search"
-                    class="text-gray-400 dark:text-gray-500 w-5 h-5"
-                  />
-                </template>
-
-                <!-- 清除按钮 -->
-                <template #trailing>
-                  <UButton
-                    v-if="searchTest"
-                    icon="i-lucide-x"
-                    variant="ghost"
-                    color="neutral"
-                    size="xs"
-                    class="hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                    @click="clearSearch"
-                  />
-                </template>
-              </UInput>
+              />
             </div>
 
-            <!-- 每页数量选择 -->
-            <USelectMenu
-              v-model="elementPerPage"
-              :items="pageSizeOptions"
-              :search-input="false"
-              value-key="value"
-              label-key="label"
-              size="lg"
-              class="min-w-[140px]"
-              :ui="{
-                base: 'h-12 bg-gray-50 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-primary-500'
-              }"
-            />
-          </div>
-
-          <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 px-1">
-            <div class="flex items-center gap-4">
-              <span v-if="searchStats.hasSearch">
-                {{ $t('blog.found') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ searchStats.filtered }}</span> {{ $t('blog.articles') }}
-                （{{ $t('blog.total') }} {{ searchStats.total }} {{ $t('blog.piece') }}）
-              </span>
-              <span v-else>
-                {{ $t('blog.total') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ searchStats.total }}</span> {{ $t('blog.articles') }}
-              </span>
-            </div>
-            <div v-if="searchStats.hasSearch">
-              <UBadge variant="soft" color="primary" size="sm">
-                {{ $t('blog.searchResults') }}
-              </UBadge>
+            <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 px-1">
+              <div class="flex items-center gap-4">
+                <span v-if="searchStats.hasSearch">
+                  {{ $t('blog.found') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ searchStats.filtered }}</span> {{ $t('blog.articles') }}
+                  （{{ $t('blog.total') }} {{ searchStats.total }} {{ $t('blog.piece') }}）
+                </span>
+                <span v-else>
+                  {{ $t('blog.total') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ searchStats.total }}</span> {{ $t('blog.articles') }}
+                </span>
+              </div>
+              <div v-if="searchStats.hasSearch">
+                <UBadge variant="soft" color="primary" size="sm">
+                  {{ $t('blog.searchResults') }}
+                </UBadge>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="space-y-6 mb-8">
-        <TransitionGroup 
-          appear
-          name="list" 
-          tag="div" 
-          class="space-y-6"
-        >
-          <template v-for="(post, index) in paginatedData" :key="post.path">
-            <div :style="{ '--i': index }">
-              <BlogsArchiveCard
-                :path="post.path"
-                :title="post.title"
-                :date="post.date"
-                :description="post.description"
-                :image="post.image"
-                :alt="post.alt"
-                :tags="post.tags"
-                :published="post.published"
-                :is-sticky="post.isSticky"
+        <div class="mb-0">
+          <TransitionGroup 
+            appear
+            name="list" 
+            tag="div" 
+            class=""
+          >
+            <template v-for="(post, index) in paginatedData" :key="post.path">
+              <div :style="{ '--i': index }">
+                <BlogsArchiveCard
+                  :path="post.path"
+                  :title="post.title"
+                  :date="post.date"
+                  :description="post.description"
+                  :image="post.image"
+                  :alt="post.alt"
+                  :tags="post.tags"
+                  :published="post.published"
+                  :is-sticky="post.isSticky"
 
-              />
-            </div>
-          </template>
-        </TransitionGroup>
+                />
+              </div>
+            </template>
+          </TransitionGroup>
 
-        <div v-if="paginatedData.length === 0" class="text-center py-12">
-          <UCard>
+          <div v-if="paginatedData.length === 0" class="text-center py-12">
             <div class="flex flex-col items-center space-y-4">
               <UIcon
                 name="i-lucide-search-x"
@@ -243,20 +243,20 @@ useHead({
                 {{ $t('blog.clearSearch') }}
               </UButton>
             </div>
-          </UCard>
+          </div>
         </div>
-      </div>
 
-      <!-- 分页控件 -->
-      <div v-if="totalPage > 1" class="flex justify-center">
-        <UPagination
-          :page="pageNumber"
-          :total="blogsData?.total || 0"
-          :items-per-page="elementPerPage"
-          :sibling-count="1"
-          show-edges
-          @update:page="handlePageChange"
-        />
+        <!-- 分页控件 -->
+        <div v-if="totalPage > 1" class="flex justify-center py-6 border-t border-gray-100 dark:border-gray-800">
+          <UPagination
+            :page="pageNumber"
+            :total="blogsData?.total || 0"
+            :items-per-page="elementPerPage"
+            :sibling-count="1"
+            show-edges
+            @update:page="handlePageChange"
+          />
+        </div>
       </div>
 
       <div v-if="paginatedData.length > 0" class="mt-8 text-center">

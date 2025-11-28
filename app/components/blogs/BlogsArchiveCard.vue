@@ -55,7 +55,7 @@ const hasImage = computed(() => {
 </script>
 
 <template>
-  <article class="py-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors duration-200 group">
+  <article class="py-6 px-6 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-200 group">
     <NuxtLink :to="path" class="block">
       <!-- 主内容区域 -->
       <div class="flex gap-4 relative">
