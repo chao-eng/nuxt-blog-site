@@ -7,7 +7,7 @@ const localePath = useLocalePath()
 </script>
 
 <template>
-  <div class="container mx-auto py-8">
+  <div class="container mx-auto py-8 ">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
       <!-- 原有的标题区域 -->
       <div class="px-6">
@@ -20,8 +20,8 @@ const localePath = useLocalePath()
       </div>
 
       <!-- 新增的关于我区域 -->
-      <div class="px-6">
-        <UCard class="shadow-lg">
+      <div class="px-6 ">
+        <UCard class="shadow-lg bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none ">
           <div class="text-center space-y-6">
             <!-- 头像 -->
             <div class="flex justify-center">

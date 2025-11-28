@@ -72,7 +72,7 @@ const articles = computed(() => blogData.value?.articles || [])
 </script>
 
 <template>
-  <div class="pb-10 px-4">
+  <div class="pb-10 px-4 ">
     <header class="flex items-center gap-2 pt-5 pb-2">
       <UIcon name="i-lucide-clock" class="text-2xl text-primary" />
       <div class="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
@@ -82,11 +82,11 @@ const articles = computed(() => blogData.value?.articles || [])
       <div
         v-for="(post, index) in blogPosts"
         :key="`blog-${index}-${post.to}`"
-        class="group cursor-pointer card-animation"
+        class="group cursor-pointer card-animation "
         :style="{ animationDelay: `${index * 100}ms` }"
         @click="navigateTo(post.to)"
       >
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border-2 border-gray-100 dark:border-gray-800 hover:border-primary-200 dark:hover:border-primary-800 relative">
+        <div class="bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border-2 border-gray-100 dark:border-gray-800 hover:border-primary-200 dark:hover:border-primary-800 relative">
           <!-- 置顶标识 -->
           <div v-if="articles[index]?.isSticky" class="absolute top-2 right-2 z-10">
             <UIcon name="i-lucide-pin" class="text-orange-500 w-4 h-4" />

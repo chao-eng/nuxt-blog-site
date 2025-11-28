@@ -65,7 +65,7 @@ useHead({
     </div>
 
     <!-- 标签网格 -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden max-w-5xl mx-auto">
+    <div class="bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden max-w-5xl mx-auto">
       <div v-if="sortedTags.length > 0" class="p-6">
         <TransitionGroup 
           appear

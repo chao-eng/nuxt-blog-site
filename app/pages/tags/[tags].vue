@@ -97,9 +97,9 @@ useHead({
 
 <template>
   <main class="container max-w-5xl mx-auto text-zinc-600">
-    <UContainer class="py-8">
+    <UContainer class="py-8 ">
       <!-- 标签页面标题区域 -->
-      <div class="mb-8">
+      <div class="mb-8 ">
         <!-- 面包屑导航 -->
         <nav class="flex items-center gap-2 mb-4">
           <NuxtLink
@@ -128,7 +128,7 @@ useHead({
         </p>
       </div>
 
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <!-- 筛选控制区域 -->
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
           <div class="space-y-4">

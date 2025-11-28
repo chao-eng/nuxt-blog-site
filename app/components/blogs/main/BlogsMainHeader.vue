@@ -48,7 +48,7 @@ const toggleLocale = () => {
 </script>
 
 <template>
-  <nav class="border-b border-gray-200/20 dark:border-gray-700/30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+  <nav class=" bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none border-b border-gray-200/20 dark:border-gray-700/30 dark:bg-gray-900/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
     <UContainer class="max-w-6xl">
       <div class="flex justify-between items-center h-16 gap-4">
         <!-- Left: Logo & Navigation -->

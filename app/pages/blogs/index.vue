@@ -116,8 +116,8 @@ useHead({
 
 <template>
   <main class="container max-w-5xl mx-auto text-zinc-600">
-    <UContainer class="py-8">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <UContainer class="py-8 ">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none">
         <!-- 统计与筛选栏 -->
         <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
           <div class="flex items-center justify-between">

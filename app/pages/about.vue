@@ -23,7 +23,7 @@ useHead({
 <template>
   <UContainer class="py-8 max-w-4xl">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-      <div class="p-8 md:p-12">
+      <div class="bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none p-8 md:p-12">
         <div class="max-w-2xl mx-auto space-y-12">
           <!-- 头像和基本信息 -->
           <div class="text-center space-y-6">

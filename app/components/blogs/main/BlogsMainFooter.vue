@@ -62,7 +62,7 @@ const { data: umamiStats } = await useFetch('/api/umami/stats', {
 </script>
 
 <template>
-  <footer class="border-t border-gray-200/20 dark:border-gray-700/30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm mt-auto">
+  <footer class=" border-t border-gray-200/20 dark:border-gray-700/30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm mt-auto">
     <UContainer class="max-w-6xl py-6">
       <!-- 主要内容区 -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
