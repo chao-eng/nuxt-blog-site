@@ -4,6 +4,7 @@ import { useHead } from 'nuxt/app'
 import { useBlogsPage } from '../../data'
 const localePath = useLocalePath()
 const { t } = useI18n()
+const route = useRoute()
 
 // 配置页面布局
 definePageMeta({
@@ -15,18 +16,6 @@ const blogsPage = useBlogsPage()
 // 响应式变量
 const elementPerPage = ref(5)
 const pageNumber = ref(1)
-const searchTest = ref('')
-const debouncedSearch = ref('')
-
-// 防抖处理搜索
-let searchTimer: any = null
-watch(searchTest, (newVal) => {
-  if (searchTimer) clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => {
-    debouncedSearch.value = newVal
-    pageNumber.value = 1 // 搜索变化重置页码
-  }, 500)
-})
 
 // 监听每页数量变化，重置页码
 watch(elementPerPage, () => {
@@ -40,13 +29,13 @@ const { data: blogsData, status } = await useAsyncData(
     const query = {
       page: pageNumber.value,
       pageSize: elementPerPage.value,
-      search: debouncedSearch.value
+      search: route.query.search?.toString() || ''
     }
     const res: Result<{ list: Article[], total: number }> = await $fetch('/api/blogs/all', { query })
     return res.data || { list: [], total: 0 }
   },
   {
-    watch: [pageNumber, elementPerPage, debouncedSearch]
+    watch: [pageNumber, elementPerPage, () => route.query.search]
   }
 )
 
@@ -85,7 +74,7 @@ const pageSizeOptions = computed(() => [
 // 搜索状态计算属性
 const searchStats = computed(() => {
   const total = blogsData.value?.total || 0
-  const hasSearch = !!debouncedSearch.value
+  const hasSearch = !!route.query.search
 
   return {
     total,
@@ -97,9 +86,14 @@ const searchStats = computed(() => {
 
 // 清空搜索
 const clearSearch = () => {
-  searchTest.value = ''
-  debouncedSearch.value = ''
-  pageNumber.value = 1
+  navigateTo({
+    path: localePath('/blogs'),
+    query: {
+      ...route.query,
+      search: undefined,
+      page: 1
+    }
+  })
 }
 
 // 处理分页变化
@@ -127,40 +121,7 @@ useHead({
         <!-- 搜索头部 -->
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
           <div class="space-y-4">
-            <div class="flex gap-4">
-              <div class="flex-1 max-w-2xl">
-                <UInput
-                  v-model="searchTest"
-                  size="lg"
-                  :placeholder="$t('blog.searchPlaceholder')"
-                  :ui="{
-                    base: 'w-full min-w-0 h-12 px-4 text-base bg-gray-50 dark:bg-gray-900 border-0 focus:ring-2 focus:ring-primary-500 transition-all duration-200'
-                  }"
-                  class="w-full"
-                >
-                  <!-- 前置图标插槽 -->
-                  <template #leading>
-                    <UIcon
-                      name="i-lucide-search"
-                      class="text-gray-400 dark:text-gray-500 w-5 h-5"
-                    />
-                  </template>
-
-                  <!-- 清除按钮 -->
-                  <template #trailing>
-                    <UButton
-                      v-if="searchTest"
-                      icon="i-lucide-x"
-                      variant="ghost"
-                      color="neutral"
-                      size="xs"
-                      class="hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-                      @click="clearSearch"
-                    />
-                  </template>
-                </UInput>
-              </div>
-
+            <div class="flex justify-end gap-4">
               <!-- 每页数量选择 -->
               <USelectMenu
                 v-model="elementPerPage"
