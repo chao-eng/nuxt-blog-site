@@ -1,5 +1,39 @@
 # Nuxt Blog Site [![zread](https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff)](https://zread.ai/chao-eng/nuxt-blog-site)
 
+
+> A nuxt blog site project.  一个基于 Nuxt.js 的博客项目。
+
+## ✨ 核心亮点：像动态博客一样管理你的 Markdown 静态站
+
+**告别繁琐的 "本地编辑 -> Git Commit -> Git Push -> 等待构建" 流程。**
+
+我开发这个项目的初衷，是因为发现 GitHub 上绝大多数优秀的博客项目，在发布文章时都需要在本地操作 Git 提交流程，这对于随时随地记录灵感来说非常不便。
+
+本项目完美解决了这个问题：
+
+* **🚀 在线直接发布/编辑**：集成了强大的后台编辑器，支持你通过浏览器直接创建、修改和发布文章，体验与 WordPress 等动态博客无异。
+* **💾 MD 文件物理存储**：文章依然以纯粹的 Markdown 格式保存在服务器的物理磁盘上。这意味着你的数据是透明、可迁移的，且完全掌握在自己手中，没有复杂的数据库依赖。
+
+
+## 📸 预览截图
+
+为了直观展示，以下是博客前台和后台编辑器的实际运行截图。
+
+### 1. 简洁大气的前台首页
+
+
+![博客首页长截图预览](docs/images/home-preview.png)
+
+---
+
+### 2. 强大的在线 Markdown 编辑器
+
+（无需本地构建，浏览器直接编辑、预览并保存到服务器磁盘）
+
+![在线编辑器预览](docs/images/editor-preview.png)
+
+---
+
 ## 📖 简介 (Introduction)
 
 **Nuxt Blog Site** 是一个基于 **Nuxt 4** 构建的现代化全栈个人博客系统模板。它不仅具备传统静态博客的内容展示功能，还内置了强大的后台管理系统（CMS）。
