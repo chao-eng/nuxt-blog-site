@@ -28,6 +28,12 @@ const saveArticle = async (dir: string, content: string, originalPath: string, u
             throw new Error(`原路径 "${originalAbsPath}" 不是目录，无法重命名`)
           }
 
+          // 确保新目录的父级目录存在
+          const newDirParent = path.dirname(newDirAbsPath)
+          if (!fs.existsSync(newDirParent)) {
+            fs.mkdirSync(newDirParent, { recursive: true })
+          }
+
           // 如果新目录已存在，先删除（避免重命名冲突）
           if (fs.existsSync(newDirAbsPath)) {
             fs.rmSync(newDirAbsPath, { recursive: true, force: true }) // 递归删除目录及内容
