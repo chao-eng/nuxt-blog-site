@@ -118,7 +118,14 @@ const toggleLocale = () => {
               {{ item.label.charAt(0) }}
             </UButton>
           </template>
-
+          <UButton
+            icon="i-simple-icons-github"
+            size="sm"
+            variant="ghost"
+            color="neutral"
+            to="https://github.com/chao-eng/nuxt-blog-site"
+            target="_blank"
+          />
           <UButton
             icon="i-lucide-languages"
             size="sm"

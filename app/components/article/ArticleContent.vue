@@ -305,7 +305,7 @@
     </div>
  
     <UModal 
-      v-model="isDeleteModalOpen" 
+      :open="isDeleteModalOpen" 
       prevent-close
     >
     <template #content>
@@ -442,6 +442,7 @@ const metadata = ref({
   image: '',
   tags: [] as string[],
   published: true,
+  isSticky: false, 
 })
 const tagsInput = ref('')
 const coverImageInput = ref<HTMLInputElement>()
