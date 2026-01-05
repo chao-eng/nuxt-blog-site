@@ -87,7 +87,7 @@ const toggleLocale = () => {
             :ui="{
               base: 'w-full h-9  border-0 focus:ring-2 focus:ring-primary-500 rounded-full transition-all duration-200',
               icon: { trailing: { pointer: '' } },
-              padding: { sm: 'ps-4' } 
+              padding: { sm: 'ps-4' }
             }"
             class="w-full"
             @keydown.enter="handleSearch"

@@ -99,6 +99,7 @@
 <script setup lang="ts">
 import { z } from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
+
 const localePath = useLocalePath()
 // 页面元信息
 definePageMeta({

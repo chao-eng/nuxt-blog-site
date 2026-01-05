@@ -2,6 +2,7 @@
 import type { Article, Result } from '../../types'
 import { useHead } from 'nuxt/app'
 import { useBlogsPage } from '../../data'
+
 const localePath = useLocalePath()
 const { t } = useI18n()
 const route = useRoute()
@@ -51,7 +52,7 @@ const paginatedData = computed(() => {
       date: article.date || 'not-date-available',
       tags: article.tags || [],
       published: article.published,
-      isSticky: article.isSticky || false,
+      isSticky: article.isSticky || false
 
     }
   })
@@ -129,11 +130,16 @@ useHead({
               <span v-else>
                 {{ $t('blog.total') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ searchStats.total }}</span> {{ $t('blog.articles') }}
               </span>
-              <UBadge v-if="searchStats.hasSearch" variant="soft" color="primary" size="sm">
+              <UBadge
+                v-if="searchStats.hasSearch"
+                variant="soft"
+                color="primary"
+                size="sm"
+              >
                 {{ $t('blog.searchResults') }}
               </UBadge>
             </div>
-            
+
             <!-- 每页数量选择 -->
             <USelectMenu
               v-model="elementPerPage"
@@ -151,10 +157,10 @@ useHead({
         </div>
 
         <div class="mb-0">
-          <TransitionGroup 
+          <TransitionGroup
             appear
-            name="list" 
-            tag="div" 
+            name="list"
+            tag="div"
             class=""
           >
             <template v-for="(post, index) in paginatedData" :key="post.path">
@@ -169,7 +175,6 @@ useHead({
                   :tags="post.tags"
                   :published="post.published"
                   :is-sticky="post.isSticky"
-
                 />
               </div>
             </template>

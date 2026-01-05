@@ -67,7 +67,7 @@ async function saveConfig() {
         categoryId: categoryId.value
       }
     })
-    
+
     toast.add({
       title: t('admin.set.comments.saveSuccess'),
       description: t('admin.set.comments.configUpdated'),
@@ -94,7 +94,9 @@ onMounted(() => {
     <UCard>
       <template #header>
         <div class="flex items-center justify-between">
-          <h1 class="text-2xl font-bold">{{ t('admin.set.comments.title') }}</h1>
+          <h1 class="text-2xl font-bold">
+            {{ t('admin.set.comments.title') }}
+          </h1>
           <UButton
             icon="i-lucide-refresh-cw"
             variant="ghost"
@@ -110,8 +112,12 @@ onMounted(() => {
         <!-- 开启/关闭评论 -->
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('admin.set.comments.enableComments') }}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ t('admin.set.comments.enableCommentsDesc') }}</p>
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.set.comments.enableComments') }}
+            </h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              {{ t('admin.set.comments.enableCommentsDesc') }}
+            </p>
           </div>
           <USwitch v-model="enableComments" />
         </div>
@@ -121,7 +127,9 @@ onMounted(() => {
         <!-- Giscus 配置 -->
         <div class="space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('admin.set.comments.giscusConfig') }}</h3>
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.set.comments.giscusConfig') }}
+            </h3>
             <a href="https://giscus.app/zh-CN" target="_blank" class="text-sm text-primary hover:underline">
               {{ t('admin.set.comments.getConfigInfo') }} &rarr;
             </a>

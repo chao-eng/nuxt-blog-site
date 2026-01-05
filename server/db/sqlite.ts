@@ -191,7 +191,6 @@ function initDB(): void {
     insertUmamiConfig.run()
     console.log('✅ 已创建 umami_config 表并插入默认配置')
   }
-
 }
 
 // 执行初始化
@@ -405,7 +404,7 @@ const dbUtils = {
       const validSortOrder = sortOrder.toLowerCase() === 'asc' ? 'asc' : 'desc'
 
       // 3. 构建查询条件
-      let whereClause = "t.published = 1"
+      let whereClause = 't.published = 1'
       const queryParams: any[] = []
 
       if (search) {

@@ -43,7 +43,7 @@ const paginatedData = computed(() => {
       ogImage: article.image || '/not-found.jpg',
       date: article.date || 'not-date-available',
       tags: article.tags || [],
-      published: article.published,
+      published: article.published
 
     }
   })
@@ -198,7 +198,6 @@ useHead({
               :alt="post.alt"
               :tags="post.tags"
               :published="post.published"
-
             />
           </template>
 

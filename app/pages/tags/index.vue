@@ -2,6 +2,7 @@
 import type { Result } from '../../types'
 import { useTagsPage } from '~/data'
 import { useHead } from 'nuxt/app'
+
 const localePath = useLocalePath()
 const { t } = useI18n()
 definePageMeta({
@@ -67,10 +68,10 @@ useHead({
     <!-- 标签网格 -->
     <div class="bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden max-w-5xl mx-auto">
       <div v-if="sortedTags.length > 0" class="p-6">
-        <TransitionGroup 
+        <TransitionGroup
           appear
-          name="list" 
-          tag="div" 
+          name="list"
+          tag="div"
           class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
         >
           <NuxtLink
@@ -120,8 +121,6 @@ useHead({
         </div>
       </div>
     </div>
-
-
   </UContainer>
 </template>
 

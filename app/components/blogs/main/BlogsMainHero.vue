@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useHomePage, useAboutPage, useSocialLinks } from '~/data'
+
 const homePage = useHomePage()
 const aboutPage = useAboutPage()
 const socialLinks = useSocialLinks()

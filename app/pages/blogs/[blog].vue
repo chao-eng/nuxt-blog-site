@@ -33,8 +33,8 @@ definePageMeta({
 
 // 服务端数据获取
 const { path } = useRoute()
-const decodedPath = decodeURIComponent(path);
-const blogPath = decodedPath.replace(/^(\/[a-z]{2})?\/blogs\//, '');
+const decodedPath = decodeURIComponent(path)
+const blogPath = decodedPath.replace(/^(\/[a-z]{2})?\/blogs\//, '')
 const { t, locale } = useI18n()
 
 // 使用 useAsyncData 在服务端获取数据

@@ -63,7 +63,7 @@ const articles = computed(() => stickyData.value?.articles || [])
   <div class="pb-10 px-4">
     <header class="flex items-center gap-3 pt-5 pb-6">
       <UIcon name="i-lucide-pin" class="text-3xl text-orange-500" />
-            <div class="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
+      <div class="h-px flex-1 bg-gray-200 dark:bg-gray-700" />
     </header>
 
     <div v-if="blogPosts.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -75,7 +75,6 @@ const articles = computed(() => stickyData.value?.articles || [])
         @click="navigateTo(post.to)"
       >
         <div class="bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden hover:-translate-y-1 border border-gray-100 dark:border-gray-700 relative">
-          
           <!-- 头部区域 - 只有日期 -->
           <div class="p-6 pb-4">
             <div class="flex items-start  mb-4">

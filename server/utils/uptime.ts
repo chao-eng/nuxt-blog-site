@@ -2,9 +2,9 @@
 const serverStartTime = Date.now()
 
 export function getServerStartTime() {
-    return serverStartTime
+  return serverStartTime
 }
 
 export function getServerUptime() {
-    return Date.now() - serverStartTime
+  return Date.now() - serverStartTime
 }

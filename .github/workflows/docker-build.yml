@@ -2,7 +2,7 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "master", "latest_branch" ]  # 监听 master 和 latest_branch 分支的提交
+    branches: [ "master" ]  # 监听 master 和 latest_branch 分支的提交
     # tags: [ "v*" ]      # (可选) 也可以配置打 tag 时触发
   workflow_dispatch:  # 允许手动触发构建
 
@@ -40,5 +40,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/blog:latest
-            ${{ secrets.DOCKER_USERNAME }}/blog:${{ github.sha }} 
+            ${{ secrets.DOCKER_USERNAME }}/nuxt-blog-site:latest
+            ${{ secrets.DOCKER_USERNAME }}/nuxt-blog-site:${{ github.sha }} 

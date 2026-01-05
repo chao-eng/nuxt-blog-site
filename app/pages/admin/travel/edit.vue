@@ -30,22 +30,22 @@ const mapLoading = ref(true)
 
 // 行政区划代码映射 (只保留省份级别，用于第一次钻取)
 const adCodeMap: Record<string, string> = {
-  '河北省': '130000', '山西省': '140000', '辽宁省': '210000', 
-  '吉林省': '220000', '黑龙江省': '230000', '上海市': '310000', 
-  '江苏省': '320000', '浙江省': '330000', '安徽省': '340000', 
-  '福建省': '350000', '江西省': '360000', '山东省': '370000', 
-  '河南省': '410000', '湖北省': '420000', '湖南省': '430000', 
-  '广东省': '440000', '海南省': '460000', '四川省': '510000', 
-  '贵州省': '520000', '云南省': '530000', '陕西省': '610000', 
-  '甘肃省': '620000', '青海省': '630000', '内蒙古自治区': '150000', 
-  '广西壮族自治区': '450000', '西藏自治区': '540000', '宁夏回族自治区': '640000', 
-  '新疆维吾尔自治区': '650000', '北京市': '110000', '天津市': '120000', 
-  '重庆市': '500000', 
+  河北省: '130000', 山西省: '140000', 辽宁省: '210000',
+  吉林省: '220000', 黑龙江省: '230000', 上海市: '310000',
+  江苏省: '320000', 浙江省: '330000', 安徽省: '340000',
+  福建省: '350000', 江西省: '360000', 山东省: '370000',
+  河南省: '410000', 湖北省: '420000', 湖南省: '430000',
+  广东省: '440000', 海南省: '460000', 四川省: '510000',
+  贵州省: '520000', 云南省: '530000', 陕西省: '610000',
+  甘肃省: '620000', 青海省: '630000', 内蒙古自治区: '150000',
+  广西壮族自治区: '450000', 西藏自治区: '540000', 宁夏回族自治区: '640000',
+  新疆维吾尔自治区: '650000', 北京市: '110000', 天津市: '120000',
+  重庆市: '500000'
   // 注意：港澳台 GeoJSON 通常需要特殊处理或单独提供，这里简化处理。
 }
 // 存储地图历史栈：记录当前显示的地图名称和中心点
 const mapHistory = ref<{ mapName: string, adCode: string }[]>(
-    [{ mapName: 'china', adCode: '100000' }] // 初始为全国
+  [{ mapName: 'china', adCode: '100000' }] // 初始为全国
 )
 // 缓存已加载的 GeoJSON
 const geoJsonCache: Record<string, any> = {}
@@ -87,7 +87,7 @@ function handleResize() {
 async function fetchWithTimeout(url: string, timeout = 10000) {
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), timeout)
-  
+
   try {
     const response = await fetch(url, { signal: controller.signal })
     clearTimeout(timeoutId)
@@ -106,30 +106,29 @@ async function fetchWithTimeout(url: string, timeout = 10000) {
  * @param adCode 当前行政区的 AdCode (例如 510000)
  */
 async function loadAndRegisterNextMap(adCode: string): Promise<string> {
-  const mapName = `map-${adCode}`;
-  
+  const mapName = `map-${adCode}`
+
   // 1. 检查缓存和注册
   if (echarts.getMap(mapName)) {
-      return mapName;
+    return mapName
   }
 
   // 2. 异步加载 GeoJSON
   const mapResponse: any = await $fetch('/api/map/geojson', {
     params: { adcode: adCode }
-  });
+  })
 
   if (!mapResponse.success || !mapResponse.data) {
-    throw new Error(`Failed to load map data for AdCode ${adCode}: ${mapResponse.error}`);
+    throw new Error(`Failed to load map data for AdCode ${adCode}: ${mapResponse.error}`)
   }
 
-  const geoJson = mapResponse.data;
-  
+  const geoJson = mapResponse.data
 
   // 3. 注册地图
-  echarts.registerMap(mapName, geoJson);
-  geoJsonCache[adCode] = geoJson;
-  
-  return mapName;
+  echarts.registerMap(mapName, geoJson)
+  geoJsonCache[adCode] = geoJson
+
+  return mapName
 }
 
 /**
@@ -138,15 +137,15 @@ async function loadAndRegisterNextMap(adCode: string): Promise<string> {
 function updateMapMarker() {
   if (!chartInstance) return
 
-  const currentMap = mapHistory.value[mapHistory.value.length - 1];
-  
+  const currentMap = mapHistory.value[mapHistory.value.length - 1]
+
   const option: echarts.EChartsOption = {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
       formatter: (params: any) => {
         if (params.componentSubType === 'scatter') {
-            return `
+          return `
                 <div style="padding: 8px;">
                   <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px;">当前选择位置</div>
                   <div style="color: #666;">经度: ${formData.value.value[0]}</div>
@@ -168,7 +167,7 @@ function updateMapMarker() {
       zoom: (chartInstance.getOption()?.geo?.[0]?.zoom as number) || 1, // 保持缩放
       center: (chartInstance.getOption()?.geo?.[0]?.center as [number, number]) || undefined, // 保持中心
       label: {
-        show: true, 
+        show: true,
         formatter: (params: any) => params.name,
         color: '#333',
         fontSize: 10
@@ -185,12 +184,12 @@ function updateMapMarker() {
         data: [{ name: formData.value.name || '选择的位置', value: formData.value.value }],
         symbolSize: 12,
         itemStyle: { color: 'red' },
-        label: { 
-            show: true, // 始终显示选中位置的标签
-            formatter: formData.value.name || '选择的位置',
-            position: 'right',
-            fontWeight: 'bold', 
-            color: '#333'
+        label: {
+          show: true, // 始终显示选中位置的标签
+          formatter: formData.value.name || '选择的位置',
+          position: 'right',
+          fontWeight: 'bold',
+          color: '#333'
         }
       },
       // 2. 闪烁效果（可选）
@@ -205,7 +204,7 @@ function updateMapMarker() {
         label: { show: false },
         itemStyle: { color: '#ef4444', shadowBlur: 10, shadowColor: 'rgba(239, 68, 68, 0.8)' },
         zlevel: 1
-      },
+      }
     ]
   }
 
@@ -218,98 +217,96 @@ function updateMapMarker() {
  * @param newAdCode 新地图的 AdCode (例如 510000)
  */
 function switchMap(newMapName: string, newAdCode: string) {
-    if (!chartInstance) return;
+  if (!chartInstance) return
 
-    // 更新历史栈
-    mapHistory.value.push({ mapName: newMapName, adCode: newAdCode });
+  // 更新历史栈
+  mapHistory.value.push({ mapName: newMapName, adCode: newAdCode })
 
-    // 更新 ECharts 配置，执行地图切换
-    const newOption: echarts.EChartsOption = {
-        geo: {
-            map: newMapName,
-            zoom: 1, // 重置缩放
-            center: undefined // 自动居中
-        },
-        series: [{
-            type: 'scatter',
-            coordinateSystem: 'geo',
-            // 重新设置 scatter data，确保它在新地图上居中
-            data: [{ name: formData.value.name || '选择的位置', value: formData.value.value }], 
-        }]
-    };
-    
-    // 使用不合并选项，确保地图彻底重绘
-    chartInstance.setOption(newOption, { notMerge: false });
+  // 更新 ECharts 配置，执行地图切换
+  const newOption: echarts.EChartsOption = {
+    geo: {
+      map: newMapName,
+      zoom: 1, // 重置缩放
+      center: undefined // 自动居中
+    },
+    series: [{
+      type: 'scatter',
+      coordinateSystem: 'geo',
+      // 重新设置 scatter data，确保它在新地图上居中
+      data: [{ name: formData.value.name || '选择的位置', value: formData.value.value }]
+    }]
+  }
 
-    // 更新标记，确保新的 Geo 标签显示
-    updateMapMarker();
+  // 使用不合并选项，确保地图彻底重绘
+  chartInstance.setOption(newOption, { notMerge: false })
+
+  // 更新标记，确保新的 Geo 标签显示
+  updateMapMarker()
 }
 
 /**
  * 返回上一级地图 (在模板中使用 @click="goBackToChina")
  */
 function goBackToChina() {
-    if (mapHistory.value.length <= 1 || !chartInstance) {
-        toast.add({ title: '提示', description: '已是最高级地图 (全国)', color: 'gray' });
-        return;
+  if (mapHistory.value.length <= 1 || !chartInstance) {
+    toast.add({ title: '提示', description: '已是最高级地图 (全国)', color: 'gray' })
+    return
+  }
+
+  // 弹出当前地图，回到上一个地图
+  mapHistory.value.pop()
+  const prevMap = mapHistory.value[mapHistory.value.length - 1]
+
+  chartInstance.setOption({
+    geo: {
+      map: prevMap.mapName,
+      zoom: 1,
+      center: undefined
     }
+  }, { notMerge: false })
 
-    // 弹出当前地图，回到上一个地图
-    mapHistory.value.pop();
-    const prevMap = mapHistory.value[mapHistory.value.length - 1];
-
-    chartInstance.setOption({
-        geo: {
-            map: prevMap.mapName,
-            zoom: 1,
-            center: undefined
-        }
-    }, { notMerge: false });
-
-    updateMapMarker();
-    toast.add({ title: '返回成功', description: `当前地图：${prevMap.mapName.replace('map-', 'AdCode ')}`, color: 'blue' });
+  updateMapMarker()
+  toast.add({ title: '返回成功', description: `当前地图：${prevMap.mapName.replace('map-', 'AdCode ')}`, color: 'blue' })
 }
-
 
 // 初始化地图
 async function initMap() {
   try {
     mapLoading.value = true
-    
+
     // 1. 加载并注册中国地图 GeoJSON 数据
-    const chinaMapName = await loadAndRegisterNextMap('100000');
-    
+    const chinaMapName = await loadAndRegisterNextMap('100000')
+
     // 确保历史栈初始正确
-    mapHistory.value = [{ mapName: chinaMapName, adCode: '100000' }]; 
+    mapHistory.value = [{ mapName: chinaMapName, adCode: '100000' }]
 
     await nextTick()
-    
+
     if (!chartContainer.value) {
       throw new Error('Chart container not found')
     }
-    
+
     // 尺寸检查 (保持不变)
     if (chartContainer.value.clientWidth === 0 || chartContainer.value.clientHeight === 0) {
-        await new Promise(resolve => setTimeout(resolve, 50)) 
-        if (chartContainer.value.clientWidth === 0 || chartContainer.value.clientHeight === 0) {
-            console.error('ECharts容器尺寸仍然为零，初始化失败。')
-            throw new Error('ECharts容器尺寸仍然为零，请检查其父组件是否隐藏或高度限制。')
-        }
+      await new Promise(resolve => setTimeout(resolve, 50))
+      if (chartContainer.value.clientWidth === 0 || chartContainer.value.clientHeight === 0) {
+        console.error('ECharts容器尺寸仍然为零，初始化失败。')
+        throw new Error('ECharts容器尺寸仍然为零，请检查其父组件是否隐藏或高度限制。')
+      }
     }
 
     chartInstance = echarts.init(chartContainer.value)
     mapLoading.value = false
-    
+
     updateMapMarker()
 
     // 监听地图点击事件：实现钻取和选点
     chartInstance.on('click', async (params: any) => {
       if (params.componentType === 'geo' || params.componentSubType === 'map') {
-        
         // 1. 更新选点坐标
         const pointInPixel = [params.event.offsetX, params.event.offsetY]
         const pointInGeo = chartInstance!.convertFromPixel({ geoIndex: 0 }, pointInPixel)
-        
+
         if (pointInGeo && Array.isArray(pointInGeo)) {
           formData.value.value = [
             Math.round(pointInGeo[0] * 1000000) / 1000000,
@@ -317,30 +314,30 @@ async function initMap() {
           ]
           updateMapMarker()
         }
-        
+
         // 2. 尝试向下钻取
-        const currentAdCode = mapHistory.value[mapHistory.value.length - 1].adCode;
-        
-        let nextAdCode = '';
+        const currentAdCode = mapHistory.value[mapHistory.value.length - 1].adCode
+
+        let nextAdCode = ''
         if (currentAdCode === '100000') {
-            // 全国地图 -> 查找省份 AdCode
-            nextAdCode = adCodeMap[params.name]; 
+          // 全国地图 -> 查找省份 AdCode
+          nextAdCode = adCodeMap[params.name]
         } else {
-            // 省级/市级地图 -> 查找下一级 AdCode
-            const currentGeoJson = geoJsonCache[currentAdCode];
-            const feature = currentGeoJson?.features?.find((f: any) => f.properties.name === params.name);
-            nextAdCode = feature?.properties?.adcode;
+          // 省级/市级地图 -> 查找下一级 AdCode
+          const currentGeoJson = geoJsonCache[currentAdCode]
+          const feature = currentGeoJson?.features?.find((f: any) => f.properties.name === params.name)
+          nextAdCode = feature?.properties?.adcode
         }
 
         // 如果找到了下一级 AdCode，则执行切换
         if (nextAdCode) {
-            try {
-                const newMapName = await loadAndRegisterNextMap(nextAdCode);
-                switchMap(newMapName, nextAdCode);
-            } catch (e: any) {
-                // console.error("钻取失败:", e);
-                // toast.add({ title: '钻取失败', description: '无法加载下一级地图数据', color: 'red' });
-            }
+          try {
+            const newMapName = await loadAndRegisterNextMap(nextAdCode)
+            switchMap(newMapName, nextAdCode)
+          } catch (e: any) {
+            // console.error("钻取失败:", e);
+            // toast.add({ title: '钻取失败', description: '无法加载下一级地图数据', color: 'red' });
+          }
         }
       }
     })
@@ -362,7 +359,7 @@ async function loadData() {
     const response: any = await $fetch('/api/travel/records')
     if (response.success && response.data) {
       const data = Array.isArray(response.data) ? response.data : []
-      
+
       if (route.query.index !== undefined) {
         const index = parseInt(route.query.index as string)
         if (index >= 0 && index < data.length) {
@@ -389,14 +386,14 @@ function onFileClick() {
 // 手动更新经纬度时同步地图 (在模板中使用 @change="onCoordinateChange")
 function onCoordinateChange() {
   if (typeof formData.value.value[0] === 'number' && typeof formData.value.value[1] === 'number') {
-      updateMapMarker()
-      if (chartInstance) {
-          chartInstance.setOption({
-              geo: {
-                  center: formData.value.value
-              }
-          })
-      }
+    updateMapMarker()
+    if (chartInstance) {
+      chartInstance.setOption({
+        geo: {
+          center: formData.value.value
+        }
+      })
+    }
   } else {
     toast.add({
       title: '输入错误',
@@ -444,7 +441,7 @@ async function uploadImage(event: Event) {
     })
   } finally {
     uploading.value = false
-    if (input) input.value = '' 
+    if (input) input.value = ''
   }
 }
 
@@ -468,7 +465,7 @@ async function saveData() {
   try {
     const response: any = await $fetch('/api/travel/records')
     let data: TravelCity[] = []
-    
+
     if (response.success && response.data) {
       data = Array.isArray(response.data) ? response.data : []
     }
@@ -521,8 +518,12 @@ onUnmounted(() => {
         <template #header>
           <div class="flex items-center justify-between">
             <div>
-              <h1 class="text-2xl font-bold">{{ pageTitle }}</h1>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ t('admin.tra.fillInfo') }}</p>
+              <h1 class="text-2xl font-bold">
+                {{ pageTitle }}
+              </h1>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {{ t('admin.tra.fillInfo') }}
+              </p>
             </div>
             <UButton
               variant="ghost"
@@ -535,11 +536,13 @@ onUnmounted(() => {
 
         <div class="space-y-6">
           <div class="space-y-4">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('admin.tra.basicInfo') }}</h3>
-            
-            <UFormField 
-              :label="t('admin.tra.locationName')" 
-              required 
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.tra.basicInfo') }}
+            </h3>
+
+            <UFormField
+              :label="t('admin.tra.locationName')"
+              required
               class="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-center gap-4"
             >
               <UInput
@@ -550,9 +553,9 @@ onUnmounted(() => {
               />
             </UFormField>
 
-            <UFormField 
-              :label="t('admin.tra.travelTime')" 
-              required 
+            <UFormField
+              :label="t('admin.tra.travelTime')"
+              required
               class="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-center gap-4"
             >
               <UInput
@@ -562,8 +565,8 @@ onUnmounted(() => {
               />
             </UFormField>
 
-            <UFormField 
-              :label="t('admin.tra.travelDesc')" 
+            <UFormField
+              :label="t('admin.tra.travelDesc')"
               class="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-start gap-4"
             >
               <UTextarea
@@ -574,8 +577,8 @@ onUnmounted(() => {
               />
             </UFormField>
 
-            <UFormField 
-              :label="t('admin.tra.articleLink')" 
+            <UFormField
+              :label="t('admin.tra.articleLink')"
               class="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-center gap-4"
             >
               <UInput
@@ -590,8 +593,10 @@ onUnmounted(() => {
 
           <div class="space-y-4">
             <div class="flex items-center justify-between">
-              <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('admin.tra.locationSelect') }}</h3>
-              
+              <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+                {{ t('admin.tra.locationSelect') }}
+              </h3>
+
               <UButton
                 v-if="mapHistory.length > 1"
                 icon="i-lucide-arrow-left"
@@ -612,29 +617,33 @@ onUnmounted(() => {
             />
 
             <div class="w-full">
-            <div class="relative w-full rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden" 
-                 style="height: 512px;"> 
-              <div 
-                v-if="mapLoading" 
-                class="absolute inset-0 z-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800"
+              <div
+                class="relative w-full rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                style="height: 512px;"
               >
-                <div class="text-center">
-                  <div class="loading-spinner mx-auto mb-2" />
-                  <p class="text-sm text-gray-500">{{ t('admin.tra.loadingMap') }}</p>
+                <div
+                  v-if="mapLoading"
+                  class="absolute inset-0 z-10 flex items-center justify-center bg-gray-50 dark:bg-gray-800"
+                >
+                  <div class="text-center">
+                    <div class="loading-spinner mx-auto mb-2" />
+                    <p class="text-sm text-gray-500">
+                      {{ t('admin.tra.loadingMap') }}
+                    </p>
+                  </div>
                 </div>
-              </div>
-              
-              <div 
-                ref="chartContainer" 
-                class="w-full h-full"
+
+                <div
+                  ref="chartContainer"
+                  class="w-full h-full"
                 />
+              </div>
             </div>
-          </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <UFormField 
-                :label="t('admin.tra.longitude')" 
-                required 
+              <UFormField
+                :label="t('admin.tra.longitude')"
+                required
                 class="grid grid-cols-1 sm:grid-cols-[100px_1fr] items-center gap-4"
               >
                 <UInput
@@ -647,9 +656,9 @@ onUnmounted(() => {
                 />
               </UFormField>
 
-              <UFormField 
-                :label="t('admin.tra.latitude')" 
-                required 
+              <UFormField
+                :label="t('admin.tra.latitude')"
+                required
                 class="grid grid-cols-1 sm:grid-cols-[100px_1fr] items-center gap-4"
               >
                 <UInput
@@ -667,9 +676,11 @@ onUnmounted(() => {
           <USeparator />
 
           <div class="space-y-4">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('admin.tra.travelPhotos') }}</h3>
-            
-            <UFormField 
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.tra.travelPhotos') }}
+            </h3>
+
+            <UFormField
               :label="t('admin.tra.photos')"
               :description="t('admin.tra.photoGuide')"
               class="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-start gap-4"
@@ -685,7 +696,7 @@ onUnmounted(() => {
                       :src="photo"
                       loading="lazy"
                       class="w-full h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
-                    />
+                    >
                     <UButton
                       icon="i-lucide-x"
                       size="xs"
@@ -705,7 +716,7 @@ onUnmounted(() => {
                     multiple
                     class="hidden"
                     @change="uploadImage"
-                  />
+                  >
                   <UButton
                     icon="i-lucide-upload"
                     color="neutral"

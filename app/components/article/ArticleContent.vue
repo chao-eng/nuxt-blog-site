@@ -11,7 +11,7 @@
           @click="handleClose"
         />
       </template>
- 
+
       <template #title>
         <div class="flex items-center gap-3 min-w-0 flex-1">
           <div class="flex-shrink-0">
@@ -29,19 +29,19 @@
           </div>
         </div>
       </template>
- 
+
       <template #right>
         <div class="flex items-center gap-1">
-          <UTooltip  v-if="vditorInstance"  :text="$t('admin.art.previewMode')">
-              <UButton
+          <UTooltip v-if="vditorInstance" :text="$t('admin.art.previewMode')">
+            <UButton
               icon="i-lucide-eye"
               color="neutral"
               variant="ghost"
               size="sm"
               @click="previewArticle()"
             />
-            </UTooltip>
-             <UTooltip   v-if="!vditorInstance" :text="$t('admin.art.editMode')">
+          </UTooltip>
+          <UTooltip v-if="!vditorInstance" :text="$t('admin.art.editMode')">
             <UButton
               icon="i-lucide-edit"
               color="neutral"
@@ -50,7 +50,7 @@
               @click="editArticle()"
             />
           </UTooltip>
- 
+
           <UTooltip :text="$t('admin.art.saveArticle')">
             <UButton
               icon="i-lucide-save"
@@ -61,9 +61,9 @@
               @click="saveArticle"
             />
           </UTooltip>
- 
-          <div class="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-2"></div>
- 
+
+          <div class="w-px h-6 bg-gray-300 dark:bg-gray-700 mx-2" />
+
           <UTooltip :text="$t('admin.art.deleteArticle')">
             <UButton
               icon="i-lucide-trash-2"
@@ -76,143 +76,142 @@
         </div>
       </template>
     </UDashboardNavbar>
- 
+
     <div v-if="vditorInstance" class="flex-shrink-0">
       <div class="p-3 bg-gradient-to-r from-gray-50/50 via-white/80 to-gray-50/50 dark:from-gray-900/50 dark:via-gray-950/80 dark:to-gray-900/50 border-b border-gray-200/60 dark:border-gray-800/60">
         <div class="space-y-2">
           <div v-show="isMetadataVisible" class="space-y-2">
-          <div class="grid grid-cols-12 gap-2">
-            <div class="col-span-6 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
-              <div class="flex items-center gap-1.5 mb-2">
-                <UIcon name="i-lucide-heading" class="w-3.5 h-3.5 text-blue-500" />
-                <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.title') }}</span>
+            <div class="grid grid-cols-12 gap-2">
+              <div class="col-span-6 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
+                <div class="flex items-center gap-1.5 mb-2">
+                  <UIcon name="i-lucide-heading" class="w-3.5 h-3.5 text-blue-500" />
+                  <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.title') }}</span>
+                </div>
+                <UFormField required>
+                  <UInput
+                    v-model="metadata.title"
+                    :placeholder="$t('admin.art.titlePlaceholder')"
+                    size="sm"
+                    maxlength="100"
+                    class="w-full"
+                  />
+                </UFormField>
               </div>
-              <UFormField required>
-                <UInput
-                  v-model="metadata.title"
-                  :placeholder="$t('admin.art.titlePlaceholder')"
-                  size="sm"
-                  maxlength="100"
-                  class="w-full"
-                />
-              </UFormField>
-            </div>
 
-            <div class="col-span-3 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
-              <div class="flex items-center gap-1.5 mb-2">
-                <UIcon name="i-lucide-calendar" class="w-3.5 h-3.5 text-indigo-500" />
-                <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.date') }}</span>
+              <div class="col-span-3 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
+                <div class="flex items-center gap-1.5 mb-2">
+                  <UIcon name="i-lucide-calendar" class="w-3.5 h-3.5 text-indigo-500" />
+                  <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.date') }}</span>
+                </div>
+                <UFormField required>
+                  <UInput
+                    v-model="metadata.date"
+                    type="datetime-local"
+                    size="sm"
+                  />
+                </UFormField>
               </div>
-              <UFormField required>
-                <UInput
-                  v-model="metadata.date"
-                  type="datetime-local"
-                  size="sm"
-                />
-              </UFormField>
-            </div>
 
-            <div class="col-span-3 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
-              <div class="flex items-center gap-1.5 mb-2">
-                <UIcon name="i-lucide-toggle-right" class="w-3.5 h-3.5 text-indigo-500" />
-                <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.status') }}</span>
-              </div>
-              <div class="flex items-center justify-between h-8 px-2 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                <span class="text-xs font-medium">
-                  {{ metadata.published ? $t('admin.art.published') : $t('admin.art.draft') }}
-                </span>
-                <USwitch
-                  v-model="metadata.published"
-                  checked-icon="i-lucide-check"
-                  unchecked-icon="i-lucide-x"
-                  size="sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-12 gap-2">
-            <div class="col-span-6 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
-              <div class="flex items-center gap-1.5 mb-2">
-                <UIcon name="i-lucide-align-left" class="w-3.5 h-3.5 text-purple-500" />
-                <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.description') }}</span>
-              </div>
-              <UFormField>
-                <UTextarea
-                  v-model="metadata.description"
-                  :placeholder="$t('admin.art.descPlaceholder')"
-                  :rows="2"
-                  maxlength="200"
-                  autoresize
-                  class="w-full"
-                />
-              </UFormField>
-            </div>
-
-            <div class="col-span-3 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
-              <div class="flex items-center gap-1.5 mb-2">
-                <UIcon name="i-lucide-tags" class="w-3.5 h-3.5 text-green-500" />
-                <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.tags') }}</span>
-              </div>
-              <UFormField>
-                <UInput
-                  v-model="tagsInput"
-                  :placeholder="$t('admin.art.tagsPlaceholder')"
-                  size="sm"
-                  class="w-full"
-                  @blur="updateTags"
-                  @keyup.enter="updateTags"
-                />
-              </UFormField>
-              
-              <div v-if="metadata.tags.length" class="flex flex-wrap gap-1 mt-2">
-                <UBadge
-                  v-for="(tag, idx) in metadata.tags"
-                  :key="idx"
-                  color="primary"
-                  variant="soft"
-                  size="sm"
-                  class="cursor-pointer hover:scale-105 transition-all duration-200 group px-2 py-0.5 rounded-full"
-                  @click="removeTag(idx)"
-                >
-                  <div class="flex items-center gap-1">
-                    <span class="text-xs">{{ tag }}</span>
-                    <UIcon 
-                      name="i-lucide-x" 
-                      class="w-2.5 h-2.5 opacity-60 group-hover:opacity-100 group-hover:text-red-500 transition-all duration-200" 
-                    />
-                  </div>
-                </UBadge>
+              <div class="col-span-3 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
+                <div class="flex items-center gap-1.5 mb-2">
+                  <UIcon name="i-lucide-toggle-right" class="w-3.5 h-3.5 text-indigo-500" />
+                  <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.status') }}</span>
+                </div>
+                <div class="flex items-center justify-between h-8 px-2 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                  <span class="text-xs font-medium">
+                    {{ metadata.published ? $t('admin.art.published') : $t('admin.art.draft') }}
+                  </span>
+                  <USwitch
+                    v-model="metadata.published"
+                    checked-icon="i-lucide-check"
+                    unchecked-icon="i-lucide-x"
+                    size="sm"
+                  />
+                </div>
               </div>
             </div>
 
-            <div class="col-span-3 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
-              <div class="flex items-center gap-1.5 mb-2">
-                <UIcon name="i-lucide-image" class="w-3.5 h-3.5 text-pink-500" />
-                <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.cover') }}</span>
+            <div class="grid grid-cols-12 gap-2">
+              <div class="col-span-6 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
+                <div class="flex items-center gap-1.5 mb-2">
+                  <UIcon name="i-lucide-align-left" class="w-3.5 h-3.5 text-purple-500" />
+                  <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.description') }}</span>
+                </div>
+                <UFormField>
+                  <UTextarea
+                    v-model="metadata.description"
+                    :placeholder="$t('admin.art.descPlaceholder')"
+                    :rows="2"
+                    maxlength="200"
+                    autoresize
+                    class="w-full"
+                  />
+                </UFormField>
               </div>
-              <div class="flex gap-1">
-                <UInput
-                  v-model="metadata.image"
-                  placeholder="URL"
-                  size="sm"
-                  class="flex-1"
-                />
-                <UButton
-                  icon="i-lucide-upload"
-                  size="sm"
-                  color="primary"
-                  variant="soft"
-                  @click="uploadCoverImage"
-                />
+
+              <div class="col-span-3 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
+                <div class="flex items-center gap-1.5 mb-2">
+                  <UIcon name="i-lucide-tags" class="w-3.5 h-3.5 text-green-500" />
+                  <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.tags') }}</span>
+                </div>
+                <UFormField>
+                  <UInput
+                    v-model="tagsInput"
+                    :placeholder="$t('admin.art.tagsPlaceholder')"
+                    size="sm"
+                    class="w-full"
+                    @blur="updateTags"
+                    @keyup.enter="updateTags"
+                  />
+                </UFormField>
+
+                <div v-if="metadata.tags.length" class="flex flex-wrap gap-1 mt-2">
+                  <UBadge
+                    v-for="(tag, idx) in metadata.tags"
+                    :key="idx"
+                    color="primary"
+                    variant="soft"
+                    size="sm"
+                    class="cursor-pointer hover:scale-105 transition-all duration-200 group px-2 py-0.5 rounded-full"
+                    @click="removeTag(idx)"
+                  >
+                    <div class="flex items-center gap-1">
+                      <span class="text-xs">{{ tag }}</span>
+                      <UIcon
+                        name="i-lucide-x"
+                        class="w-2.5 h-2.5 opacity-60 group-hover:opacity-100 group-hover:text-red-500 transition-all duration-200"
+                      />
+                    </div>
+                  </UBadge>
+                </div>
+              </div>
+
+              <div class="col-span-3 p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60">
+                <div class="flex items-center gap-1.5 mb-2">
+                  <UIcon name="i-lucide-image" class="w-3.5 h-3.5 text-pink-500" />
+                  <span class="font-medium text-xs text-gray-700 dark:text-gray-300">{{ $t('admin.art.cover') }}</span>
+                </div>
+                <div class="flex gap-1">
+                  <UInput
+                    v-model="metadata.image"
+                    placeholder="URL"
+                    size="sm"
+                    class="flex-1"
+                  />
+                  <UButton
+                    icon="i-lucide-upload"
+                    size="sm"
+                    color="primary"
+                    variant="soft"
+                    @click="uploadCoverImage"
+                  />
+                </div>
               </div>
             </div>
-          </div>
-
           </div>
 
           <div class="flex gap-2">
-            <div class="flex-shrink-0 w-1/4" v-if="metadata.image">
+            <div v-if="metadata.image" class="flex-shrink-0 w-1/4">
               <div class="p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60 h-full flex flex-col">
                 <div class="flex items-center gap-1.5 mb-2">
                   <UIcon name="i-lucide-image" class="w-3.5 h-3.5 text-pink-500" />
@@ -223,7 +222,7 @@
                     :src="metadata.image"
                     :alt="$t('admin.art.cover')"
                     class="w-full aspect-video object-cover rounded-lg border border-gray-200 dark:border-gray-700"
-                  />
+                  >
                   <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
                     <UButton
                       icon="i-lucide-trash-2"
@@ -235,7 +234,7 @@
                 </div>
               </div>
             </div>
-          
+
             <div class="flex-1">
               <div class="p-3 rounded-lg shadow-sm border-0 bg-white/60 dark:bg-gray-900/60 h-full flex flex-col">
                 <div class="flex items-center gap-1.5 mb-2">
@@ -249,12 +248,11 @@
                     color="primary"
                     variant="card"
                     :items="items"
-                    :ui="{ 
+                    :ui="{
                       fieldset: 'flex flex-nowrap gap-2 w-full',
                       legend: 'sr-only'
                     }"
                   />
-
                 </div>
               </div>
             </div>
@@ -267,7 +265,7 @@
                 <div class="flex-1 flex items-center justify-center">
                   <div class="flex items-center gap-3">
                     <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {{ metadata.isSticky ? $t('admin.art.sticked') : $t('admin.art.notSticked')}}
+                      {{ metadata.isSticky ? $t('admin.art.sticked') : $t('admin.art.notSticked') }}
                     </span>
                     <USwitch
                       v-model="metadata.isSticky"
@@ -275,17 +273,17 @@
                       unchecked-icon="i-lucide-minus"
                       size="md"
                       color="orange"
-                         class="flex-1"
+                      class="flex-1"
                     />
-                                      <UTooltip :text="isMetadataVisible ? $t('admin.art.collapseMetadata') : $t('admin.art.expandMetadata')">
-                    <UButton
-                      :icon="isMetadataVisible ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-                      color="neutral"
-                      variant="ghost"
-                      size="xs"
-                      @click="isMetadataVisible = !isMetadataVisible"
-                    />
-                  </UTooltip>
+                    <UTooltip :text="isMetadataVisible ? $t('admin.art.collapseMetadata') : $t('admin.art.expandMetadata')">
+                      <UButton
+                        :icon="isMetadataVisible ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+                        color="neutral"
+                        variant="ghost"
+                        size="xs"
+                        @click="isMetadataVisible = !isMetadataVisible"
+                      />
+                    </UTooltip>
                   </div>
                 </div>
               </div>
@@ -294,7 +292,7 @@
         </div>
       </div>
     </div>
- 
+
     <div class="flex-1 min-h-0 overflow-hidden bg-white dark:bg-gray-950">
       <iframe
         v-if="!vditorInstance"
@@ -303,135 +301,137 @@
       />
       <div id="preview-container" class="w-full h-full" />
     </div>
- 
-    <UModal 
-      :open="isDeleteModalOpen" 
+
+    <UModal
+      :open="isDeleteModalOpen"
       prevent-close
     >
-    <template #content>
+      <template #content>
         <UCard class="shadow-2xl border-0 bg-white/95 dark:bg-gray-900/95">
-        <template #header>
-          <div class="flex items-center gap-4">
-            <div class="flex-shrink-0">
-              <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                <UIcon name="i-lucide-alert-triangle" class="w-6 h-6 text-red-600 dark:text-red-400" />
-              </div>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                {{ $t('admin.art.confirmDelete') }}
-              </h3>
-              <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                {{ $t('admin.art.operationWarning') }}
-              </p>
-            </div>
-          </div>
-        </template>
- 
-        <div class="space-y-6">
-          <UAlert
-            color="error"
-            variant="soft"
-            :title="$t('admin.art.dangerWarning')"
-            class="border border-red-200 dark:border-red-800"
-          >
-            <template #description>
-              <div class="space-y-3 mt-2">
-                <p class="text-sm">{{ $t('admin.art.willDelete') }}</p>
-                <div class="p-3 rounded-lg bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800">
-                  <code class="text-sm font-mono text-red-800 dark:text-red-200">{{ article.path }}</code>
+          <template #header>
+            <div class="flex items-center gap-4">
+              <div class="flex-shrink-0">
+                <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                  <UIcon name="i-lucide-alert-triangle" class="w-6 h-6 text-red-600 dark:text-red-400" />
                 </div>
-                <p class="text-sm text-red-700 dark:text-red-300">
-                  ⚠️ {{ $t('admin.art.permanentLoss') }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                  {{ $t('admin.art.confirmDelete') }}
+                </h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {{ $t('admin.art.operationWarning') }}
                 </p>
               </div>
-            </template>
-          </UAlert>
- 
-          <UCard class="border border-gray-200 dark:border-gray-700">
-            <UFormField 
-              :label="$t('admin.art.confirmDeleteLabel')" 
-              required
-              :help="$t('admin.art.confirmDeleteHelp')"
+            </div>
+          </template>
+
+          <div class="space-y-6">
+            <UAlert
+              color="error"
+              variant="soft"
+              :title="$t('admin.art.dangerWarning')"
+              class="border border-red-200 dark:border-red-800"
             >
-              <UInput
-                ref="deleteInputRef"
-                v-model="deleteConfirmText"
-                :placeholder="$t('admin.art.inputPlaceholder', { path: article.path })"
-                :error="!!deleteError"
-                class="font-mono transition-all duration-200"
-                @keyup.enter="handleDelete"
-                @keyup.escape="closeDeleteModal"
-              />
-              <template v-if="deleteError" #error>
-                <div class="flex items-center gap-1 text-red-600 dark:text-red-400">
-                  <UIcon name="i-lucide-alert-circle" class="w-4 h-4" />
-                  {{ deleteError }}
+              <template #description>
+                <div class="space-y-3 mt-2">
+                  <p class="text-sm">
+                    {{ $t('admin.art.willDelete') }}
+                  </p>
+                  <div class="p-3 rounded-lg bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800">
+                    <code class="text-sm font-mono text-red-800 dark:text-red-200">{{ article.path }}</code>
+                  </div>
+                  <p class="text-sm text-red-700 dark:text-red-300">
+                    ⚠️ {{ $t('admin.art.permanentLoss') }}
+                  </p>
                 </div>
               </template>
-            </UFormField>
-          </UCard>
-        </div>
- 
-        <template #footer>
-          <div class="flex justify-end gap-3">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              size="md"
-              :disabled="isDeleting"
-              @click="closeDeleteModal"
-            >
-              {{ $t('admin.art.cancel') }}
-            </UButton>
-            <UButton
-              color="error"
-              variant="solid"
-              size="md"
-              :loading="isDeleting"
-              :disabled="deleteConfirmText.trim() !== article.path"
-              icon="i-lucide-trash-2"
-              @click="handleDelete"
-            >
-              {{ isDeleting ? $t('admin.art.deleting') : $t('admin.art.confirmDeleteLabel') }}
-            </UButton>
+            </UAlert>
+
+            <UCard class="border border-gray-200 dark:border-gray-700">
+              <UFormField
+                :label="$t('admin.art.confirmDeleteLabel')"
+                required
+                :help="$t('admin.art.confirmDeleteHelp')"
+              >
+                <UInput
+                  ref="deleteInputRef"
+                  v-model="deleteConfirmText"
+                  :placeholder="$t('admin.art.inputPlaceholder', { path: article.path })"
+                  :error="!!deleteError"
+                  class="font-mono transition-all duration-200"
+                  @keyup.enter="handleDelete"
+                  @keyup.escape="closeDeleteModal"
+                />
+                <template v-if="deleteError" #error>
+                  <div class="flex items-center gap-1 text-red-600 dark:text-red-400">
+                    <UIcon name="i-lucide-alert-circle" class="w-4 h-4" />
+                    {{ deleteError }}
+                  </div>
+                </template>
+              </UFormField>
+            </UCard>
           </div>
-        </template>
-      </UCard>
-    </template>
+
+          <template #footer>
+            <div class="flex justify-end gap-3">
+              <UButton
+                color="neutral"
+                variant="ghost"
+                size="md"
+                :disabled="isDeleting"
+                @click="closeDeleteModal"
+              >
+                {{ $t('admin.art.cancel') }}
+              </UButton>
+              <UButton
+                color="error"
+                variant="solid"
+                size="md"
+                :loading="isDeleting"
+                :disabled="deleteConfirmText.trim() !== article.path"
+                icon="i-lucide-trash-2"
+                @click="handleDelete"
+              >
+                {{ isDeleting ? $t('admin.art.deleting') : $t('admin.art.confirmDeleteLabel') }}
+              </UButton>
+            </div>
+          </template>
+        </UCard>
+      </template>
     </UModal>
- 
+
     <input
       ref="coverImageInput"
       type="file"
       accept="image/*"
       class="hidden"
       @change="handleCoverImageUpload"
-    />
+    >
   </UDashboardPanel>
 </template>
- 
+
 <script setup lang="ts">
 import type { Article, Result } from '~/types'
 import Vditor from 'vditor'
 import 'vditor/src/assets/less/index.less'
 import { watchDeep } from '@vueuse/shared'
 import matter from 'gray-matter'
- 
+
 const { t } = useI18n()
 const localePath = useLocalePath()
 const toast = useToast()
 const props = defineProps<{
   article: Article
 }>()
- 
+
 /* ---------- 响应式状态 ---------- */
 const vditorInstance = ref<Vditor | null>(null)
 const currentMode = ref<'wysiwyg' | 'ir' | 'sv'>('ir')
 const editingPath = ref<string>()
 const editTextContent = ref<string>()
 const isSaving = ref(false)
- 
+
 const isMetadataVisible = ref(true)
 
 // 元数据
@@ -442,20 +442,20 @@ const metadata = ref({
   image: '',
   tags: [] as string[],
   published: true,
-  isSticky: false, 
+  isSticky: false
 })
 const tagsInput = ref('')
 const coverImageInput = ref<HTMLInputElement>()
- 
+
 // 删除相关
 const isDeleteModalOpen = ref(false)
 const deleteConfirmText = ref('')
 const deleteError = ref('')
 const isDeleting = ref(false)
 const deleteInputRef = ref()
- 
+
 const emits = defineEmits(['close', 'deleted'])
- 
+
 /* ---------- UI 选项 ---------- */
 const items = computed(() => [
   {
@@ -465,7 +465,7 @@ const items = computed(() => [
   },
   {
     label: t('admin.art.instantRender'),
-    value: 'ir', 
+    value: 'ir',
     description: ''
   },
   {
@@ -474,7 +474,7 @@ const items = computed(() => [
     description: ''
   }
 ])
- 
+
 /* ---------- 辅助函数 ---------- */
 // 从 API 返回的 frontMatter 填充表单
 const loadMetadata = (frontMatter: any) => {
@@ -487,12 +487,12 @@ const loadMetadata = (frontMatter: any) => {
     image: frontMatter.image || '',
     tags: Array.isArray(frontMatter.tags) ? frontMatter.tags : [],
     published: frontMatter.published === true || frontMatter.published === 'true' || frontMatter.published === 1,
-    isSticky: !!frontMatter.isSticky 
+    isSticky: !!frontMatter.isSticky
 
   }
   tagsInput.value = metadata.value.tags.join(', ')
 }
- 
+
 // 生成 frontMatter（YAML）
 const generateFrontmatter = (): string => {
   const data = {
@@ -506,21 +506,21 @@ const generateFrontmatter = (): string => {
   }
   return matter.stringify('', data).trim()
 }
- 
+
 // 更新标签数组
 const updateTags = () => {
   metadata.value.tags = tagsInput.value
     .split(',')
-    .map((t) => t.trim())
-    .filter((t) => t.length > 0)
+    .map(t => t.trim())
+    .filter(t => t.length > 0)
 }
- 
+
 // 删除单个标签
 const removeTag = (idx: number) => {
   metadata.value.tags.splice(idx, 1)
   tagsInput.value = metadata.value.tags.join(', ')
 }
- 
+
 // 封面图上传
 const uploadCoverImage = () => {
   coverImageInput.value?.click()
@@ -529,17 +529,17 @@ const handleCoverImageUpload = async (e: Event) => {
   const target = e.target as HTMLInputElement
   const file = target.files?.[0]
   if (!file || !editingPath.value) return
- 
+
   try {
     const formData = new FormData()
     formData.append('file', file)
     formData.append('uploadPath', editingPath.value)
- 
-    const response = await $fetch<Result<{ url: string; filename: string }>>('/api/article/upload', {
+
+    const response = await $fetch<Result<{ url: string, filename: string }>>('/api/article/upload', {
       method: 'POST',
-      body: formData,
+      body: formData
     })
- 
+
     if (response.success) {
       metadata.value.image = response.data.url
       toast.add({ title: t('admin.art.coverUploadSuccess'), color: 'success', icon: 'i-heroicons-check-circle' })
@@ -550,7 +550,7 @@ const handleCoverImageUpload = async (e: Event) => {
     if (target) target.value = ''
   }
 }
- 
+
 /* ---------- 业务流程 ---------- */
 const handleClose = () => {
   if (vditorInstance.value) {
@@ -559,7 +559,7 @@ const handleClose = () => {
   }
   emits('close')
 }
- 
+
 /* 删除相关 */
 const openDeleteModal = () => {
   deleteConfirmText.value = ''
@@ -580,11 +580,11 @@ const handleDelete = async () => {
   }
   isDeleting.value = true
   deleteError.value = ''
- 
+
   try {
     const result: Result<any> = await $fetch('/api/article/delete', {
       method: 'DELETE',
-      body: { path: props.article.path },
+      body: { path: props.article.path }
     })
     if (result.success) {
       toast.add({ title: t('admin.art.deleted'), description: t('admin.art.deletedDesc', { path: props.article.path }), color: 'success' })
@@ -604,27 +604,27 @@ const handleDelete = async () => {
 watch(deleteConfirmText, () => {
   if (deleteError.value) deleteError.value = ''
 })
- 
+
 /* 读取文章内容（只返回正文）并加载元数据 */
 const articleContent = async () => {
   if (!props.article) return ''
-  const result = await $fetch<Result<{ content: string; frontMatter: any }>>('/api/article/content', {
+  const result = await $fetch<Result<{ content: string, frontMatter: any }>>('/api/article/content', {
     method: 'POST',
-    body: { path: props.article.path },
+    body: { path: props.article.path }
   })
   if (!result.success) {
     toast.add({ title: t('admin.art.loadFailed'), description: result.err, color: 'error' })
     return ''
   }
- 
+
   // 填充元数据表单
   loadMetadata(result.data.frontMatter)
- 
+
   // 只返回正文（不含 frontMatter）
   const prefix = '/api/article/fetch?path=' + encodeURIComponent(props.article.path + '/')
   return result.data.content.replace(/!\[(.*?)\]\(\1\)/g, `![$1](${prefix}$1)`)
 }
- 
+
 /* 计算编辑器高度 */
 const calculateEditorHeight = () => {
   const container = document.getElementById('preview-container')
@@ -636,29 +636,29 @@ const calculateEditorHeight = () => {
     })
   })
 }
- const previewArticle = async() =>{
-    if (vditorInstance.value) {
-      vditorInstance.value.destroy()
-      vditorInstance.value = null
+const previewArticle = async () => {
+  if (vditorInstance.value) {
+    vditorInstance.value.destroy()
+    vditorInstance.value = null
   }
- }
+}
 /* 编辑文章（加载内容或刷新） */
 const editArticle = async (refresh = true) => {
   editingPath.value = props.article.path
   if (refresh) editTextContent.value = await articleContent()
- 
+
   const container = document.getElementById('preview-container')
   if (!container) return
- 
+
   container.innerHTML = ''
   if (vditorInstance.value) {
     vditorInstance.value.destroy()
     vditorInstance.value = null
   }
- 
+
   await nextTick()
   const editorHeight = await calculateEditorHeight()
- 
+
   vditorInstance.value = new Vditor(container, {
     i18n: window.VditorI18n,
     height: editorHeight,
@@ -672,7 +672,7 @@ const editArticle = async (refresh = true) => {
       handler(files) {
         const file = files[0]
         if (!file) return Promise.resolve(null)
- 
+
         const uploadImage = async () => {
           if (!editingPath.value) {
             vditorInstance.value?.tip(t('admin.art.pathEmpty'), 3000) // 替换: '目录不能为空'
@@ -682,7 +682,7 @@ const editArticle = async (refresh = true) => {
             const formData = new FormData()
             formData.append('file', file)
             formData.append('uploadPath', editingPath.value)
- 
+
             const response = await $fetch<Result<{
               originalName: string
               filename: string
@@ -693,9 +693,9 @@ const editArticle = async (refresh = true) => {
               type: string
             }>>('/api/article/upload', {
               method: 'POST',
-              body: formData,
+              body: formData
             })
- 
+
             if (response.success) {
               const imgUrl = window.location.origin + response.data.url
               vditorInstance.value?.insertValue(`![${response.data.filename}](${imgUrl})`)
@@ -707,15 +707,15 @@ const editArticle = async (refresh = true) => {
         }
         uploadImage()
         return Promise.resolve(null)
-      },
+      }
     },
     preview: {
       hljs: {
         defaultLang: 'sh',
         lineNumber: true,
         style: 'github',
-        enable: true,
-      },
+        enable: true
+      }
     },
     toolbar: [
       'emoji',
@@ -740,10 +740,10 @@ const editArticle = async (refresh = true) => {
       'undo',
       'redo'
     ],
-    cache: { enable: false },
+    cache: { enable: false }
   })
 }
- 
+
 /* 保存文章（生成 frontMatter 并写入） */
 const saveArticle = async () => {
   const body = vditorInstance.value?.getValue()
@@ -755,18 +755,18 @@ const saveArticle = async () => {
     toast.add({ title: t('admin.art.titleEmpty'), color: 'error', icon: 'i-heroicons-x-circle' }) // 替换: '标题不能为空'
     return
   }
- 
+
   isSaving.value = true
   try {
     const frontmatter = generateFrontmatter()
     const fullContent = `${frontmatter}\n\n${body}`
     const payload = fullContent.replace(/!\[(.*?)\]\(.*?\/api\/article\/fetch\?path=.*?\)/g, '![$1]($1)')
- 
+
     const res = await $fetch('/api/article/save', {
       method: 'PUT',
-      body: { path: editingPath.value, content: payload, originalPath: props.article.path },
+      body: { path: editingPath.value, content: payload, originalPath: props.article.path }
     })
- 
+
     if (res.success) {
       toast.add({ title: t('admin.art.success'), color: 'success', icon: 'i-heroicons-check-circle' }) // 替换: '保存成功'
       if (vditorInstance.value) {
@@ -782,7 +782,7 @@ const saveArticle = async () => {
     isSaving.value = false
   }
 }
- 
+
 /* ---------- 生命周期 & 监听 ---------- */
 onMounted(() => {
   if (props.article.newBlog) {
@@ -791,22 +791,22 @@ onMounted(() => {
     return
   }
 })
- 
+
 onUnmounted(() => {
   if (vditorInstance.value) {
     vditorInstance.value.destroy()
     vditorInstance.value = null
   }
 })
- 
+
 watch(
   () => currentMode.value,
   () => {
     if (vditorInstance.value) editTextContent.value = vditorInstance.value.getValue()
     editArticle(false)
-  },
+  }
 )
- 
+
 watchDeep(
   () => props.article,
   (article) => {
@@ -816,17 +816,17 @@ watchDeep(
       return
     }
     if (vditorInstance.value) editArticle(true)
-  },
+  }
 )
 </script>
- 
+
 <style scoped>
 /* 工具栏图标大小 */
 :deep(.vditor-toolbar svg) {
   width: 16px !important;
   height: 16px !important;
 }
- 
+
 /* 列表样式 */
 :deep(.vditor-reset) {
   ol {
@@ -844,12 +844,12 @@ watchDeep(
     margin-bottom: 0.25em !important;
   }
 }
- 
+
 /* 防止双层滚动条 */
 :deep(#preview-container) {
   overflow: hidden;
 }
- 
+
 /* Vditor 完全填充容器 */
 :deep(.vditor) {
   height: 100% !important;
