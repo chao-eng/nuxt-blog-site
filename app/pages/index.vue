@@ -18,6 +18,5 @@ definePageMeta({
         </ClientOnly>
       </section>
     </main>
-  
   </div>
 </template>

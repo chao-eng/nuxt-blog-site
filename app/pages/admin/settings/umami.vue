@@ -62,7 +62,7 @@ async function saveConfig() {
         shareUrl: shareUrl.value
       }
     })
-    
+
     toast.add({
       title: t('admin.set.umami.saveSuccess'),
       description: t('admin.set.umami.configUpdated'),
@@ -89,7 +89,9 @@ onMounted(() => {
     <UCard>
       <template #header>
         <div class="flex items-center justify-between">
-          <h1 class="text-2xl font-bold">{{ t('admin.set.umami.title') }}</h1>
+          <h1 class="text-2xl font-bold">
+            {{ t('admin.set.umami.title') }}
+          </h1>
           <UButton
             icon="i-lucide-refresh-cw"
             variant="ghost"
@@ -105,7 +107,9 @@ onMounted(() => {
         <!-- Umami 配置 -->
         <div class="space-y-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ t('admin.set.umami.basicConfig') }}</h3>
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">
+              {{ t('admin.set.umami.basicConfig') }}
+            </h3>
             <a href="https://umami.is/" target="_blank" class="text-sm text-primary hover:underline">
               {{ t('admin.set.umami.officialWebsite') }} &rarr;
             </a>
@@ -134,7 +138,9 @@ onMounted(() => {
 
             <UFormField :label="t('admin.set.umami.shareUrl')" class="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-center gap-4">
               <UInput v-model="shareUrl" :placeholder="t('admin.set.umami.shareUrlPlaceholder')" class="w-full" />
-              <p class="text-xs text-gray-500 col-start-2">{{ t('admin.set.umami.shareUrlDesc') }}</p>
+              <p class="text-xs text-gray-500 col-start-2">
+                {{ t('admin.set.umami.shareUrlDesc') }}
+              </p>
             </UFormField>
           </div>
         </div>

@@ -36,7 +36,7 @@ const formatUptime = (milliseconds: number) => {
   const minutes = Math.floor(seconds / 60)
   const hours = Math.floor(minutes / 60)
   const days = Math.floor(hours / 24)
-  
+
   if (days > 0) {
     return `${days}${t('admin.dash.days')}${hours % 24}${t('admin.dash.hours')}`
   } else if (hours > 0) {
@@ -64,7 +64,7 @@ onMounted(async () => {
     if (uptimeRes.success) {
       serverStartTime = uptimeRes.startTime
       updateUptime()
-      
+
       // 每分钟更新一次运行时间
       setInterval(updateUptime, 60000)
     }
@@ -115,7 +115,9 @@ onMounted(async () => {
           <template #header>
             <div class="flex items-center gap-3">
               <UIcon name="i-lucide-layout-dashboard" class="w-6 h-6 text-primary" />
-              <h1 class="text-2xl font-bold">{{ t('admin.dash.title') }}</h1>
+              <h1 class="text-2xl font-bold">
+                {{ t('admin.dash.title') }}
+              </h1>
             </div>
           </template>
 
@@ -134,11 +136,15 @@ onMounted(async () => {
           <UCard v-for="stat in stats" :key="stat.label">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">{{ stat.label }}</p>
-                <p class="text-2xl font-bold mt-1">{{ stat.value }}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ stat.label }}
+                </p>
+                <p class="text-2xl font-bold mt-1">
+                  {{ stat.value }}
+                </p>
               </div>
-              <UIcon 
-                :name="stat.icon" 
+              <UIcon
+                :name="stat.icon"
                 class="w-12 h-12 opacity-20"
                 :class="`text-${stat.color}-500`"
               />
@@ -149,7 +155,9 @@ onMounted(async () => {
         <!-- 功能介绍 -->
         <UCard>
           <template #header>
-            <h2 class="text-xl font-semibold">{{ t('admin.dash.systemFeatures') }}</h2>
+            <h2 class="text-xl font-semibold">
+              {{ t('admin.dash.systemFeatures') }}
+            </h2>
           </template>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -157,7 +165,9 @@ onMounted(async () => {
             <div class="space-y-3">
               <div class="flex items-center gap-2">
                 <UIcon name="i-lucide-newspaper" class="w-5 h-5 text-blue-500" />
-                <h3 class="font-semibold">{{ t('admin.dash.articleManagement') }}</h3>
+                <h3 class="font-semibold">
+                  {{ t('admin.dash.articleManagement') }}
+                </h3>
               </div>
               <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400 ml-7">
                 <li>• {{ t('admin.dash.featureMarkdown') }}</li>
@@ -171,7 +181,9 @@ onMounted(async () => {
             <div class="space-y-3">
               <div class="flex items-center gap-2">
                 <UIcon name="i-lucide-map-pin" class="w-5 h-5 text-green-500" />
-                <h3 class="font-semibold">{{ t('admin.dash.travelRecords') }}</h3>
+                <h3 class="font-semibold">
+                  {{ t('admin.dash.travelRecords') }}
+                </h3>
               </div>
               <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400 ml-7">
                 <li>• {{ t('admin.dash.featureMap') }}</li>
@@ -185,7 +197,9 @@ onMounted(async () => {
             <div class="space-y-3">
               <div class="flex items-center gap-2">
                 <UIcon name="i-lucide-settings" class="w-5 h-5 text-purple-500" />
-                <h3 class="font-semibold">{{ t('admin.dash.systemSettings') }}</h3>
+                <h3 class="font-semibold">
+                  {{ t('admin.dash.systemSettings') }}
+                </h3>
               </div>
               <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400 ml-7">
                 <li>• {{ t('admin.dash.featureAccount') }}</li>
@@ -199,7 +213,9 @@ onMounted(async () => {
             <div class="space-y-3">
               <div class="flex items-center gap-2">
                 <UIcon name="i-lucide-message-square" class="w-5 h-5 text-orange-500" />
-                <h3 class="font-semibold">{{ t('admin.dash.commentsAndStats') }}</h3>
+                <h3 class="font-semibold">
+                  {{ t('admin.dash.commentsAndStats') }}
+                </h3>
               </div>
               <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400 ml-7">
                 <li>• {{ t('admin.dash.featureGiscus') }}</li>
@@ -214,7 +230,9 @@ onMounted(async () => {
         <!-- 技术栈 -->
         <UCard>
           <template #header>
-            <h2 class="text-xl font-semibold">{{ t('admin.dash.techStack') }}</h2>
+            <h2 class="text-xl font-semibold">
+              {{ t('admin.dash.techStack') }}
+            </h2>
           </template>
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -240,13 +258,15 @@ onMounted(async () => {
         <!-- 快速链接 -->
         <UCard>
           <template #header>
-            <h2 class="text-xl font-semibold">{{ t('admin.dash.quickLinks') }}</h2>
+            <h2 class="text-xl font-semibold">
+              {{ t('admin.dash.quickLinks') }}
+            </h2>
           </template>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <UButton 
-              :to="localePath('/admin/article')" 
-              variant="outline" 
+            <UButton
+              :to="localePath('/admin/article')"
+              variant="outline"
               size="lg"
               block
             >
@@ -256,9 +276,9 @@ onMounted(async () => {
               {{ t('admin.dash.articleManagement') }}
             </UButton>
 
-            <UButton 
-              :to="localePath('/admin/travel')" 
-              variant="outline" 
+            <UButton
+              :to="localePath('/admin/travel')"
+              variant="outline"
               size="lg"
               block
             >
@@ -268,9 +288,9 @@ onMounted(async () => {
               {{ t('admin.dash.travelRecords') }}
             </UButton>
 
-            <UButton 
-              :to="localePath('/admin/settings')" 
-              variant="outline" 
+            <UButton
+              :to="localePath('/admin/settings')"
+              variant="outline"
               size="lg"
               block
             >

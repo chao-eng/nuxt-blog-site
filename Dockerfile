@@ -12,7 +12,7 @@ RUN apk add --no-cache --virtual .build-deps \
     g++ \
     sqlite-dev
 
-COPY package.json yarn.lock ./
+COPY package.json yarn.lock .yarnrc ./
 RUN yarn install --frozen-lockfile
 
 COPY . .

@@ -103,8 +103,8 @@ const columns: TableColumn<TravelCity>[] = [
       )
 
       if (photos.length > 3) {
-        imgElements.push(h('div', { 
-            class: 'flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-xs text-gray-500 font-medium ring-1 ring-white dark:ring-gray-900' 
+        imgElements.push(h('div', {
+          class: 'flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-xs text-gray-500 font-medium ring-1 ring-white dark:ring-gray-900'
         }, `+${photos.length - 3}`))
       }
 
@@ -286,7 +286,9 @@ onMounted(() => {
         <div class="space-y-6">
           <div class="w-full">
             <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-semibold">{{ t('admin.tra.preview') }} ({{ tableData.length }} {{ t('admin.tra.records') }})</h3>
+              <h3 class="text-sm font-semibold">
+                {{ t('admin.tra.preview') }} ({{ tableData.length }} {{ t('admin.tra.records') }})
+              </h3>
               <UButton icon="i-lucide-plus" size="sm" @click="addRecord">
                 {{ t('admin.tra.add') }}
               </UButton>
@@ -321,15 +323,19 @@ onMounted(() => {
             <div class="flex items-center justify-between mb-3">
               <label class="text-sm font-semibold">{{ t('admin.tra.jsonData') }}</label>
               <div class="flex gap-2">
-                <UButton size="xs" variant="ghost" @click="formatJson">{{ t('admin.tra.format') }}</UButton>
-                <UButton size="xs" variant="ghost" @click="resetToExample">{{ t('admin.tra.example') }}</UButton>
+                <UButton size="xs" variant="ghost" @click="formatJson">
+                  {{ t('admin.tra.format') }}
+                </UButton>
+                <UButton size="xs" variant="ghost" @click="resetToExample">
+                  {{ t('admin.tra.example') }}
+                </UButton>
               </div>
             </div>
-            
+
             <UTextarea
               v-model="jsonData"
               :rows="20"
-              placeholder='[{"name": "北京"...}]'
+              placeholder="[{&quot;name&quot;: &quot;北京&quot;...}]"
               class="font-mono text-sm w-full"
               :ui="{ wrapper: 'w-full', base: 'w-full resize-none' }"
             />
@@ -338,8 +344,12 @@ onMounted(() => {
           <USeparator />
 
           <div class="flex justify-end gap-3 pt-2">
-            <UButton variant="outline" @click="loadData">{{ t('admin.tra.cancel') }}</UButton>
-            <UButton color="primary" :loading="saving" @click="saveData">{{ t('admin.tra.save') }}</UButton>
+            <UButton variant="outline" @click="loadData">
+              {{ t('admin.tra.cancel') }}
+            </UButton>
+            <UButton color="primary" :loading="saving" @click="saveData">
+              {{ t('admin.tra.save') }}
+            </UButton>
           </div>
         </div>
       </UPageCard>

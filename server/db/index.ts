@@ -18,10 +18,10 @@ export { dbCommentConfig, dbUmamiConfig }
  * 初始化数据库（创建所有表，首次运行时执行）
  */
 function initDB(): void {
-    initUserTable()
-    initArticleTable()
-    initTravelTable()
-    initSettingsTables()
+  initUserTable()
+  initArticleTable()
+  initTravelTable()
+  initSettingsTables()
 }
 
 // 执行初始化
@@ -32,11 +32,11 @@ initDB()
  * 保持向后兼容，方便迁移
  */
 const dbUtils = {
-    common: dbCommon,
-    article: dbArticle,
-    travelRecords: dbTravel,
-    commentConfig: dbCommentConfig,
-    umamiConfig: dbUmamiConfig
+  common: dbCommon,
+  article: dbArticle,
+  travelRecords: dbTravel,
+  commentConfig: dbCommentConfig,
+  umamiConfig: dbUmamiConfig
 }
 
 export default dbUtils

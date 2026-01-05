@@ -200,14 +200,37 @@ cp .env.production.example .env.production
 ```
 
 ### Docker 部署 (推荐)
-项目包含 `Dockerfile`，可直接构建镜像：
+
+#### 方式一：使用预构建镜像（推荐）
+直接从 Docker Hub 拉取已构建好的镜像：
+
+```bash
+# 拉取最新镜像
+docker pull bujidec/nuxt-blog-site:latest
+
+# 运行容器
+docker run -d -p 3000:3000 \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/data/blog:/blog \
+  -v $(pwd)/public/uploads:/app/static \
+  --name nuxt-blog \
+  bujidec/nuxt-blog-site:latest
+```
+
+**镜像信息：**
+- Docker Hub 地址: [`bujidec/nuxt-blog-site`](https://hub.docker.com/r/bujidec/nuxt-blog-site)
+- 支持架构: `linux/amd64`, `linux/arm64`
+- 自动更新: 每次推送到 `master` 分支时自动构建
+
+#### 方式二：本地构建镜像
+如果需要自定义或本地构建，可以使用项目提供的 Dockerfile：
 
 ```bash
 docker build -t nuxt-blog-site .
 docker run -d -p 3000:3000 \
-  -v $(pwd)/data:/data \
-  -v $(pwd)/data/blog:/data/blog \
-  -v $(pwd)/public/uploads:/uploads \
+  -v $(pwd)/data:/app/data \
+  -v $(pwd)/data/blog:/blog \
+  -v $(pwd)/public/uploads:/app/static \
   nuxt-blog-site
 ```
 

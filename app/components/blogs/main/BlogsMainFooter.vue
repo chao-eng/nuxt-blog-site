@@ -57,8 +57,6 @@ const { data: umamiStats } = await useFetch('/api/umami/stats', {
   server: false,
   query: computed(() => ({ range: selectedRange.value }))
 })
-
-
 </script>
 
 <template>
@@ -158,14 +156,14 @@ const { data: umamiStats } = await useFetch('/api/umami/stats', {
             <UIcon name="i-lucide-users" class="w-3.5 h-3.5" />
             <span>{{ t('footer.visitors') }}: {{ umamiStats.data.visitors }}</span>
           </div>
-          <div class="w-px h-3 bg-gray-300 dark:bg-gray-600"></div>
-          
+          <div class="w-px h-3 bg-gray-300 dark:bg-gray-600" />
+
           <!-- 访问次数 -->
           <div class="flex items-center gap-1.5">
             <UIcon name="i-lucide-mouse-pointer-click" class="w-3.5 h-3.5" />
             <span>{{ t('footer.visits') }}: {{ umamiStats.data.visits }}</span>
           </div>
-          <div class="w-px h-3 bg-gray-300 dark:bg-gray-600"></div>
+          <div class="w-px h-3 bg-gray-300 dark:bg-gray-600" />
 
           <!-- 总浏览量 -->
           <div class="flex items-center gap-1.5">

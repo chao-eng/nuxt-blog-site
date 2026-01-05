@@ -28,12 +28,6 @@ try {
 
 export default defineNuxtConfig({
 
-  app: {
-    head: {
-      script: []
-    }
-  },
-
   modules: [
     '@nuxt/icon',
     '@nuxt/eslint',
@@ -43,36 +37,12 @@ export default defineNuxtConfig({
     '@nuxtjs/i18n'
   ],
 
-  i18n: {
-    locales: [
-      {
-        code: 'en',
-        file: 'en.json',
-        name: 'English'
-      },
-      {
-        code: 'zh-CN',
-        file: 'zh-CN.json',
-        name: '简体中文'
-      }
-    ],
-    lazy: true,
-    langDir: 'locales',
-    defaultLocale: 'zh-CN',
-    strategy: 'prefix_except_default',
-    detectBrowserLanguage: {
-      useCookie: true,
-      cookieKey: 'i18n_redirected',
-      redirectOn: 'root'
-    }
-  },
-
   devtools: {
     enabled: true
-  },
-
-  devServer: {
-    host: '0.0.0.0'
+  }, app: {
+    head: {
+      script: []
+    }
   },
 
   css: ['~/assets/css/main.css'],
@@ -115,6 +85,10 @@ export default defineNuxtConfig({
     }
   },
 
+  devServer: {
+    host: '0.0.0.0'
+  },
+
   compatibilityDate: '2024-07-11',
   auth: {
     globalAppMiddleware: false,
@@ -151,6 +125,30 @@ export default defineNuxtConfig({
         commaDangle: 'never',
         braceStyle: '1tbs'
       }
+    }
+  },
+
+  i18n: {
+    locales: [
+      {
+        code: 'en',
+        file: 'en.json',
+        name: 'English'
+      },
+      {
+        code: 'zh-CN',
+        file: 'zh-CN.json',
+        name: '简体中文'
+      }
+    ],
+    lazy: true,
+    langDir: 'locales',
+    defaultLocale: 'zh-CN',
+    strategy: 'prefix_except_default',
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      redirectOn: 'root'
     }
   }
 })

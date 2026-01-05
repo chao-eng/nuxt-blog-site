@@ -99,7 +99,7 @@ const getThemeColors = () => {
 async function initMap() {
   try {
     await loadTravelRecords()
-    
+
     if (!isVisible.value) {
       loading.value = false
       return
@@ -108,16 +108,16 @@ async function initMap() {
     const mapResponse: any = await $fetch('/api/map/geojson', {
       params: { adcode: '100000' }
     })
-    
+
     if (!mapResponse.success || !mapResponse.data) {
       throw new Error(mapResponse.error || 'Failed to load map data')
     }
-    
+
     echarts.registerMap('china', mapResponse.data)
 
     loading.value = false
     await nextTick()
-    
+
     if (!chartContainer.value) throw new Error('Chart container not found')
 
     chartInstance = echarts.init(chartContainer.value)
@@ -251,7 +251,6 @@ async function initMap() {
 
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
     window.addEventListener('resize', handleResize)
-
   } catch (err: any) {
     console.error('Error loading map:', err)
     loading.value = false
@@ -271,16 +270,20 @@ onUnmounted(() => {
   <div v-if="isVisible" class="travel-map-container">
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner" />
-      <p class="loading-text">加载地图中...</p>
+      <p class="loading-text">
+        加载地图中...
+      </p>
     </div>
     <div v-else-if="error" class="error-container">
-      <p class="error-text">{{ error }}</p>
+      <p class="error-text">
+        {{ error }}
+      </p>
     </div>
     <div v-else class="map-wrapper">
       <div ref="chartContainer" class="shadow-lg chart-wrapper bg-white/50 dark:bg-slate-800/50" />
 
       <Transition name="popover-fade">
-        <div 
+        <div
           v-if="showPopover && hoveredCity"
           class="city-popover"
           :style="{ left: `${popoverPosition.x}px`, top: `${popoverPosition.y}px` }"
@@ -290,26 +293,41 @@ onUnmounted(() => {
           <div class="popover-content">
             <div class="popover-header">
               <div>
-                <h3 class="popover-city-name">{{ hoveredCity.name }}</h3>
-                <p class="popover-city-time">{{ hoveredCity.time }}</p>
+                <h3 class="popover-city-name">
+                  {{ hoveredCity.name }}
+                </h3>
+                <p class="popover-city-time">
+                  {{ hoveredCity.time }}
+                </p>
               </div>
             </div>
-            <p class="popover-description">{{ hoveredCity.description }}</p>
+            <p class="popover-description">
+              {{ hoveredCity.description }}
+            </p>
 
             <div v-if="hoveredCity.photos && hoveredCity.photos.length > 0" class="popover-photos">
               <div class="photo-preview-wrapper">
                 <div class="photo-preview">
-                  <img 
-                    :src="hoveredCity.photos[currentPhotoIndex]" 
+                  <img
+                    :src="hoveredCity.photos[currentPhotoIndex]"
                     class="preview-image"
-                  />
+                  >
                 </div>
                 <div v-if="hoveredCity.photos.length > 1" class="photo-controls">
-                  <button @click.stop="prevPhoto" class="photo-nav-btn"><UIcon name="i-lucide-chevron-left" class="w-4 h-4" /></button>
-                  <button @click.stop="nextPhoto" class="photo-nav-btn"><UIcon name="i-lucide-chevron-right" class="w-4 h-4" /></button>
+                  <button class="photo-nav-btn" @click.stop="prevPhoto">
+                    <UIcon name="i-lucide-chevron-left" class="w-4 h-4" />
+                  </button>
+                  <button class="photo-nav-btn" @click.stop="nextPhoto">
+                    <UIcon name="i-lucide-chevron-right" class="w-4 h-4" />
+                  </button>
                 </div>
                 <div v-if="hoveredCity.photos.length > 1" class="photo-indicators">
-                  <div v-for="(_, idx) in hoveredCity.photos" :key="idx" class="photo-indicator" :class="{ 'active': idx === currentPhotoIndex }" />
+                  <div
+                    v-for="(_, idx) in hoveredCity.photos"
+                    :key="idx"
+                    class="photo-indicator"
+                    :class="{ active: idx === currentPhotoIndex }"
+                  />
                 </div>
               </div>
             </div>
@@ -347,7 +365,7 @@ onUnmounted(() => {
 }
 
 /* 核心修改 1: 地图容器样式
-  增加 border-radius 和 overflow: hidden 
+  增加 border-radius 和 overflow: hidden
 */
 .chart-wrapper {
   width: 100%;
@@ -407,7 +425,7 @@ onUnmounted(() => {
   background: white;
   border-radius: 24px;
   padding: 20px;
-  box-shadow: 
+  box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04),
     0 0 0 1px rgba(0, 0, 0, 0.05);
@@ -419,7 +437,7 @@ onUnmounted(() => {
 .dark .popover-content {
   background: rgba(17, 24, 39, 0.95);
   border: 1px solid rgba(75, 85, 99, 0.3);
-  box-shadow: 
+  box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.5),
     0 10px 10px -5px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.05);
