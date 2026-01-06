@@ -1,25 +1,14 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
-import { config } from 'dotenv'
 import { resolve } from 'path'
 import fs from 'fs'
 import yaml from 'js-yaml'
 
-const envFile = `.env.${process.env.NODE_ENV}`
-const envPath = resolve(process.cwd(), envFile)
-
-console.log(`🔧 Manually loading: ${envPath}`)
-const result = config({ path: envPath, override: true })
-if (result.error) {
-  console.error('❌ Failed to load env file:', result.error)
-} else {
-  console.log('✅ Successfully loaded env file')
-  console.log('📄 Loaded variables:', Object.keys(result.parsed || {}))
-}
-
+// 编译时加载 app_config.yml 作为默认配置
+// Docker 运行时可通过环境变量覆盖
 const appConfigPath = resolve(process.cwd(), 'app_config.yml')
 let appConfig: Record<string, any> = {}
 try {
-  const fileContents = fs.readFileSync(resolve(process.cwd(), appConfigPath), 'utf8')
+  const fileContents = fs.readFileSync(appConfigPath, 'utf8')
   appConfig = yaml.load(fileContents) as Record<string, any>
   console.log('✅ Successfully loaded app config from:', appConfigPath)
 } catch (e) {
@@ -49,7 +38,12 @@ export default defineNuxtConfig({
 
   ui: {
     fonts: false
-  }, runtimeConfig: {
+  },
+
+  runtimeConfig: {
+    // 🔐 私有配置（仅服务端可用）
+    // 运行时通过环境变量覆盖：NUXT_STATIC_PATH, NUXT_BASE_PATH, NUXT_DB_PATH, NUXT_AUTH__SECRET
+
     auth: {
       excludedPaths: [
         '/api/auth/login',
@@ -67,13 +61,18 @@ export default defineNuxtConfig({
         '/api/comments/config',
         '/api/umami/config',
         '/api/map/geojson',
-        '/api/umami/stats'
+        '/api/umami/stats',
+        '/api/test/*'
       ]
     },
-    staticPath: process.env.NUXT_STATIC_PATH,
-    basePath: process.env.NUXT_BASE_PATH,
-    dbPath: process.env.NUXT_DB_PATH,
-    authSecret: process.env.NUXT_AUTH__SECRET,
+
+    // 提供默认值，Docker 启动时可通过环境变量覆盖
+    staticPath: '/app/static',
+    basePath: '/blog',
+    dbPath: '/app/data/blog.db',
+    authSecret: 'change-me-in-production',
+
+    // 🌐 公共配置（客户端和服务端都可用）
     public: {
       appConfig
     }

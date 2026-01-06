@@ -211,7 +211,7 @@ docker pull bujidec/nuxt-blog-site:latest
 # 运行容器
 docker run -d -p 3000:3000 \
   -v $(pwd)/data:/app/data \
-  -v $(pwd)/data/blog:/blog \
+  -v $(pwd)/data/blog:/app/blog \
   -v $(pwd)/public/uploads:/app/static \
   --name nuxt-blog \
   bujidec/nuxt-blog-site:latest
@@ -229,10 +229,26 @@ docker run -d -p 3000:3000 \
 docker build -t nuxt-blog-site .
 docker run -d -p 3000:3000 \
   -v $(pwd)/data:/app/data \
-  -v $(pwd)/data/blog:/blog \
+  -v $(pwd)/data/blog:/app/blog \
   -v $(pwd)/public/uploads:/app/static \
   nuxt-blog-site
 ```
+
+#### 方式三：Docker Compose 部署 (最简便)
+
+推荐使用 Docker Compose 进行管理，配置文件位于 `docs/compose.yml`。
+
+1. 准备配置文件：
+   ```bash
+   cp docs/compose.yml docker-compose.yml
+   ```
+
+2. 启动服务：
+   ```bash
+   docker-compose up -d
+   ```
+
+详细使用说明请参考 [Docker Compose 部署指南](docs/DOCKER_COMPOSE.md)。
 
 ### 常规部署
 1. 环境变量配置
