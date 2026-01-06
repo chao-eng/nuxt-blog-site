@@ -13,7 +13,7 @@ RUN apk add --no-cache --virtual .build-deps \
     sqlite-dev
 
 COPY package.json yarn.lock .yarnrc ./
-RUN yarn install --frozen-lockfile --verbose
+RUN yarn install --frozen-lockfile
 
 COPY . .
 RUN yarn build
