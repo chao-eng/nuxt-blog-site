@@ -28,5 +28,7 @@ logs
 static/
 .vscode
 
-.env.development
-.env.production
+# 环境变量文件
+.env*
+# 但允许示例文件提交
+!.env*.example

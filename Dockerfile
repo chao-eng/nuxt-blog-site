@@ -13,7 +13,7 @@ RUN apk add --no-cache --virtual .build-deps \
     sqlite-dev
 
 COPY package.json yarn.lock .yarnrc ./
-RUN yarn install --frozen-lockfile
+RUN yarn install --frozen-lockfile --verbose
 
 COPY . .
 RUN yarn build
@@ -44,7 +44,6 @@ COPY --chown=nuxt:nodejs package.json ./
 # 🔥 不安装任何 npm 包，Nuxt 构建后是自包含的
 USER nuxt
 EXPOSE 3000
-VOLUME ["/app/data","/app/static","/blog"]
 
 ENV NODE_ENV=production
 CMD ["node", ".output/server/index.mjs"]

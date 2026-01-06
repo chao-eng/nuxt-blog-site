@@ -16,7 +16,7 @@ export default defineNitroPlugin((nitroApp) => {
   const nuxtVars = Object.keys(process.env)
     .filter(key => key.startsWith('NUXT_'))
     .reduce((obj, key) => {
-      obj[key] = key.includes('SECRET') || key.includes('KEY') ? '***hidden***' : process.env[key] ?? ''
+      obj[key] = key.includes('SECRET') || key.includes('KEY') ? '***********' : process.env[key] ?? ''
       return obj
     }, {} as Record<string, string>)
 
