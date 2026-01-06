@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  blog:
+    image: bujidec/nuxt-blog-site:latest
+    container_name: nuxt-blog
+    ports:
+      - "3000:3000"
+    environment:
+      # 数据库路径
+      - NUXT_DB_PATH=/app/data/blog.db
+      # Markdown 文章路径
+      - NUXT_BASE_PATH=/app/blog
+      # 静态文件上传路径
+      - NUXT_STATIC_PATH=/app/static
+      # JWT 认证密钥（生产环境必须修改！）
+      - NUXT_AUTH__SECRET=${AUTH_SECRET:-change-me-in-production}
+    volumes:
+      # 数据库持久化
+      - ./data:/app/data
+      # Markdown 文章持久化
+      - ./blog:/app/blog
+      # 静态文件（图片等）持久化
+      - ./static:/app/static
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
