@@ -26,6 +26,8 @@ export function initArticleTable(): void {
       userid INTEGER NOT NULL,
       -- 是否首页置顶：1 为置顶 0为不指定
       isSticky INTEGER DEFAULT 0,
+      -- MD 格式正文内容（允许为空，存储完整的 Markdown 内容）
+      content TEXT,
       -- 修改时间：SQLite 支持 DATETIME 类型，自动存储时间戳
       modifyTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
@@ -70,8 +72,8 @@ export const dbArticle = {
         throw new Error('新增文章必须传入 标题、创建时间 、发布状态等 核心字段')
       }
       const sql = `
-        INSERT INTO articles (path, title, date, description, image, tags, published, userid, isSticky)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO articles (path, title, date, description, image, tags, published, userid, isSticky, content)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `
       return dbCommon.run(sql, [
         path,
@@ -82,7 +84,8 @@ export const dbArticle = {
         tagsStr,
         publishedVal,
         rest.userid,
-        isStickyVal
+        isStickyVal,
+        rest.content || null
       ])
     }
 
@@ -117,6 +120,10 @@ export const dbArticle = {
     if (rest.isSticky !== undefined) {
       updateFields.push('isSticky = ?')
       updateParams.push(isStickyVal)
+    }
+    if (rest.content !== undefined) {
+      updateFields.push('content = ?')
+      updateParams.push(rest.content)
     }
 
     // 强制更新修改时间
@@ -157,6 +164,40 @@ export const dbArticle = {
   getAllArticlePaths: () => {
     const sql = 'SELECT path FROM articles'
     return dbCommon.all<{ path: string }>(sql)
+  },
+
+  /**
+     * 根据路径查询单篇文章的完整信息
+     * @param path 文章路径
+     * @returns 文章对象或 null
+     */
+  getArticleByPath: (path: string): Article | null => {
+    if (!path) return null
+    const sql = 'SELECT * FROM articles WHERE path = ?'
+    const rawArticle = dbCommon.get<Omit<Article, 'tags'> & { tags: string }>(sql, [path])
+
+    if (!rawArticle) return null
+
+    // 解析 tags 字段
+    let tags: string[] = []
+    try {
+      tags = rawArticle.tags ? JSON.parse(rawArticle.tags) : []
+      if (!Array.isArray(tags)) tags = []
+    } catch (e) {
+      console.warn(`解析文章tags失败（path: ${path}）:`, e)
+      tags = []
+    }
+
+    return {
+      ...rawArticle,
+      tags,
+      isSticky: !!rawArticle.isSticky,
+      published: !!rawArticle.published,
+      isSaved: true,
+      author: '',
+      avatar: '',
+      newBlog: false
+    } as Article
   },
 
   /**

@@ -67,6 +67,7 @@ const saveArticle = async (dir: string, content: string, originalPath: string, u
       image: frontMatter.image,
       published: frontMatter.published,
       isSticky: frontMatter.isSticky,
+      content: mdBody,  // 存储 MD 正文内容
       userid: userid
     })
 

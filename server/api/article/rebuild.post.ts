@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
           try {
             // 读取并解析
             const content = fs.readFileSync(mdPath, 'utf-8')
-            const { data: frontMatter } = matter(content)
+            const { data: frontMatter, content: mdBody } = matter(content)
 
             // 构造文章对象
             // 必须包含 title, date
@@ -46,6 +46,7 @@ export default defineEventHandler(async (event) => {
                 tags: frontMatter.tags || [],
                 published: frontMatter.published ?? false, // 保持原样，saveArticle 会处理
                 isSticky: frontMatter.isSticky ?? false,
+                content: mdBody, // 保存 MD 正文内容
                 userid: userId
               }
 

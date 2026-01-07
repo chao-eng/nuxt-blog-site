@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import type { Result } from '../../types'
 import { format } from 'date-fns'
-import Vditor from 'vditor'
-import 'vditor/dist/index.css'
+import MarkdownIt from 'markdown-it'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github.css' // 代码高亮样式（可选择其他主题）
+import 'github-markdown-css/github-markdown-light.css'
 import Giscus from '@giscus/vue'
 import { onMounted } from 'vue'
 
@@ -62,7 +64,7 @@ const { data: articleData, error } = await useAsyncData(
       image: res?.data?.frontMatter?.image ?? null,
       tags: res?.data?.frontMatter?.tags ?? [],
       content: content.replace(
-        /!\[(.*?)]\(\1\)/g, // 匹配 ![xxx](xxx) 格式（[]和()内容相同）
+        /!\[(.*?)\]\(\1\)/g, // 匹配 ![xxx](xxx) 格式（[]和()内容相同）
         `![$1](${prefix}$1)` // 替换为 ![xxx](前缀/xxx)
       ),
       published: res?.data?.frontMatter?.published ?? false,
@@ -174,28 +176,40 @@ const detectNavbarHeight = () => {
   document.documentElement.style.setProperty('--navbar-height', `${height}px`)
 }
 
+// 初始化 markdown-it，配置代码高亮
+const md = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        return hljs.highlight(str, { language: lang }).value
+      } catch (err) {
+        console.error('代码高亮失败:', err)
+      }
+    }
+    return '' // 使用默认转义
+  }
+})
+
+// 直接渲染 markdown（在 setup 中执行，服务端和客户端都会运行）
+const renderedHtml = computed(() => {
+  if (article.content) {
+    return md.render(article.content)
+  }
+  return ''
+})
+
 // 客户端初始化
 onMounted(() => {
   detectNavbarHeight()
   window.addEventListener('resize', detectNavbarHeight)
-  const previewContainer = document.getElementById('preview-container')
-  if (previewContainer && article.content) {
-    Vditor.preview(previewContainer as HTMLDivElement, article.content, {
-      mode: 'light',
-      markdown: {
-        toc: true,
-        mark: true,
-        footnotes: true,
-        autoSpace: true
-      },
-      after() {
-        // console.log('Vditor渲染完成')
-        nextTick(() => {
-          generateTOC()
-        })
-      }
-    })
-  }
+  
+  // 等待 DOM 渲染完成后生成目录
+  nextTick(() => {
+    generateTOC()
+  })
 })
 
 onUnmounted(() => {
@@ -374,22 +388,9 @@ watch(() => $router.currentRoute.value.path, () => {
             <article class="px-6 lg:px-8 py-8">
               <div
                 id="preview-container"
-                class="prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-code:text-primary-600 dark:prose-code:text-primary-400 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700"
+                class="markdown-body prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-code:text-primary-600 dark:prose-code:text-primary-400 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700"
+                v-html="renderedHtml"
               >
-                <!-- 服务端渲染时显示加载占位符 -->
-                <ClientOnly>
-                  <template #fallback>
-                    <div class="animate-pulse space-y-6">
-                      <div class="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                      <div class="space-y-3">
-                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded" />
-                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
-                        <div class="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/6" />
-                      </div>
-                      <div class="h-32 bg-gray-200 dark:bg-gray-700 rounded" />
-                    </div>
-                  </template>
-                </ClientOnly>
               </div>
             </article>
 
