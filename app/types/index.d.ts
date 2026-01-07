@@ -53,6 +53,7 @@ type SaveArticleParams = Omit<Article, 'tags' | 'modifyTime' | 'content' | 'isSa
   // 编辑时可选字段，新增时必传核心字段（title/date/content）
   title?: string
   date?: string
+  content?: string
   userid: number
 }
 

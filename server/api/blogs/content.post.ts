@@ -8,11 +8,35 @@ import dbUtils from '../../db'
 const readArticle = async (dir: string): Promise<Result<any>> => {
   try {
     // console.log('读取文章目录:', dir);
-    const basePath = useRuntimeConfig().basePath
-    const filePath = path.join(basePath, dir, 'index.md')
-    const content = await promisify(fs.readFile)(filePath, 'utf8')
-    const { data: frontMatter, content: mdBody } = matter(content)
-    // console.log('读取到的文章frontMatter:', frontMatter);
+
+    // 先尝试从数据库获取文章内容
+    const dbArticle = dbUtils.article.getArticleByPath(dir)
+
+    let mdBody: string
+    let frontMatter: any
+
+    if (dbArticle && dbArticle.content) {
+      // 从数据库读取内容
+      mdBody = dbArticle.content
+      frontMatter = {
+        title: dbArticle.title,
+        date: dbArticle.date,
+        description: dbArticle.description,
+        image: dbArticle.image,
+        tags: dbArticle.tags,
+        published: dbArticle.published,
+        isSticky: dbArticle.isSticky
+      }
+    } else {
+      // 回退到从文件系统读取
+      const basePath = useRuntimeConfig().basePath
+      const filePath = path.join(basePath, dir, 'index.md')
+      const content = await promisify(fs.readFile)(filePath, 'utf8')
+      const parsed = matter(content)
+      frontMatter = parsed.data
+      mdBody = parsed.content
+    }
+
     const author = dbUtils.article.queryAuthor(dir)
 
     // 获取上一篇和下一篇
