@@ -202,9 +202,9 @@ const md = new MarkdownIt({
   highlight: function (str, lang) {
     if (lang && hljs.getLanguage(lang)) {
       try {
-        // 手动包裹并添加 hljs 类，确保样式匹配
         const highlighted = hljs.highlight(str, { language: lang }).value
-        return `<pre class="hljs"><code>${highlighted}</code></pre>`
+        // 直接在 pre 内部注入按钮，使用内联 SVG 确保图标显示，并且压缩为单行以避免 pre 标签保留多余空白
+        return `<pre class="hljs code-block-container"><button class="copy-btn" title="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button><code>${highlighted}</code></pre>`
       } catch (err) {
         console.error('代码高亮失败:', err)
       }
@@ -225,6 +225,33 @@ const renderedHtml = computed(() => {
 onMounted(() => {
   detectNavbarHeight()
   window.addEventListener('resize', detectNavbarHeight)
+
+  // 复制功能逻辑
+  const previewContainer = document.getElementById('preview-container')
+  if (previewContainer) {
+    previewContainer.addEventListener('click', async (e) => {
+      const btn = (e.target as HTMLElement).closest('.copy-btn')
+      if (!btn) return
+
+      const pre = btn.closest('pre')
+      const codeElement = pre?.querySelector('code')
+      if (codeElement) {
+        try {
+          await navigator.clipboard.writeText(codeElement.textContent || '')
+          
+          // 成功反馈
+          const originalHTML = btn.innerHTML
+          // 切换为 Check 图标
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-green-500"><path d="M20 6 9 17l-5-5"/></svg>'
+          setTimeout(() => {
+            btn.innerHTML = originalHTML
+          }, 2000)
+        } catch (err) {
+          console.error('Failed to copy:', err)
+        }
+      }
+    })
+  }
 
   // 等待 DOM 渲染完成后生成目录
   nextTick(() => {
@@ -1033,8 +1060,48 @@ watch(() => $router.currentRoute.value.path, () => {
 }
 
 /* 保持代码块的圆角和间距 */
+/* 保持代码块的圆角和间距，并建立定位上下文 */
 #preview-container .hljs {
   padding: 1.25rem !important;
   border-radius: 0.75rem !important;
+  position: relative !important;
+}
+
+/* 极简复制按钮样式 */
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #64748b;
+  opacity: 0;
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#preview-container .hljs:hover .copy-btn {
+  opacity: 1;
+}
+
+.copy-btn:hover {
+  background-color: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #475569;
+}
+
+:global(.dark) .copy-btn {
+  color: #94a3b8;
+}
+
+:global(.dark) .copy-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
 }
 </style>
