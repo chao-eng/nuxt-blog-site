@@ -29,9 +29,10 @@ export default defineEventHandler(async (event) => {
       success: true,
       message: 'Travel records saved successfully'
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    const typedError = error as { statusCode?: number }
     throw createError({
-      statusCode: error.statusCode || 500,
+      statusCode: typedError.statusCode || 500,
       statusMessage: (error as Error).message || 'Failed to save travel records'
     })
   }

@@ -161,7 +161,7 @@ function getRowItems(row: TableRow<TravelCity>) {
       icon: 'i-lucide-copy',
       onSelect() {
         copy(row.original.name)
-        toast.add({ title: t('admin.tra.copied'), color: 'green' })
+        toast.add({ title: t('admin.tra.copied'), color: 'success' })
       }
     },
     {
@@ -178,13 +178,13 @@ function getRowItems(row: TableRow<TravelCity>) {
       icon: 'i-lucide-code',
       onSelect() {
         copy(JSON.stringify(row.original, null, 2))
-        toast.add({ title: t('admin.tra.copied'), color: 'green' })
+        toast.add({ title: t('admin.tra.copied'), color: 'success' })
       }
     }
   ]
 }
 
-function onContextmenu(_e: MouseEvent, row: TableRow<TravelCity>) {
+function onContextmenu(_e: Event, row: TableRow<TravelCity>) {
   contextMenuItems.value = getRowItems(row)
 }
 
@@ -199,7 +199,7 @@ async function loadData() {
       visible.value = response.visible !== false
     }
   } catch (error: unknown) {
-    toast.add({ title: t('admin.tra.loadFailed'), description: (error as Error).message, color: 'red' })
+    toast.add({ title: t('admin.tra.loadFailed'), description: (error as Error).message, color: 'error' })
   } finally {
     loading.value = false
   }
@@ -207,7 +207,7 @@ async function loadData() {
 
 async function saveData() {
   if (!jsonData.value.trim()) {
-    toast.add({ title: t('admin.tra.inputError'), description: t('admin.tra.enterJson'), color: 'red' })
+    toast.add({ title: t('admin.tra.inputError'), description: t('admin.tra.enterJson'), color: 'error' })
     return
   }
   let parsedData
@@ -215,7 +215,7 @@ async function saveData() {
     parsedData = JSON.parse(jsonData.value)
     if (!Array.isArray(parsedData)) throw new Error(t('admin.tra.mustBeArray'))
   } catch (e: unknown) {
-    toast.add({ title: t('admin.tra.formatFailed'), description: (e as Error).message, color: 'red' })
+    toast.add({ title: t('admin.tra.formatFailed'), description: (e as Error).message, color: 'error' })
     return
   }
 
@@ -226,9 +226,9 @@ async function saveData() {
       body: { data: jsonData.value, visible: visible.value }
     })
     tableData.value = parsedData
-    toast.add({ title: t('admin.tra.saveSuccess'), color: 'green' })
+    toast.add({ title: t('admin.tra.saveSuccess'), color: 'success' })
   } catch (error: unknown) {
-    toast.add({ title: t('admin.tra.saveFailed'), description: (error as Error).message, color: 'red' })
+    toast.add({ title: t('admin.tra.saveFailed'), description: (error as Error).message, color: 'error' })
   } finally {
     saving.value = false
   }
@@ -239,9 +239,9 @@ function formatJson() {
     const parsed = JSON.parse(jsonData.value)
     jsonText.value = JSON.stringify(parsed, null, 2)
     tableData.value = Array.isArray(parsed) ? parsed : tableData.value
-    toast.add({ title: t('admin.tra.formatSuccess'), color: 'green' })
+    toast.add({ title: t('admin.tra.formatSuccess'), color: 'success' })
   } catch {
-    toast.add({ title: t('admin.tra.formatFailed'), color: 'red' })
+    toast.add({ title: t('admin.tra.formatFailed'), color: 'error' })
   }
 }
 
@@ -338,7 +338,7 @@ onMounted(() => {
               :rows="20"
               placeholder="[{&quot;name&quot;: &quot;北京&quot;...}]"
               class="font-mono text-sm w-full"
-              :ui="{ wrapper: 'w-full', base: 'w-full resize-none' }"
+              :ui="{ base: 'w-full resize-none' }"
             />
           </div>
 

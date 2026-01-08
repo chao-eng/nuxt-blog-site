@@ -405,12 +405,13 @@ watch(() => $router.currentRoute.value.path, () => {
 
             <!-- 文章正文 -->
             <article class="px-6 lg:px-8 py-8">
-              <!-- eslint-disable-next-line vue/no-v-html -->
+              <!-- eslint-disable vue/no-v-html -->
               <div
                 id="preview-container"
                 class="markdown-body prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-code:text-primary-600 dark:prose-code:text-primary-400 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700"
                 v-html="renderedHtml"
               />
+              <!-- eslint-enable vue/no-v-html -->
             </article>
 
             <!-- 文章底部 -->

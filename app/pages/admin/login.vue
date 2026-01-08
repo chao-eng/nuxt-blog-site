@@ -71,10 +71,10 @@
         <UAlert
           v-if="error"
           icon="i-heroicons-exclamation-triangle"
-          color="red"
+          color="error"
           variant="soft"
           :title="error"
-          :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'gray', variant: 'link', size: '2xs' }"
+          :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'neutral', variant: 'link', size: '2xs' }"
           @close="error = ''"
         />
 
@@ -138,7 +138,7 @@ const currentLocaleName = computed(() => {
 })
 
 const switchLanguage = (lang: string) => {
-  setLocale(lang)
+  setLocale(lang as 'en' | 'zh-CN')
 }
 
 const languageItems = computed(() => [[
@@ -171,10 +171,13 @@ const formErrors = reactive({
   password: ''
 })
 
-function onError(event: { errors: { path: string }[] }) {
-  const element = document.getElementById(event.errors[0].path)
-  element?.focus()
-  element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+function onError(event: any) {
+  const errors = event.errors || []
+  if (errors.length > 0) {
+    const element = document.getElementById(errors[0].path)
+    element?.focus()
+    element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
 }
 
 // 登录处理函数
@@ -220,7 +223,7 @@ async function handleLogin(event: FormSubmitEvent<Schema>) {
       formErrors.password = t('login.validation.checkPassword')
     } else if (statusCode === 400) {
       error.value = t('login.validation.badRequest')
-    } else if (statusCode >= 500) {
+    } else if (statusCode && statusCode >= 500) {
       error.value = t('login.validation.serverError')
     } else {
       error.value = errorMsg

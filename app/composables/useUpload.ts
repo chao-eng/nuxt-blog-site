@@ -78,7 +78,7 @@ export const useUpload = (): UseUploadReturn => {
                 })
                 resolve(null)
               }
-            } catch (e) {
+            } catch {
               error.value = '响应解析失败'
               toast.add({
                 title: '上传失败',
@@ -94,7 +94,7 @@ export const useUpload = (): UseUploadReturn => {
             try {
               const errorResponse = JSON.parse(xhr.responseText)
               errorMessage = errorResponse.statusMessage || errorMessage
-            } catch (e) {
+            } catch {
               // 忽略解析错误，使用默认错误信息
             }
 
@@ -135,8 +135,8 @@ export const useUpload = (): UseUploadReturn => {
         xhr.timeout = 30000 // 30秒超时
         xhr.send(formData)
       })
-    } catch (err: any) {
-      const errorMessage = err.message || '上传失败'
+    } catch (err) {
+      const errorMessage = (err as Error).message || '上传失败'
       error.value = errorMessage
       toast.add({
         title: '上传失败',

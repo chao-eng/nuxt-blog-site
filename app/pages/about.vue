@@ -55,7 +55,7 @@ useHead({
                   :icon="social.icon"
                   :to="social.to"
                   variant="ghost"
-                  color="gray"
+                  color="neutral"
                   size="sm"
                   target="_blank"
                   :aria-label="social.label"

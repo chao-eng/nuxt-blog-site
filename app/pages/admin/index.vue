@@ -14,13 +14,13 @@ const stats = ref([
     label: t('admin.dash.totalArticles'),
     value: '0',
     icon: 'i-lucide-newspaper',
-    color: 'blue'
+    color: 'primary'
   },
   {
     label: t('admin.dash.travelRecords'),
     value: '0',
     icon: 'i-lucide-map-pin',
-    color: 'green'
+    color: 'success'
   },
   {
     label: t('admin.dash.systemUptime'),
@@ -52,7 +52,7 @@ const formatUptime = (milliseconds: number) => {
 
 // 更新运行时间显示
 const updateUptime = () => {
-  if (serverStartTime > 0) {
+  if (serverStartTime > 0 && stats.value[2]) {
     const uptime = Date.now() - serverStartTime
     stats.value[2].value = formatUptime(uptime)
   }
@@ -72,7 +72,9 @@ onMounted(async () => {
     }
   } catch (error) {
     console.error('Failed to load server uptime:', error)
-    stats.value[2].value = t('admin.dash.fetchFailed')
+    if (stats.value[2]) {
+      stats.value[2].value = t('admin.dash.fetchFailed')
+    }
   }
 
   try {
@@ -81,7 +83,7 @@ onMounted(async () => {
       params: { page: 1, pageSize: 1 }
     })
     console.log('Articles response:', articlesRes)
-    if (articlesRes.success && articlesRes.data?.total !== undefined) {
+    if (articlesRes.success && articlesRes.data?.total !== undefined && stats.value[0]) {
       stats.value[0].value = articlesRes.data.total.toString()
     }
   } catch (error) {
@@ -91,7 +93,7 @@ onMounted(async () => {
   try {
     // 获取旅行记录
     const travelRes = await $fetch<Result<unknown[]>>('/api/travel/records')
-    if (travelRes.success && travelRes.data) {
+    if (travelRes.success && travelRes.data && stats.value[1]) {
       stats.value[1].value = Array.isArray(travelRes.data) ? travelRes.data.length.toString() : '0'
     }
   } catch (error) {

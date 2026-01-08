@@ -84,6 +84,7 @@ const createArticle = async () => {
       content: '',
       modifyTime: new Date().toISOString(),
       isSaved: false,
+      isSticky: false,
       author: '',
       avatar: '',
       newBlog: true

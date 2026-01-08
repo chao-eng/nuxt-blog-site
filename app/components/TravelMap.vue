@@ -8,6 +8,26 @@ import type { TravelCity } from '../types/travel'
 // 旅游城市数据
 const travelCities = ref<TravelCity[]>([])
 
+interface TravelRecordsResponse {
+  success: boolean
+  visible?: boolean
+  data?: TravelCity[]
+}
+
+interface MapGeoJsonResponse {
+  success: boolean
+  data?: unknown
+  error?: string
+}
+
+interface EChartsEventParams {
+  componentSubType: string
+  data: TravelCity
+  event?: {
+    event: MouseEvent
+  }
+}
+
 const chartContainer = ref<HTMLElement | null>(null)
 let chartInstance: echarts.ECharts | null = null
 const loading = ref(true)
@@ -62,14 +82,14 @@ const keepPopover = () => {
 // 加载数据
 async function loadTravelRecords() {
   try {
-    const response: any = await $fetch('/api/travel/records')
+    const response = await $fetch<TravelRecordsResponse>('/api/travel/records')
     if (response.success) {
       isVisible.value = response.visible !== false
       if (response.data) {
         travelCities.value = response.data
       }
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error('Failed to load travel records:', err)
     travelCities.value = []
   }
@@ -105,7 +125,7 @@ async function initMap() {
       return
     }
 
-    const mapResponse: any = await $fetch('/api/map/geojson', {
+    const mapResponse = await $fetch<MapGeoJsonResponse>('/api/map/geojson', {
       params: { adcode: '100000' }
     })
 
@@ -113,7 +133,8 @@ async function initMap() {
       throw new Error(mapResponse.error || 'Failed to load map data')
     }
 
-    echarts.registerMap('china', mapResponse.data)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    echarts.registerMap('china', mapResponse.data as any)
 
     loading.value = false
     await nextTick()
@@ -201,12 +222,13 @@ async function initMap() {
 
     chartInstance.setOption(option)
 
-    chartInstance.on('mouseover', (params: any) => {
-      if (params.componentSubType === 'scatter' || params.componentSubType === 'effectScatter') {
+    chartInstance.on('mouseover', (params: unknown) => {
+      const p = params as EChartsEventParams
+      if (p.componentSubType === 'scatter' || p.componentSubType === 'effectScatter') {
         clearHideTimeout()
-        hoveredCity.value = params.data as TravelCity
+        hoveredCity.value = p.data
         currentPhotoIndex.value = 0
-        const event = params.event?.event as MouseEvent
+        const event = p.event?.event as MouseEvent
         if (event) {
           popoverPosition.value = { x: event.clientX + 15, y: event.clientY - 10 }
         }
@@ -214,8 +236,9 @@ async function initMap() {
       }
     })
 
-    chartInstance.on('mouseout', (params: any) => {
-      if (params.componentSubType === 'scatter' || params.componentSubType === 'effectScatter') {
+    chartInstance.on('mouseout', (params: unknown) => {
+      const p = params as EChartsEventParams
+      if (p.componentSubType === 'scatter' || p.componentSubType === 'effectScatter') {
         hidePopover()
       }
     })
@@ -251,10 +274,10 @@ async function initMap() {
 
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
     window.addEventListener('resize', handleResize)
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error loading map:', err)
     loading.value = false
-    error.value = `地图加载失败: ${err.message}`
+    error.value = `地图加载失败: ${(err as Error).message}`
   }
 }
 
@@ -343,8 +366,7 @@ onUnmounted(() => {
               variant="soft"
               size="xs"
               block
-              class="mt-3"
-              :ui="{ rounded: 'rounded-xl' }"
+              class="mt-3 rounded-xl"
             />
           </div>
         </div>

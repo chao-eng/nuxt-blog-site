@@ -1,4 +1,4 @@
-export default defineNuxtPlugin(async (nuxtApp) => {
+export default defineNuxtPlugin(async (_nuxtApp) => {
   // 仅在客户端执行
   if (import.meta.client) {
     try {

@@ -6,7 +6,6 @@ const navbarData = useNavbarData()
 const { t, locale, setLocale } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
-const router = useRouter()
 
 const search = ref(route.query.search?.toString() || '')
 
@@ -68,8 +67,8 @@ const toggleLocale = () => {
               v-for="item in navigationState"
               :key="item.to"
               :to="item.to"
-              :variant="item.active ? 'text' : 'ghost'"
-              :color="item.active ? 'primary' : 'gray'"
+              :variant="item.active ? 'soft' : 'ghost'"
+              :color="item.active ? 'primary' : 'neutral'"
               size="md"
               class="font-medium transition-colors"
               :class="item.active ? 'font-semibold' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
@@ -86,15 +85,14 @@ const toggleLocale = () => {
             :placeholder="t('blog.searchPlaceholder')"
             :ui="{
               base: 'w-full h-9  border-0 focus:ring-2 focus:ring-primary-500 rounded-full transition-all duration-200',
-              icon: { trailing: { pointer: '' } },
-              padding: { sm: 'ps-4' }
+              trailing: 'pe-1'
             }"
             class="w-full"
             @keydown.enter="handleSearch"
           >
             <template #trailing>
               <UButton
-                color="gray"
+                color="neutral"
                 variant="link"
                 icon="i-lucide-search"
                 :padded="false"

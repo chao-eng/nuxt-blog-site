@@ -52,7 +52,7 @@ const rangeOptions = computed(() => [
 
 // 获取 Umami 统计数据
 // useFetch 会自动监听 computed query 的变化并重新请求，无需手动 watch
-const { data: umamiStats } = await useFetch('/api/umami/stats', {
+const { data: umamiStats } = await useFetch<any>('/api/umami/stats', {
   lazy: true,
   server: false,
   query: computed(() => ({ range: selectedRange.value }))
@@ -88,7 +88,7 @@ const { data: umamiStats } = await useFetch('/api/umami/stats', {
                   target="_blank"
                   size="xs"
                   variant="ghost"
-                  color="gray"
+                  color="neutral"
                   square
                   class="hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
@@ -141,7 +141,7 @@ const { data: umamiStats } = await useFetch('/api/umami/stats', {
             v-for="option in rangeOptions"
             :key="option.value"
             :variant="selectedRange === option.value ? 'soft' : 'ghost'"
-            :color="selectedRange === option.value ? 'primary' : 'gray'"
+            :color="selectedRange === option.value ? 'primary' : 'neutral'"
             size="xs"
             class="text-xs"
             @click="selectedRange = option.value"

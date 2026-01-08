@@ -272,7 +272,7 @@
                       checked-icon="i-lucide-pin"
                       unchecked-icon="i-lucide-minus"
                       size="md"
-                      color="orange"
+                      color="warning"
                       class="flex-1"
                     />
                     <UTooltip :text="isMetadataVisible ? $t('admin.art.collapseMetadata') : $t('admin.art.expandMetadata')">
@@ -418,6 +418,16 @@ import 'vditor/src/assets/less/index.less'
 import { watchDeep } from '@vueuse/shared'
 import matter from 'gray-matter'
 
+interface FrontMatter {
+  title?: string
+  date?: string | Date
+  description?: string
+  image?: string
+  tags?: string[]
+  published?: boolean | string | number
+  isSticky?: boolean
+}
+
 const { t } = useI18n()
 const localePath = useLocalePath()
 const toast = useToast()
@@ -477,7 +487,7 @@ const items = computed(() => [
 
 /* ---------- 辅助函数 ---------- */
 // 从 API 返回的 frontMatter 填充表单
-const loadMetadata = (frontMatter: any) => {
+const loadMetadata = (frontMatter: FrontMatter) => {
   metadata.value = {
     title: frontMatter.title || props.article.path,
     date: frontMatter.date
@@ -582,7 +592,7 @@ const handleDelete = async () => {
   deleteError.value = ''
 
   try {
-    const result: Result<any> = await $fetch('/api/article/delete', {
+    const result: Result<unknown> = await $fetch('/api/article/delete', {
       method: 'DELETE',
       body: { path: props.article.path }
     })
@@ -608,7 +618,7 @@ watch(deleteConfirmText, () => {
 /* 读取文章内容（只返回正文）并加载元数据 */
 const articleContent = async () => {
   if (!props.article) return ''
-  const result = await $fetch<Result<{ content: string, frontMatter: any }>>('/api/article/content', {
+  const result = await $fetch<Result<{ content: string, frontMatter: FrontMatter }>>('/api/article/content', {
     method: 'POST',
     body: { path: props.article.path }
   })
