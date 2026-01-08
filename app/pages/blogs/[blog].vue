@@ -43,7 +43,26 @@ const { t, locale } = useI18n()
 const { data: articleData, error } = await useAsyncData(
   `blog-content-${blogPath}`,
   async () => {
-    const res: Result<any> = await $fetch('/api/blogs/content', {
+    const res: Result<{
+      content: string
+      frontMatter: {
+        title: string
+        date: string
+        description: string | null
+        image: string | null
+        tags: string[]
+        published: boolean
+        isSticky: boolean
+      }
+      author: {
+        author: string
+        avatar: string
+      }
+      adjacent: {
+        prev: { title: string, path: string } | null
+        next: { title: string, path: string } | null
+      }
+    }> = await $fetch('/api/blogs/content', {
       method: 'POST',
       body: { path: blogPath }
     })
@@ -166,7 +185,7 @@ const detectNavbarHeight = () => {
     '#header'
   ]
 
-  let navbar: any = null
+  let navbar: HTMLElement | null = null
   for (const selector of navSelectors) {
     navbar = document.querySelector(selector)
     if (navbar) break
@@ -205,7 +224,7 @@ const renderedHtml = computed(() => {
 onMounted(() => {
   detectNavbarHeight()
   window.addEventListener('resize', detectNavbarHeight)
-  
+
   // 等待 DOM 渲染完成后生成目录
   nextTick(() => {
     generateTOC()
@@ -275,7 +294,7 @@ const commentState = reactive({
   isReady: false
 })
 
-function handleGiscusMessage(event: any) {
+function handleGiscusMessage(event: MessageEvent) {
   if (event.origin !== 'https://giscus.app') return
   if (!event.data?.giscus) return
 
@@ -386,12 +405,12 @@ watch(() => $router.currentRoute.value.path, () => {
 
             <!-- 文章正文 -->
             <article class="px-6 lg:px-8 py-8">
+              <!-- eslint-disable-next-line vue/no-v-html -->
               <div
                 id="preview-container"
                 class="markdown-body prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-code:text-primary-600 dark:prose-code:text-primary-400 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700"
                 v-html="renderedHtml"
-              >
-              </div>
+              />
             </article>
 
             <!-- 文章底部 -->

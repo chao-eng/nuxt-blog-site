@@ -59,7 +59,7 @@ export default defineEventHandler(async (event): Promise<UploadResponse> => {
       originalName: file.filename,
       size: file.data.length
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Upload error:', error)
 
     throw createError({

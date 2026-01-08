@@ -65,10 +65,10 @@ export default defineEventHandler(async (event) => {
       success: true,
       message: `成功重建索引，共处理 ${count} 篇文章`
     }
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
-      message: `重建索引失败: ${error.message}`
+      message: `重建索引失败: ${(error as Error).message}`
     }
   }
 })

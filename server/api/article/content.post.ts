@@ -4,7 +4,7 @@ import * as fs from 'fs'
 import type { Result } from '~/types'
 import matter from 'gray-matter'
 
-const readArticle = async (dir: string): Promise<Result<any>> => {
+const readArticle = async (dir: string): Promise<Result<unknown>> => {
   try {
     // console.log('读取文章目录:', dir);
     const basePath = useRuntimeConfig().basePath
@@ -20,11 +20,11 @@ const readArticle = async (dir: string): Promise<Result<any>> => {
         frontMatter: frontMatter
       }
     }
-  } catch (error: any) {
-    console.error('读取文章内容失败:', error.message)
+  } catch (error: unknown) {
+    console.error('读取文章内容失败:', (error as Error).message)
     return {
       success: false,
-      err: '读取文章内容失败' + `${error.message}`,
+      err: '读取文章内容失败' + `${(error as Error).message}`,
       data: {}
     }
   }

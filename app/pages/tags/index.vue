@@ -4,7 +4,7 @@ import { useTagsPage } from '~/data'
 import { useHead } from 'nuxt/app'
 
 const localePath = useLocalePath()
-const { t } = useI18n()
+useI18n()
 definePageMeta({
   layout: 'blog'
 })

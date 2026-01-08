@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, h, resolveComponent } from 'vue'
 import type { TableColumn, TableRow, ContextMenuItem } from '@nuxt/ui'
+import type { Result } from '~/types'
 import { useClipboard } from '@vueuse/core'
 
 const { t } = useI18n()
@@ -12,9 +13,7 @@ definePageMeta({
 })
 
 // --- 1. Component Resolution (Required for h() render function) ---
-const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
-const UCheckbox = resolveComponent('UCheckbox')
 // Simple html tags like 'img' or 'div' don't need resolution
 
 // --- 2. Types & State ---
@@ -45,7 +44,7 @@ const jsonData = computed({
     try {
       const parsed = JSON.parse(value)
       if (Array.isArray(parsed)) tableData.value = parsed
-    } catch (e) { /* ignore parse errors while typing */ }
+    } catch { /* ignore parse errors while typing */ }
   }
 })
 
@@ -193,14 +192,14 @@ function onContextmenu(_e: MouseEvent, row: TableRow<TravelCity>) {
 async function loadData() {
   loading.value = true
   try {
-    const response: any = await $fetch('/api/travel/records')
+    const response = await $fetch<Result<TravelCity[]> & { visible?: boolean }>('/api/travel/records')
     if (response.success && response.data) {
       tableData.value = Array.isArray(response.data) ? response.data : []
       jsonText.value = JSON.stringify(tableData.value, null, 2)
       visible.value = response.visible !== false
     }
-  } catch (error: any) {
-    toast.add({ title: t('admin.tra.loadFailed'), description: error.message, color: 'red' })
+  } catch (error: unknown) {
+    toast.add({ title: t('admin.tra.loadFailed'), description: (error as Error).message, color: 'red' })
   } finally {
     loading.value = false
   }
@@ -208,14 +207,16 @@ async function loadData() {
 
 async function saveData() {
   if (!jsonData.value.trim()) {
-    toast.add({ title: t('admin.tra.inputError'), description: t('admin.tra.enterJson'), color: 'red' }); return
+    toast.add({ title: t('admin.tra.inputError'), description: t('admin.tra.enterJson'), color: 'red' })
+    return
   }
   let parsedData
   try {
     parsedData = JSON.parse(jsonData.value)
     if (!Array.isArray(parsedData)) throw new Error(t('admin.tra.mustBeArray'))
-  } catch (e: any) {
-    toast.add({ title: t('admin.tra.formatFailed'), description: e.message, color: 'red' }); return
+  } catch (e: unknown) {
+    toast.add({ title: t('admin.tra.formatFailed'), description: (e as Error).message, color: 'red' })
+    return
   }
 
   saving.value = true
@@ -226,8 +227,8 @@ async function saveData() {
     })
     tableData.value = parsedData
     toast.add({ title: t('admin.tra.saveSuccess'), color: 'green' })
-  } catch (error: any) {
-    toast.add({ title: t('admin.tra.saveFailed'), description: error.message, color: 'red' })
+  } catch (error: unknown) {
+    toast.add({ title: t('admin.tra.saveFailed'), description: (error as Error).message, color: 'red' })
   } finally {
     saving.value = false
   }
@@ -239,7 +240,7 @@ function formatJson() {
     jsonText.value = JSON.stringify(parsed, null, 2)
     tableData.value = Array.isArray(parsed) ? parsed : tableData.value
     toast.add({ title: t('admin.tra.formatSuccess'), color: 'green' })
-  } catch (e) {
+  } catch {
     toast.add({ title: t('admin.tra.formatFailed'), color: 'red' })
   }
 }

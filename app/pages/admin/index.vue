@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Result } from '~/types'
+
 definePageMeta({
   layout: 'default',
   middleware: 'sidebase-auth'
@@ -60,7 +62,7 @@ const updateUptime = () => {
 onMounted(async () => {
   // 获取服务器启动时间
   try {
-    const uptimeRes: any = await $fetch('/api/system/uptime')
+    const uptimeRes = await $fetch<{ success: boolean, startTime: number }>('/api/system/uptime')
     if (uptimeRes.success) {
       serverStartTime = uptimeRes.startTime
       updateUptime()
@@ -75,7 +77,7 @@ onMounted(async () => {
 
   try {
     // 获取文章总数
-    const articlesRes: any = await $fetch('/api/blogs/all', {
+    const articlesRes = await $fetch<Result<{ total: number }>>('/api/blogs/all', {
       params: { page: 1, pageSize: 1 }
     })
     console.log('Articles response:', articlesRes)
@@ -88,7 +90,7 @@ onMounted(async () => {
 
   try {
     // 获取旅行记录
-    const travelRes: any = await $fetch('/api/travel/records')
+    const travelRes = await $fetch<Result<unknown[]>>('/api/travel/records')
     if (travelRes.success && travelRes.data) {
       stats.value[1].value = Array.isArray(travelRes.data) ? travelRes.data.length.toString() : '0'
     }

@@ -74,7 +74,7 @@ export const dbUser = {
     password?: string
   }) => {
     const updateFields: string[] = []
-    const updateParams: any[] = []
+    const updateParams: (string | number | boolean | null)[] = []
 
     if (data.name !== undefined) {
       updateFields.push('name = ?')

@@ -97,7 +97,7 @@ export const dbTravel = {
     // 验证 JSON 格式
     try {
       JSON.parse(data)
-    } catch (e) {
+    } catch {
       throw new Error('Invalid JSON format')
     }
 

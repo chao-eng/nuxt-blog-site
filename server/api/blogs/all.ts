@@ -1,4 +1,3 @@
-import type { Article, Result } from '~/types'
 import dbUtils from '../../db'
 
 export default defineEventHandler(async (event) => {
@@ -23,10 +22,10 @@ export default defineEventHandler(async (event) => {
       err: '',
       data
     }
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
-      err: error.message,
+      err: (error as Error).message,
       data: { list: [], total: 0 }
     }
   }

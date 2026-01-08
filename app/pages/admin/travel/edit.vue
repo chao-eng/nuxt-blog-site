@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import * as echarts from 'echarts'
+import type { Result } from '~/types'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -48,7 +49,7 @@ const mapHistory = ref<{ mapName: string, adCode: string }[]>(
   [{ mapName: 'china', adCode: '100000' }] // 初始为全国
 )
 // 缓存已加载的 GeoJSON
-const geoJsonCache: Record<string, any> = {}
+const geoJsonCache: Record<string, { features?: { properties: { name: string, adcode: string } }[] }> = {}
 
 // 表单数据
 const formData = ref<TravelCity>({
@@ -83,24 +84,6 @@ function handleResize() {
   chartInstance?.resize()
 }
 
-// 带超时的 fetch
-async function fetchWithTimeout(url: string, timeout = 10000) {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeout)
-
-  try {
-    const response = await fetch(url, { signal: controller.signal })
-    clearTimeout(timeoutId)
-    return response
-  } catch (err) {
-    clearTimeout(timeoutId)
-    if (err instanceof DOMException && err.name === 'AbortError') {
-      throw new Error('请求超时，请检查网络连接或稍后再试。')
-    }
-    throw err
-  }
-}
-
 /**
  * 加载并注册下一级行政区划的 GeoJSON
  * @param adCode 当前行政区的 AdCode (例如 510000)
@@ -114,12 +97,12 @@ async function loadAndRegisterNextMap(adCode: string): Promise<string> {
   }
 
   // 2. 异步加载 GeoJSON
-  const mapResponse: any = await $fetch('/api/map/geojson', {
+  const mapResponse = await $fetch<Result<unknown>>('/api/map/geojson', {
     params: { adcode: adCode }
   })
 
   if (!mapResponse.success || !mapResponse.data) {
-    throw new Error(`Failed to load map data for AdCode ${adCode}: ${mapResponse.error}`)
+    throw new Error(`Failed to load map data for AdCode ${adCode}: ${mapResponse.err}`)
   }
 
   const geoJson = mapResponse.data
@@ -143,7 +126,7 @@ function updateMapMarker() {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
-      formatter: (params: any) => {
+      formatter: (params: { componentSubType: string, name: string }) => {
         if (params.componentSubType === 'scatter') {
           return `
                 <div style="padding: 8px;">
@@ -168,7 +151,7 @@ function updateMapMarker() {
       center: (chartInstance.getOption()?.geo?.[0]?.center as [number, number]) || undefined, // 保持中心
       label: {
         show: true,
-        formatter: (params: any) => params.name,
+        formatter: (params: { name: string }) => params.name,
         color: '#333',
         fontSize: 10
       },
@@ -301,7 +284,7 @@ async function initMap() {
     updateMapMarker()
 
     // 监听地图点击事件：实现钻取和选点
-    chartInstance.on('click', async (params: any) => {
+    chartInstance.on('click', async (params: { componentType?: string, componentSubType?: string, name: string, event: { offsetX: number, offsetY: number } }) => {
       if (params.componentType === 'geo' || params.componentSubType === 'map') {
         // 1. 更新选点坐标
         const pointInPixel = [params.event.offsetX, params.event.offsetY]
@@ -325,8 +308,8 @@ async function initMap() {
         } else {
           // 省级/市级地图 -> 查找下一级 AdCode
           const currentGeoJson = geoJsonCache[currentAdCode]
-          const feature = currentGeoJson?.features?.find((f: any) => f.properties.name === params.name)
-          nextAdCode = feature?.properties?.adcode
+          const feature = currentGeoJson?.features?.find(f => f.properties.name === params.name)
+          nextAdCode = feature?.properties?.adcode || ''
         }
 
         // 如果找到了下一级 AdCode，则执行切换
@@ -334,7 +317,7 @@ async function initMap() {
           try {
             const newMapName = await loadAndRegisterNextMap(nextAdCode)
             switchMap(newMapName, nextAdCode)
-          } catch (e: any) {
+          } catch {
             // console.error("钻取失败:", e);
             // toast.add({ title: '钻取失败', description: '无法加载下一级地图数据', color: 'red' });
           }
@@ -343,11 +326,11 @@ async function initMap() {
     })
 
     window.addEventListener('resize', handleResize)
-  } catch (err: any) {
+  } catch (err: unknown) {
     mapLoading.value = false
     toast.add({
       title: '地图加载失败',
-      description: err.message || '无法加载中国地图',
+      description: (err as Error).message || '无法加载中国地图',
       color: 'red'
     })
   }
@@ -356,7 +339,7 @@ async function initMap() {
 // 加载现有数据
 async function loadData() {
   try {
-    const response: any = await $fetch('/api/travel/records')
+    const response = await $fetch<Result<TravelCity[]>>('/api/travel/records')
     if (response.success && response.data) {
       const data = Array.isArray(response.data) ? response.data : []
 
@@ -369,10 +352,10 @@ async function loadData() {
         }
       }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: '加载失败',
-      description: error.message || '无法加载旅行记录',
+      description: (error as Error).message || '无法加载旅行记录',
       color: 'red'
     })
   }
@@ -415,7 +398,7 @@ async function uploadImage(event: Event) {
       const formDataUpload = new FormData()
       formDataUpload.append('file', file)
 
-      const response: any = await $fetch('/api/upload', {
+      const response = await $fetch<{ url: string }>('/api/upload', {
         method: 'POST',
         body: formDataUpload
       })
@@ -433,10 +416,10 @@ async function uploadImage(event: Event) {
       description: `成功上传 ${files.length} 张图片`,
       color: 'green'
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: '上传失败',
-      description: error.message || '无法上传图片',
+      description: (error as Error).message || '无法上传图片',
       color: 'red'
     })
   } finally {
@@ -463,7 +446,7 @@ async function saveData() {
 
   saving.value = true
   try {
-    const response: any = await $fetch('/api/travel/records')
+    const response = await $fetch<Result<TravelCity[]>>('/api/travel/records')
     let data: TravelCity[] = []
 
     if (response.success && response.data) {
@@ -486,8 +469,8 @@ async function saveData() {
     setTimeout(() => {
       navigateTo('/admin/travel')
     }, 500)
-  } catch (error: any) {
-    toast.add({ title: t('admin.tra.saveFailed'), description: error.message || t('admin.tra.saveError'), color: 'red' })
+  } catch (error: unknown) {
+    toast.add({ title: t('admin.tra.saveFailed'), description: (error as Error).message || t('admin.tra.saveError'), color: 'red' })
   } finally {
     saving.value = false
   }

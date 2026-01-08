@@ -5,7 +5,7 @@ import fs from 'fs'
 import matter from 'gray-matter'
 import dbUtils from '../../db'
 
-const readArticle = async (dir: string): Promise<Result<any>> => {
+const readArticle = async (dir: string): Promise<Result<unknown>> => {
   try {
     // console.log('读取文章目录:', dir);
 
@@ -13,7 +13,7 @@ const readArticle = async (dir: string): Promise<Result<any>> => {
     const dbArticle = dbUtils.article.getArticleByPath(dir)
 
     let mdBody: string
-    let frontMatter: any
+    let frontMatter: Record<string, unknown>
 
     if (dbArticle && dbArticle.content) {
       // 从数据库读取内容
@@ -53,11 +53,11 @@ const readArticle = async (dir: string): Promise<Result<any>> => {
         adjacent: adjacent
       }
     }
-  } catch (error: any) {
-    console.error('读取文章内容失败:', error.message)
+  } catch (error) {
+    console.error('读取文章内容失败:', (error as Error).message)
     return {
       success: false,
-      err: '读取文章内容失败' + `${error.message}`,
+      err: '读取文章内容失败' + `${(error as Error).message}`,
       data: {}
     }
   }

@@ -57,9 +57,9 @@ const getArticles = async (): Promise<Result<Article[]>> => {
             newBlog: false,
             isSticky: false
           })
-        } catch (statError: any) {
+        } catch (statError: unknown) {
           // 单独捕获某个目录的 stat 错误（避免单个目录异常导致整个循环中断）
-          console.error(`获取目录 ${fullPath} 信息失败:`, statError.message)
+          console.error(`获取目录 ${fullPath} 信息失败:`, (statError as Error).message)
           // 可选：跳过错误目录，或添加标记为异常的文章
           articles.push({
             content: '',
@@ -93,15 +93,15 @@ const getArticles = async (): Promise<Result<Article[]>> => {
       err: '',
       data: sortedArticles
     }
-  } catch (error: any) {
-    console.error('读取文章目录失败:', error.message)
+  } catch (error: unknown) {
+    console.error('读取文章目录失败:', (error as Error).message)
     return {
       success: false,
-      err: `获取文章列表失败：${error.message}`,
+      err: `获取文章列表失败：${(error as Error).message}`,
       data: []
     }
   }
 }
-export default eventHandler(async (event) => {
+export default eventHandler(async (_event) => {
   return await getArticles()
 })

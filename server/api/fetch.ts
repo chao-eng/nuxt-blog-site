@@ -71,7 +71,7 @@ export default eventHandler(async (event) => {
     // 流式传输文件（MD 文本文件同样适用流式传输）
     const readStream = createReadStream(normalizedPath)
     return sendStream(event, readStream)
-  } catch (error: any) {
+  } catch (error) {
     if (error.statusCode) {
       return error
     }

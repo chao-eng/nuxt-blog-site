@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: false,
-      err: error.message || '删除操作失败',
+      err: (error as Error).message || '删除操作失败',
       data: undefined
     }
   }

@@ -29,10 +29,10 @@ export default defineEventHandler(async (event) => {
       success: true,
       message: 'Travel records saved successfully'
     }
-  } catch (error: any) {
+  } catch (error) {
     throw createError({
       statusCode: error.statusCode || 500,
-      statusMessage: error.message || 'Failed to save travel records'
+      statusMessage: (error as Error).message || 'Failed to save travel records'
     })
   }
 })

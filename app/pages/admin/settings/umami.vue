@@ -21,7 +21,7 @@ const toast = useToast()
 async function loadConfig() {
   loading.value = true
   try {
-    const response: any = await $fetch('/api/umami/config')
+    const response = await $fetch<Result<Record<string, unknown>>>('/api/umami/config')
     if (response.success && response.data) {
       const config = response.data
       enableUmami.value = config.enableUmami
@@ -29,10 +29,10 @@ async function loadConfig() {
       websiteId.value = config.websiteId
       shareUrl.value = config.shareUrl || ''
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: t('admin.set.umami.loadFailed'),
-      description: error.message || t('admin.set.umami.loadError'),
+      description: (error as Error).message || t('admin.set.umami.loadError'),
       color: 'red'
     })
   } finally {
@@ -68,10 +68,10 @@ async function saveConfig() {
       description: t('admin.set.umami.configUpdated'),
       color: 'green'
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: t('admin.set.umami.saveFailed'),
-      description: error.message || t('admin.set.umami.saveError'),
+      description: (error as Error).message || t('admin.set.umami.saveError'),
       color: 'red'
     })
   } finally {

@@ -1,4 +1,3 @@
-import jwt from 'jsonwebtoken'
 import dbUtils from '../../db'
 
 export default defineEventHandler(async (event) => {
@@ -19,8 +18,8 @@ export default defineEventHandler(async (event) => {
       avatar: user.avatar,
       bio: user.bio
     }
-  } catch (error: any) {
-    console.error('服务器内部错误:', error.message)
+  } catch (error) {
+    console.error('服务器内部错误:', (error as Error).message)
     throw createError({
       statusCode: 500,
       statusMessage: '服务器内部错误'

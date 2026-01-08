@@ -3,7 +3,7 @@ import { join, resolve, relative } from 'path'
 import { randomUUID } from 'crypto'
 import type { Result } from '~/types'
 
-export default defineEventHandler(async (event): Promise<Result<any>> => {
+export default defineEventHandler(async (event): Promise<Result<unknown>> => {
   try {
     // 解析 multipart/form-data
     const formData = await readMultipartFormData(event)
@@ -123,9 +123,9 @@ export default defineEventHandler(async (event): Promise<Result<any>> => {
       err: ``,
       data: uploadedFile // 注意：返回单个 file 而不是 files 数组
     }
-  } catch (error: any) {
+  } catch (error) {
     // 如果是我们自定义的错误，直接抛出
-    if (error.statusCode) {
+    if (error && typeof error === 'object' && 'statusCode' in error) {
       throw error
     }
 

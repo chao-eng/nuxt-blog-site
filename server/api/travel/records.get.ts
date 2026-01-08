@@ -9,10 +9,10 @@ export default defineEventHandler(() => {
       data: JSON.parse(result.data),
       visible: result.visible
     }
-  } catch (error: any) {
+  } catch (error) {
     throw createError({
       statusCode: 500,
-      statusMessage: error.message || 'Failed to get travel records'
+      statusMessage: (error as Error).message || 'Failed to get travel records'
     })
   }
 })

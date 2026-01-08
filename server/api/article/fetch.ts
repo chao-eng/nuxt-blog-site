@@ -61,8 +61,8 @@ export default eventHandler(async (event) => {
     // 使用流式传输
     const readStream = createReadStream(normalizedPath)
     return sendStream(event, readStream)
-  } catch (error: any) {
-    if (error.statusCode) {
+  } catch (error) {
+    if (error && typeof error === 'object' && 'statusCode' in error) {
       throw error
     }
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import type { Result } from '~/types'
 
 definePageMeta({
   layout: 'default',
@@ -22,7 +23,7 @@ const toast = useToast()
 async function loadConfig() {
   loading.value = true
   try {
-    const response: any = await $fetch('/api/comments/config')
+    const response = await $fetch<Result<Record<string, unknown>>>('/api/comments/config')
     if (response.success && response.data) {
       const config = response.data
       enableComments.value = config.enableComments
@@ -31,10 +32,10 @@ async function loadConfig() {
       category.value = config.category
       categoryId.value = config.categoryId
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: t('admin.set.comments.loadFailed'),
-      description: error.message || t('admin.set.comments.loadError'),
+      description: (error as Error).message || t('admin.set.comments.loadError'),
       color: 'red'
     })
   } finally {
@@ -73,10 +74,10 @@ async function saveConfig() {
       description: t('admin.set.comments.configUpdated'),
       color: 'green'
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: t('admin.set.comments.saveFailed'),
-      description: error.message || t('admin.set.comments.saveError'),
+      description: (error as Error).message || t('admin.set.comments.saveError'),
       color: 'red'
     })
   } finally {

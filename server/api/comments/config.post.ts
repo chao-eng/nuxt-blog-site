@@ -23,10 +23,10 @@ export default defineEventHandler(async (event) => {
       success: true,
       message: 'Comment configuration saved successfully'
     }
-  } catch (error: any) {
+  } catch (error) {
     throw createError({
       statusCode: error.statusCode || 500,
-      statusMessage: error.message || 'Failed to save comment configuration'
+      statusMessage: (error as Error).message || 'Failed to save comment configuration'
     })
   }
 })
