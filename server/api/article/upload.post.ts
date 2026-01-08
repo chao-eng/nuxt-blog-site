@@ -3,7 +3,7 @@ import { join, resolve, relative } from 'path'
 import { randomUUID } from 'crypto'
 import type { Result } from '~/types'
 
-export default defineEventHandler(async (event): Promise<Result<any>> => {
+export default defineEventHandler(async (event): Promise<Result<unknown>> => {
   try {
     // 解析 multipart/form-data
     const formData = await readMultipartFormData(event)
@@ -51,7 +51,7 @@ export default defineEventHandler(async (event): Promise<Result<any>> => {
       }
     }
 
-    const file = imageFiles[0]
+    const file = imageFiles[0]!
 
     // 构建完整的上传目录
     const basePath = useRuntimeConfig().basePath
@@ -123,14 +123,15 @@ export default defineEventHandler(async (event): Promise<Result<any>> => {
       err: ``,
       data: uploadedFile // 注意：返回单个 file 而不是 files 数组
     }
-  } catch (error: any) {
-    // 如果是我们自定义的错误，直接抛出
-    if (error.statusCode) {
+  } catch (error: unknown) {
+    // 处理其他错误
+    console.error('文件上传错误:', error)
+
+    const typedError = error as { statusCode?: number, statusMessage?: string }
+    if (typedError.statusCode) {
       throw error
     }
 
-    // 处理其他错误
-    console.error('文件上传错误:', error)
     throw createError({
       statusCode: 500,
       statusMessage: '文件上传失败'

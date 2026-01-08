@@ -24,7 +24,7 @@ watch(elementPerPage, () => {
 })
 
 // 使用 useAsyncData 在服务端获取数据（支持分页和搜索）
-const { data: blogsData, status } = await useAsyncData(
+const { data: blogsData } = await useAsyncData(
   'blogs-list',
   async () => {
     const query = {

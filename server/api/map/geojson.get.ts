@@ -34,12 +34,12 @@ export default defineEventHandler(async (event) => {
       success: true,
       data: geoJson
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching map data:', error)
 
     return {
       success: false,
-      error: error.message || 'Failed to fetch map data'
+      error: (error as Error).message || 'Failed to fetch map data'
     }
   }
 })

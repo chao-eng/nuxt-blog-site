@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-import type { Result } from '../../types'
+import type { Result } from '~/types'
 import { format } from 'date-fns'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
-import 'highlight.js/styles/github.css' // 代码高亮样式（可选择其他主题）
-import 'github-markdown-css/github-markdown-light.css'
+import 'github-markdown-css/github-markdown.css'
 import Giscus from '@giscus/vue'
 import { onMounted } from 'vue'
 
@@ -43,7 +42,26 @@ const { t, locale } = useI18n()
 const { data: articleData, error } = await useAsyncData(
   `blog-content-${blogPath}`,
   async () => {
-    const res: Result<any> = await $fetch('/api/blogs/content', {
+    const res: Result<{
+      content: string
+      frontMatter: {
+        title: string
+        date: string
+        description: string | null
+        image: string | null
+        tags: string[]
+        published: boolean
+        isSticky: boolean
+      }
+      author: {
+        author: string
+        avatar: string
+      }
+      adjacent: {
+        prev: { title: string, path: string } | null
+        next: { title: string, path: string } | null
+      }
+    }> = await $fetch('/api/blogs/content', {
       method: 'POST',
       body: { path: blogPath }
     })
@@ -166,7 +184,7 @@ const detectNavbarHeight = () => {
     '#header'
   ]
 
-  let navbar: any = null
+  let navbar: HTMLElement | null = null
   for (const selector of navSelectors) {
     navbar = document.querySelector(selector)
     if (navbar) break
@@ -184,7 +202,9 @@ const md = new MarkdownIt({
   highlight: function (str, lang) {
     if (lang && hljs.getLanguage(lang)) {
       try {
-        return hljs.highlight(str, { language: lang }).value
+        const highlighted = hljs.highlight(str, { language: lang }).value
+        // 直接在 pre 内部注入按钮，使用内联 SVG 确保图标显示，并且压缩为单行以避免 pre 标签保留多余空白
+        return `<pre class="hljs code-block-container"><button class="copy-btn" title="Copy"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg></button><code>${highlighted}</code></pre>`
       } catch (err) {
         console.error('代码高亮失败:', err)
       }
@@ -205,7 +225,34 @@ const renderedHtml = computed(() => {
 onMounted(() => {
   detectNavbarHeight()
   window.addEventListener('resize', detectNavbarHeight)
-  
+
+  // 复制功能逻辑
+  const previewContainer = document.getElementById('preview-container')
+  if (previewContainer) {
+    previewContainer.addEventListener('click', async (e) => {
+      const btn = (e.target as HTMLElement).closest('.copy-btn')
+      if (!btn) return
+
+      const pre = btn.closest('pre')
+      const codeElement = pre?.querySelector('code')
+      if (codeElement) {
+        try {
+          await navigator.clipboard.writeText(codeElement.textContent || '')
+          
+          // 成功反馈
+          const originalHTML = btn.innerHTML
+          // 切换为 Check 图标
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-green-500"><path d="M20 6 9 17l-5-5"/></svg>'
+          setTimeout(() => {
+            btn.innerHTML = originalHTML
+          }, 2000)
+        } catch (err) {
+          console.error('Failed to copy:', err)
+        }
+      }
+    })
+  }
+
   // 等待 DOM 渲染完成后生成目录
   nextTick(() => {
     generateTOC()
@@ -275,7 +322,7 @@ const commentState = reactive({
   isReady: false
 })
 
-function handleGiscusMessage(event: any) {
+function handleGiscusMessage(event: MessageEvent) {
   if (event.origin !== 'https://giscus.app') return
   if (!event.data?.giscus) return
 
@@ -386,12 +433,16 @@ watch(() => $router.currentRoute.value.path, () => {
 
             <!-- 文章正文 -->
             <article class="px-6 lg:px-8 py-8">
+              <!-- eslint-disable vue/no-v-html -->
               <div
                 id="preview-container"
                 class="markdown-body prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-code:text-primary-600 dark:prose-code:text-primary-400 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700"
+                :data-color-mode="colorMode.value"
+                data-light-theme="light"
+                data-dark-theme="dark"
                 v-html="renderedHtml"
-              >
-              </div>
+              />
+              <!-- eslint-enable vue/no-v-html -->
             </article>
 
             <!-- 文章底部 -->
@@ -676,6 +727,11 @@ watch(() => $router.currentRoute.value.path, () => {
 .dark #preview-container pre {
   background-color: #111827;
   border-color: #374151;
+}
+
+/* 确保 markdown-body 背景透明 */
+:deep(.markdown-body) {
+  background-color: transparent !important;
 }
 
 /* 引用块样式 */
@@ -976,5 +1032,76 @@ watch(() => $router.currentRoute.value.path, () => {
 
 .dark .toc-content::-webkit-scrollbar-thumb:hover {
   background: #64748b;
+}
+</style>
+
+<style lang="less">
+/* 定义亮色和暗色的官方样式混入 */
+.hljs-light-theme() {
+  @import (less) "highlight.js/styles/github.css";
+}
+.hljs-dark-theme() {
+  @import (less) "highlight.js/styles/github-dark.css";
+}
+
+#preview-container {
+  // 默认应用官方亮色主题
+  .hljs-light-theme();
+
+  // 当顶级标签有 .dark 类时，强制应用官方暗色主题，使用 !important 确保覆盖
+  :global(.dark) & {
+    .hljs-dark-theme() !important;
+  }
+
+  // 同时也适配 data-color-mode 属性
+  &[data-color-mode="dark"] {
+    .hljs-dark-theme() !important;
+  }
+}
+
+/* 保持代码块的圆角和间距 */
+/* 保持代码块的圆角和间距，并建立定位上下文 */
+#preview-container .hljs {
+  padding: 1.25rem !important;
+  border-radius: 0.75rem !important;
+  position: relative !important;
+}
+
+/* 极简复制按钮样式 */
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #64748b;
+  opacity: 0;
+  transition: all 0.2s;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#preview-container .hljs:hover .copy-btn {
+  opacity: 1;
+}
+
+.copy-btn:hover {
+  background-color: rgba(148, 163, 184, 0.1);
+  border-color: rgba(148, 163, 184, 0.2);
+  color: #475569;
+}
+
+:global(.dark) .copy-btn {
+  color: #94a3b8;
+}
+
+:global(.dark) .copy-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #e2e8f0;
 }
 </style>

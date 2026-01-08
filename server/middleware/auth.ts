@@ -1,6 +1,5 @@
 // server/middleware/auth.ts
 import jwt from 'jsonwebtoken'
-import type { User } from '~/types'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -40,12 +39,12 @@ export default defineEventHandler(async (event) => {
     }
 
     // 验证 JWT token
-    const payload = jwt.verify(token, jwtSecret) as any
+    const payload = jwt.verify(token, jwtSecret) as { userId: number, username: string }
 
     // console.log('当前登录用户:', payload)
     // 将用户信息注入到 event context
     event.context.user = payload
-  } catch (error: any) {
+  } catch {
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorized'

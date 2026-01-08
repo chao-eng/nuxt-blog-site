@@ -20,9 +20,9 @@ export const dbCommon = {
      * @param params 查询参数（数组或对象）
      * @returns 单条数据对象（或 undefined）
      */
-  get: <T = Record<string, any>>(sql: string, params?: any[] | object): T | undefined => {
+  get: <T = Record<string, unknown>>(sql: string, params?: (string | number | boolean | null)[] | object): T | undefined => {
     const statement = db.prepare(sql)
-    return params === undefined ? statement.get() as T | undefined : statement.get(params) as T | undefined
+    return params === undefined ? statement.get() as T | undefined : (statement.get(params) as T | undefined)
   },
 
   /**
@@ -31,10 +31,10 @@ export const dbCommon = {
      * @param params 查询参数（数组或对象）
      * @returns 数据对象数组
      */
-  all: <T = Record<string, any>>(sql: string, params?: any[] | object): T[] => {
+  all: <T = Record<string, unknown>>(sql: string, params?: (string | number | boolean | null)[] | object): T[] => {
     const statement = db.prepare(sql)
     // 关键：如果没有 params，直接调用 all() 而非 all(undefined)
-    return params === undefined ? statement.all() as T[] : statement.all(params) as T[]
+    return params === undefined ? statement.all() as T[] : (statement.all(params) as T[])
   },
 
   /**
@@ -43,7 +43,7 @@ export const dbCommon = {
      * @param params 操作参数（数组或对象）
      * @returns 操作结果（包含 changes、lastInsertRowid 等）
      */
-  run: (sql: string, params?: any[] | object): Database.RunResult => {
+  run: (sql: string, params?: (string | number | boolean | null)[] | object): Database.RunResult => {
     const statement = db.prepare(sql)
     return params === undefined ? statement.run() : statement.run(params)
   },

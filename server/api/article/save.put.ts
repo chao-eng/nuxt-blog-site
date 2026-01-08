@@ -67,7 +67,7 @@ const saveArticle = async (dir: string, content: string, originalPath: string, u
       image: frontMatter.image,
       published: frontMatter.published,
       isSticky: frontMatter.isSticky,
-      content: mdBody,  // 存储 MD 正文内容
+      content: mdBody, // 存储 MD 正文内容
       userid: userid
     })
 
@@ -76,11 +76,11 @@ const saveArticle = async (dir: string, content: string, originalPath: string, u
       err: '',
       data: undefined
     }
-  } catch (error: any) {
-    console.error('保存文章内容失败:', error.message)
+  } catch (error: unknown) {
+    console.error('保存文章内容失败:', (error as Error).message)
     return {
       success: false,
-      err: `保存文章内容失败: ${error.message}`,
+      err: `保存文章内容失败: ${(error as Error).message}`,
       data: undefined
     }
   }

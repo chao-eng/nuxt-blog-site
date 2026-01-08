@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as z from 'zod'
-import type { FormError, FormSubmitEvent } from '@nuxt/ui'
-import type { Result } from '../../types'
+import type { FormError } from '@nuxt/ui'
+import type { Result } from '~/types'
 
 definePageMeta({
   layout: 'default',

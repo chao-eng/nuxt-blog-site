@@ -57,7 +57,7 @@ type SaveArticleParams = Omit<Article, 'tags' | 'modifyTime' | 'content' | 'isSa
   userid: number
 }
 
-export interface User {
+export interface Customer {
   id: number
   name: string
   email: string
@@ -86,4 +86,47 @@ export type Period = 'daily' | 'weekly' | 'monthly'
 export interface Range {
   start: Date
   end: Date
+}
+
+export interface NavbarData {
+  homeTitle: string
+}
+
+export interface FooterData {
+  author: string
+  aboutAuthor: string
+  authorInterest: string
+  aboutTheSite: string
+}
+
+export interface PageInfo {
+  title: string
+  description: string
+  aboutMe?: string
+}
+
+export interface SocialLink {
+  icon: string
+  to: string
+  label: string
+}
+
+export interface SeoData {
+  title: string
+  ogTitle: string
+  description?: string
+  ogDescription?: string
+  mailAddress: string
+}
+
+export interface AppConfig {
+  navbarData: NavbarData
+  footerData: FooterData
+  homePage: PageInfo
+  blogsPage: PageInfo
+  tagsPage: PageInfo
+  aboutPage: PageInfo
+  seoData: SeoData
+  socialLinks: SocialLink[]
+  GiscusData?: unknown
 }

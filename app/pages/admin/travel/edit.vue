@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import * as echarts from 'echarts'
+import type { Result } from '~/types'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -83,24 +84,6 @@ function handleResize() {
   chartInstance?.resize()
 }
 
-// 带超时的 fetch
-async function fetchWithTimeout(url: string, timeout = 10000) {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), timeout)
-
-  try {
-    const response = await fetch(url, { signal: controller.signal })
-    clearTimeout(timeoutId)
-    return response
-  } catch (err) {
-    clearTimeout(timeoutId)
-    if (err instanceof DOMException && err.name === 'AbortError') {
-      throw new Error('请求超时，请检查网络连接或稍后再试。')
-    }
-    throw err
-  }
-}
-
 /**
  * 加载并注册下一级行政区划的 GeoJSON
  * @param adCode 当前行政区的 AdCode (例如 510000)
@@ -114,17 +97,18 @@ async function loadAndRegisterNextMap(adCode: string): Promise<string> {
   }
 
   // 2. 异步加载 GeoJSON
-  const mapResponse: any = await $fetch('/api/map/geojson', {
+  const mapResponse = await $fetch<Result<unknown>>('/api/map/geojson', {
     params: { adcode: adCode }
   })
 
   if (!mapResponse.success || !mapResponse.data) {
-    throw new Error(`Failed to load map data for AdCode ${adCode}: ${mapResponse.error}`)
+    throw new Error(`Failed to load map data for AdCode ${adCode}: ${mapResponse.err}`)
   }
 
-  const geoJson = mapResponse.data
+  const geoJson = mapResponse.data as any
 
   // 3. 注册地图
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   echarts.registerMap(mapName, geoJson)
   geoJsonCache[adCode] = geoJson
 
@@ -138,13 +122,15 @@ function updateMapMarker() {
   if (!chartInstance) return
 
   const currentMap = mapHistory.value[mapHistory.value.length - 1]
+  if (!currentMap) return
 
   const option: echarts.EChartsOption = {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
       formatter: (params: any) => {
-        if (params.componentSubType === 'scatter') {
+        const p = params as { componentSubType: string, name: string }
+        if (p.componentSubType === 'scatter') {
           return `
                 <div style="padding: 8px;">
                   <div style="font-weight: bold; font-size: 14px; margin-bottom: 4px;">当前选择位置</div>
@@ -164,11 +150,11 @@ function updateMapMarker() {
     geo: {
       map: currentMap.mapName, // 动态切换地图名称
       roam: true,
-      zoom: (chartInstance.getOption()?.geo?.[0]?.zoom as number) || 1, // 保持缩放
-      center: (chartInstance.getOption()?.geo?.[0]?.center as [number, number]) || undefined, // 保持中心
+      zoom: (chartInstance.getOption() as any)?.geo?.[0]?.zoom || 1, // 保持缩放
+      center: (chartInstance.getOption() as any)?.geo?.[0]?.center || undefined, // 保持中心
       label: {
         show: true,
-        formatter: (params: any) => params.name,
+        formatter: (params: { name: string }) => params.name,
         color: '#333',
         fontSize: 10
       },
@@ -183,7 +169,7 @@ function updateMapMarker() {
         coordinateSystem: 'geo',
         data: [{ name: formData.value.name || '选择的位置', value: formData.value.value }],
         symbolSize: 12,
-        itemStyle: { color: 'red' },
+        itemStyle: { color: 'error' },
         label: {
           show: true, // 始终显示选中位置的标签
           formatter: formData.value.name || '选择的位置',
@@ -249,13 +235,14 @@ function switchMap(newMapName: string, newAdCode: string) {
  */
 function goBackToChina() {
   if (mapHistory.value.length <= 1 || !chartInstance) {
-    toast.add({ title: '提示', description: '已是最高级地图 (全国)', color: 'gray' })
+    toast.add({ title: '提示', description: '已是最高级地图 (全国)', color: 'neutral' })
     return
   }
 
   // 弹出当前地图，回到上一个地图
   mapHistory.value.pop()
   const prevMap = mapHistory.value[mapHistory.value.length - 1]
+  if (!prevMap) return
 
   chartInstance.setOption({
     geo: {
@@ -266,7 +253,7 @@ function goBackToChina() {
   }, { notMerge: false })
 
   updateMapMarker()
-  toast.add({ title: '返回成功', description: `当前地图：${prevMap.mapName.replace('map-', 'AdCode ')}`, color: 'blue' })
+  toast.add({ title: '返回成功', description: `当前地图：${prevMap.mapName.replace('map-', 'AdCode ')}`, color: 'primary' })
 }
 
 // 初始化地图
@@ -301,54 +288,63 @@ async function initMap() {
     updateMapMarker()
 
     // 监听地图点击事件：实现钻取和选点
-    chartInstance.on('click', async (params: any) => {
-      if (params.componentType === 'geo' || params.componentSubType === 'map') {
-        // 1. 更新选点坐标
-        const pointInPixel = [params.event.offsetX, params.event.offsetY]
-        const pointInGeo = chartInstance!.convertFromPixel({ geoIndex: 0 }, pointInPixel)
+    chartInstance.on('click', (params: any) => {
+      const p = params as { componentType?: string, componentSubType?: string, name: string, event: { offsetX: number, offsetY: number } }
+      
+      const handleClick = async () => {
+        if (p.componentType === 'geo' || p.componentSubType === 'map') {
+          if (!p.event) return
+          // 1. 更新选点坐标
+          const pointInPixel = [p.event.offsetX, p.event.offsetY]
+          const pointInGeo = chartInstance!.convertFromPixel({ geoIndex: 0 }, pointInPixel)
 
-        if (pointInGeo && Array.isArray(pointInGeo)) {
-          formData.value.value = [
-            Math.round(pointInGeo[0] * 1000000) / 1000000,
-            Math.round(pointInGeo[1] * 1000000) / 1000000
-          ]
-          updateMapMarker()
-        }
+          if (pointInGeo && Array.isArray(pointInGeo)) {
+            const geoPoint = pointInGeo as number[]
+            formData.value.value = [
+              Math.round(geoPoint[0]! * 1000000) / 1000000,
+              Math.round(geoPoint[1]! * 1000000) / 1000000
+            ]
+            updateMapMarker()
+          }
 
-        // 2. 尝试向下钻取
-        const currentAdCode = mapHistory.value[mapHistory.value.length - 1].adCode
+          // 2. 尝试向下钻取
+          const currentMapTop = mapHistory.value[mapHistory.value.length - 1]
+          if (!currentMapTop) return
+          const currentAdCode = currentMapTop.adCode
 
-        let nextAdCode = ''
-        if (currentAdCode === '100000') {
-          // 全国地图 -> 查找省份 AdCode
-          nextAdCode = adCodeMap[params.name]
-        } else {
-          // 省级/市级地图 -> 查找下一级 AdCode
-          const currentGeoJson = geoJsonCache[currentAdCode]
-          const feature = currentGeoJson?.features?.find((f: any) => f.properties.name === params.name)
-          nextAdCode = feature?.properties?.adcode
-        }
+          let nextAdCode = ''
+          if (currentAdCode === '100000') {
+            // 全国地图 -> 查找省份 AdCode
+            nextAdCode = adCodeMap[p.name] || ''
+          } else {
+            // 省级/市级地图 -> 查找下一级 AdCode
+            const currentGeoJson = geoJsonCache[currentAdCode]
+            const feature = currentGeoJson?.features?.find((f: any) => f.properties.name === p.name)
+            nextAdCode = feature?.properties?.adcode || ''
+          }
 
-        // 如果找到了下一级 AdCode，则执行切换
-        if (nextAdCode) {
-          try {
-            const newMapName = await loadAndRegisterNextMap(nextAdCode)
-            switchMap(newMapName, nextAdCode)
-          } catch (e: any) {
-            // console.error("钻取失败:", e);
-            // toast.add({ title: '钻取失败', description: '无法加载下一级地图数据', color: 'red' });
+          // 如果找到了下一级 AdCode，则执行切换
+          if (nextAdCode) {
+            try {
+              const newMapName = await loadAndRegisterNextMap(nextAdCode)
+              switchMap(newMapName, nextAdCode)
+            } catch {
+              // Ignore drill error
+            }
           }
         }
       }
+
+      handleClick()
     })
 
     window.addEventListener('resize', handleResize)
-  } catch (err: any) {
+  } catch (err: unknown) {
     mapLoading.value = false
     toast.add({
       title: '地图加载失败',
-      description: err.message || '无法加载中国地图',
-      color: 'red'
+      description: (err as Error).message || '无法加载中国地图',
+      color: 'error'
     })
   }
 }
@@ -356,7 +352,7 @@ async function initMap() {
 // 加载现有数据
 async function loadData() {
   try {
-    const response: any = await $fetch('/api/travel/records')
+    const response = await $fetch<Result<TravelCity[]>>('/api/travel/records')
     if (response.success && response.data) {
       const data = Array.isArray(response.data) ? response.data : []
 
@@ -365,15 +361,15 @@ async function loadData() {
         if (index >= 0 && index < data.length) {
           isEditMode.value = true
           editIndex.value = index
-          formData.value = { ...data[index] }
+          formData.value = { ...data[index] } as TravelCity
         }
       }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: '加载失败',
-      description: error.message || '无法加载旅行记录',
-      color: 'red'
+      description: (error as Error).message || '无法加载旅行记录',
+      color: 'error'
     })
   }
 }
@@ -398,7 +394,7 @@ function onCoordinateChange() {
     toast.add({
       title: '输入错误',
       description: '经纬度必须是有效的数字',
-      color: 'red'
+      color: 'error'
     })
   }
 }
@@ -415,7 +411,7 @@ async function uploadImage(event: Event) {
       const formDataUpload = new FormData()
       formDataUpload.append('file', file)
 
-      const response: any = await $fetch('/api/upload', {
+      const response = await $fetch<{ url: string }>('/api/upload', {
         method: 'POST',
         body: formDataUpload
       })
@@ -431,13 +427,13 @@ async function uploadImage(event: Event) {
     toast.add({
       title: '上传成功',
       description: `成功上传 ${files.length} 张图片`,
-      color: 'green'
+      color: 'success'
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: '上传失败',
-      description: error.message || '无法上传图片',
-      color: 'red'
+      description: (error as Error).message || '无法上传图片',
+      color: 'error'
     })
   } finally {
     uploading.value = false
@@ -453,17 +449,17 @@ function removePhoto(index: number) {
 // 保存数据 (在模板中使用 @click="saveData")
 async function saveData() {
   if (!formData.value.name.trim()) {
-    toast.add({ title: t('admin.tra.inputError'), description: t('admin.tra.enterName'), color: 'red' })
+    toast.add({ title: t('admin.tra.inputError'), description: t('admin.tra.enterName'), color: 'error' })
     return
   }
   if (!formData.value.time.trim()) {
-    toast.add({ title: t('admin.tra.inputError'), description: t('admin.tra.enterTime'), color: 'red' })
+    toast.add({ title: t('admin.tra.inputError'), description: t('admin.tra.enterTime'), color: 'error' })
     return
   }
 
   saving.value = true
   try {
-    const response: any = await $fetch('/api/travel/records')
+    const response = await $fetch<Result<TravelCity[]>>('/api/travel/records')
     let data: TravelCity[] = []
 
     if (response.success && response.data) {
@@ -481,13 +477,13 @@ async function saveData() {
       body: { data: JSON.stringify(data), visible: true }
     })
 
-    toast.add({ title: t('admin.tra.saveSuccess'), description: t('admin.tra.updated'), color: 'green' })
+    toast.add({ title: t('admin.tra.saveSuccess'), description: t('admin.tra.updated'), color: 'success' })
 
     setTimeout(() => {
       navigateTo('/admin/travel')
     }, 500)
-  } catch (error: any) {
-    toast.add({ title: t('admin.tra.saveFailed'), description: error.message || t('admin.tra.saveError'), color: 'red' })
+  } catch (error: unknown) {
+    toast.add({ title: t('admin.tra.saveFailed'), description: (error as Error).message || t('admin.tra.saveError'), color: 'error' })
   } finally {
     saving.value = false
   }
@@ -601,7 +597,7 @@ onUnmounted(() => {
                 v-if="mapHistory.length > 1"
                 icon="i-lucide-arrow-left"
                 variant="outline"
-                color="gray"
+                color="neutral"
                 @click="goBackToChina"
               >
                 {{ t('admin.tra.backToPrev') }}
@@ -610,7 +606,7 @@ onUnmounted(() => {
 
             <UAlert
               icon="i-lucide-info"
-              color="blue"
+              color="primary"
               variant="soft"
               :title="t('admin.tra.usageGuide')"
               :description="t('admin.tra.drillGuide')"
@@ -700,7 +696,7 @@ onUnmounted(() => {
                     <UButton
                       icon="i-lucide-x"
                       size="xs"
-                      color="red"
+                      color="error"
                       variant="solid"
                       class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
                       @click="removePhoto(index)"

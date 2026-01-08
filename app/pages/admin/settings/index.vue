@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
-import type { Result } from '../../types'
+import type { Result } from '~/types'
 
 definePageMeta({
   layout: 'default',
@@ -26,14 +26,14 @@ type ProfileSchema = z.output<typeof profileSchema>
 const { data } = useAuth()
 
 const profile = reactive<Partial<ProfileSchema>>({
-  name: (data.value as any)?.name,
-  email: (data.value as any)?.email,
-  username: (data.value as any)?.username,
-  avatar: (data.value as any)?.avatar,
-  bio: (data.value as any)?.bio
+  name: (data.value as { name?: string })?.name,
+  email: (data.value as { email?: string })?.email,
+  username: (data.value as { username?: string })?.username,
+  avatar: (data.value as { avatar?: string })?.avatar,
+  bio: (data.value as { bio?: string })?.bio
 })
 const toast = useToast()
-async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
+async function onSubmit(_event: FormSubmitEvent<ProfileSchema>) {
   const result: Result<undefined> = await $fetch('/api/user/profile', {
     method: 'POST',
     body: profile

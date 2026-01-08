@@ -84,6 +84,7 @@ const createArticle = async () => {
       content: '',
       modifyTime: new Date().toISOString(),
       isSaved: false,
+      isSticky: false,
       author: '',
       avatar: '',
       newBlog: true
@@ -122,15 +123,15 @@ const refreshArticle = async () => {
 const rebuildIndex = async () => {
   const toast = useToast()
   try {
-    const res: any = await $fetch('/api/article/rebuild', { method: 'POST' })
+    const res = await $fetch<{ success: boolean, message: string }>('/api/article/rebuild', { method: 'POST' })
     if (res.success) {
       toast.add({ title: t('admin.art.success'), description: res.message, color: 'success' })
       refreshArticle()
     } else {
       toast.add({ title: t('admin.art.failed'), description: res.message, color: 'error' })
     }
-  } catch (e: any) {
-    toast.add({ title: t('admin.art.error'), description: e.message, color: 'error' })
+  } catch (e: unknown) {
+    toast.add({ title: t('admin.art.error'), description: (e as Error).message, color: 'error' })
   }
 }
 

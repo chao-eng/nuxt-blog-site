@@ -12,15 +12,20 @@ const colors = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone']
 
 const { signOut, data } = useAuth()
-// console.log("当前登录用户:",data.value);
+interface SessionUser {
+  name?: string
+  avatar?: string
+  email?: string
+}
 
-const user = ref({
-  name: (data.value as any)?.name ?? 'Guest',
-  avatar: {
-    src: (data.value as any)?.avatar
-      ? (data.value as any).avatar
-      : 'https://avatars.githubusercontent.com/u/904724?v=4',
-    alt: (data.value as any)?.name ?? 'Guest'
+const user = computed(() => {
+  const sessionUser = data.value as SessionUser | null
+  return {
+    name: sessionUser?.name ?? 'Guest',
+    avatar: {
+      src: sessionUser?.avatar ?? 'https://avatars.githubusercontent.com/u/904724?v=4',
+      alt: sessionUser?.name ?? 'Guest'
+    }
   }
 })
 
@@ -53,7 +58,7 @@ const items = computed<DropdownMenuItem[]>(() => ([[{
       slot: 'chip',
       checked: appConfig.ui.colors.primary === color,
       type: 'checkbox',
-      onSelect: (e) => {
+      onSelect: (e: Event) => {
         e.preventDefault()
 
         appConfig.ui.colors.primary = color
@@ -73,7 +78,7 @@ const items = computed<DropdownMenuItem[]>(() => ([[{
       slot: 'chip',
       type: 'checkbox',
       checked: appConfig.ui.colors.neutral === color,
-      onSelect: (e: any) => {
+      onSelect: (e: Event) => {
         e.preventDefault()
 
         appConfig.ui.colors.neutral = color
@@ -176,8 +181,8 @@ const items = computed<DropdownMenuItem[]>(() => ([[{
         <span
           class="rounded-full ring ring-bg bg-(--chip-light) dark:bg-(--chip-dark) size-2"
           :style="{
-            '--chip-light': `var(--color-${(item as any).chip}-500)`,
-            '--chip-dark': `var(--color-${(item as any).chip}-400)`
+            '--chip-light': `var(--color-${(item as DropdownMenuItem & { chip: string }).chip}-500)`,
+            '--chip-dark': `var(--color-${(item as DropdownMenuItem & { chip: string }).chip}-400)`
           }"
         />
       </div>

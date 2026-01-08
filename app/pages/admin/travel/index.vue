@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, h, resolveComponent } from 'vue'
 import type { TableColumn, TableRow, ContextMenuItem } from '@nuxt/ui'
+import type { Result } from '~/types'
 import { useClipboard } from '@vueuse/core'
 
 const { t } = useI18n()
@@ -12,9 +13,7 @@ definePageMeta({
 })
 
 // --- 1. Component Resolution (Required for h() render function) ---
-const UBadge = resolveComponent('UBadge')
 const UButton = resolveComponent('UButton')
-const UCheckbox = resolveComponent('UCheckbox')
 // Simple html tags like 'img' or 'div' don't need resolution
 
 // --- 2. Types & State ---
@@ -45,7 +44,7 @@ const jsonData = computed({
     try {
       const parsed = JSON.parse(value)
       if (Array.isArray(parsed)) tableData.value = parsed
-    } catch (e) { /* ignore parse errors while typing */ }
+    } catch { /* ignore parse errors while typing */ }
   }
 })
 
@@ -162,7 +161,7 @@ function getRowItems(row: TableRow<TravelCity>) {
       icon: 'i-lucide-copy',
       onSelect() {
         copy(row.original.name)
-        toast.add({ title: t('admin.tra.copied'), color: 'green' })
+        toast.add({ title: t('admin.tra.copied'), color: 'success' })
       }
     },
     {
@@ -179,13 +178,13 @@ function getRowItems(row: TableRow<TravelCity>) {
       icon: 'i-lucide-code',
       onSelect() {
         copy(JSON.stringify(row.original, null, 2))
-        toast.add({ title: t('admin.tra.copied'), color: 'green' })
+        toast.add({ title: t('admin.tra.copied'), color: 'success' })
       }
     }
   ]
 }
 
-function onContextmenu(_e: MouseEvent, row: TableRow<TravelCity>) {
+function onContextmenu(_e: Event, row: TableRow<TravelCity>) {
   contextMenuItems.value = getRowItems(row)
 }
 
@@ -193,14 +192,14 @@ function onContextmenu(_e: MouseEvent, row: TableRow<TravelCity>) {
 async function loadData() {
   loading.value = true
   try {
-    const response: any = await $fetch('/api/travel/records')
+    const response = await $fetch<Result<TravelCity[]> & { visible?: boolean }>('/api/travel/records')
     if (response.success && response.data) {
       tableData.value = Array.isArray(response.data) ? response.data : []
       jsonText.value = JSON.stringify(tableData.value, null, 2)
       visible.value = response.visible !== false
     }
-  } catch (error: any) {
-    toast.add({ title: t('admin.tra.loadFailed'), description: error.message, color: 'red' })
+  } catch (error: unknown) {
+    toast.add({ title: t('admin.tra.loadFailed'), description: (error as Error).message, color: 'error' })
   } finally {
     loading.value = false
   }
@@ -208,14 +207,16 @@ async function loadData() {
 
 async function saveData() {
   if (!jsonData.value.trim()) {
-    toast.add({ title: t('admin.tra.inputError'), description: t('admin.tra.enterJson'), color: 'red' }); return
+    toast.add({ title: t('admin.tra.inputError'), description: t('admin.tra.enterJson'), color: 'error' })
+    return
   }
   let parsedData
   try {
     parsedData = JSON.parse(jsonData.value)
     if (!Array.isArray(parsedData)) throw new Error(t('admin.tra.mustBeArray'))
-  } catch (e: any) {
-    toast.add({ title: t('admin.tra.formatFailed'), description: e.message, color: 'red' }); return
+  } catch (e: unknown) {
+    toast.add({ title: t('admin.tra.formatFailed'), description: (e as Error).message, color: 'error' })
+    return
   }
 
   saving.value = true
@@ -225,9 +226,9 @@ async function saveData() {
       body: { data: jsonData.value, visible: visible.value }
     })
     tableData.value = parsedData
-    toast.add({ title: t('admin.tra.saveSuccess'), color: 'green' })
-  } catch (error: any) {
-    toast.add({ title: t('admin.tra.saveFailed'), description: error.message, color: 'red' })
+    toast.add({ title: t('admin.tra.saveSuccess'), color: 'success' })
+  } catch (error: unknown) {
+    toast.add({ title: t('admin.tra.saveFailed'), description: (error as Error).message, color: 'error' })
   } finally {
     saving.value = false
   }
@@ -238,9 +239,9 @@ function formatJson() {
     const parsed = JSON.parse(jsonData.value)
     jsonText.value = JSON.stringify(parsed, null, 2)
     tableData.value = Array.isArray(parsed) ? parsed : tableData.value
-    toast.add({ title: t('admin.tra.formatSuccess'), color: 'green' })
-  } catch (e) {
-    toast.add({ title: t('admin.tra.formatFailed'), color: 'red' })
+    toast.add({ title: t('admin.tra.formatSuccess'), color: 'success' })
+  } catch {
+    toast.add({ title: t('admin.tra.formatFailed'), color: 'error' })
   }
 }
 
@@ -337,7 +338,7 @@ onMounted(() => {
               :rows="20"
               placeholder="[{&quot;name&quot;: &quot;北京&quot;...}]"
               class="font-mono text-sm w-full"
-              :ui="{ wrapper: 'w-full', base: 'w-full resize-none' }"
+              :ui="{ base: 'w-full resize-none' }"
             />
           </div>
 

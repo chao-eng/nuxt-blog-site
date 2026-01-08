@@ -4,6 +4,9 @@ import { getServerUser } from '../../utils/auth'
 export default defineEventHandler(async (event) => {
   const { currPassword, newPassword } = await readBody(event)
   const session = await getServerUser(event)
+  if (!session) {
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+  }
   // console.log("当前登录用户:",session)
   return await changePassword(session.userId, currPassword, newPassword)
 })
