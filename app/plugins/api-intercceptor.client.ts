@@ -1,15 +1,4 @@
-// plugins/auth-interceptor.client.ts
 export default defineNuxtPlugin(() => {
-  // 定义错误响应接口
-  interface ErrorResponse {
-    response: {
-      status: number
-      statusText: string
-      _data?: any
-    }
-    request?: string
-  }
-
   // 全局 401 错误处理函数
   const handleUnauthorized = (): void => {
     // 清除认证状态

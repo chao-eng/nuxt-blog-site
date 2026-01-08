@@ -21,7 +21,7 @@ export default defineEventHandler(async (event): Promise<UploadResponse> => {
       })
     }
 
-    const file = form[0]
+    const file = form[0]!
 
     // 类型验证
     if (!file.type || !config.allowedTypes.includes(file.type)) {
@@ -59,12 +59,13 @@ export default defineEventHandler(async (event): Promise<UploadResponse> => {
       originalName: file.filename,
       size: file.data.length
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Upload error:', error)
 
+    const typedError = error as { statusCode?: number, statusMessage?: string }
     throw createError({
-      statusCode: error.statusCode || 500,
-      statusMessage: error.statusMessage || 'Upload failed'
+      statusCode: typedError.statusCode || 500,
+      statusMessage: typedError.statusMessage || 'Upload failed'
     })
   }
 })

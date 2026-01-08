@@ -58,8 +58,8 @@ export const dbArticle = {
     const tagsStr = JSON.stringify(tags || [])
     // 转换为 1/0
     let publishedVal = 0
-    const pub = params.published as any
-    if (pub === true || pub === 'true' || pub == 1) {
+    const pub = params.published
+    if (pub) {
       publishedVal = 1
     }
     const isStickyVal = params.isSticky ? 1 : 0
@@ -91,7 +91,7 @@ export const dbArticle = {
 
     // 4. 编辑模式：构建更新字段 + 执行更新
     const updateFields: string[] = []
-    const updateParams: any[] = []
+    const updateParams: (string | number | boolean | null)[] = []
 
     if (rest.title !== undefined) {
       updateFields.push('title = ?')
@@ -237,7 +237,7 @@ export const dbArticle = {
 
     // 3. 构建查询条件
     let whereClause = 't.published = 1'
-    const queryParams: any[] = []
+    const queryParams: (string | number | boolean | null)[] = []
 
     if (search) {
       whereClause += ' AND (t.title LIKE ? OR t.description LIKE ?)'

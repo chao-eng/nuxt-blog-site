@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
 
-const route = useRoute()
 const toast = useToast()
 
 // 侧边栏展开状态（初始值确保服务端/客户端一致）
@@ -10,7 +9,7 @@ const open = ref(false)
 const { t } = useI18n()
 const localePath = useLocalePath()
 
-const links = computed(() => [
+const links = computed<NavigationMenuItem[]>(() => [
   {
     label: t('admin.dashboard'),
     icon: 'i-lucide-layout-dashboard',

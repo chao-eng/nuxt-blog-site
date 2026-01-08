@@ -11,10 +11,10 @@ const getRecentArticles = async (): Promise<Result<{ list: Article[], total: num
       err: '',
       data: dbUtils.article.getArticles({ page: 1, pageSize: 3, sortBy: 'date', sortOrder: 'desc', isSticky: false })
     }
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
-      err: error.message,
+      err: (error as Error).message,
       data: { list: [], total: 0 }
     }
   }

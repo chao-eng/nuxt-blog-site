@@ -1,6 +1,6 @@
 import { getCommentsConfig } from '../../utils/config-state'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (_event) => {
   try {
     // 从全局状态读取配置（而不是数据库）
     const config = getCommentsConfig()
@@ -15,10 +15,10 @@ export default defineEventHandler(async (event) => {
         categoryId: ''
       }
     }
-  } catch (error: any) {
+  } catch (error) {
     throw createError({
       statusCode: 500,
-      message: error.message || '获取配置失败'
+      message: (error as Error).message || '获取配置失败'
     })
   }
 })

@@ -24,10 +24,10 @@ export default defineEventHandler(async (event) => {
       success: true,
       message: 'Umami 配置已保存'
     }
-  } catch (error: any) {
+  } catch (error) {
     throw createError({
       statusCode: 500,
-      message: error.message || '保存失败'
+      message: (error as Error).message || '保存失败'
     })
   }
 })

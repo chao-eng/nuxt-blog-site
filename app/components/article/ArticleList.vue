@@ -13,7 +13,7 @@ const selectedArticle = defineModel<Article | null>()
   <!-- 列表容器：允许垂直滚动，每个项之间添加分隔线 -->
   <div class="overflow-y-auto divide-y divide-default">
     <div
-      v-for="(article, index) in articles"
+      v-for="article in articles"
       :key="article.path"
     >
       <div

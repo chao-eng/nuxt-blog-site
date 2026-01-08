@@ -1,17 +1,17 @@
 import dbUtils from '../../db'
 import type { Result } from '~/types'
 
-const getArticleTags = async (): Promise<Result<any>> => {
+const getArticleTags = async (): Promise<Result<{ tag: string, count: number }[]>> => {
   try {
     return {
       success: true,
       err: '',
       data: dbUtils.article.getTagsWithCount()
     }
-  } catch (error: any) {
+  } catch (error) {
     return {
       success: false,
-      err: error.message,
+      err: (error as Error).message,
       data: []
     }
   }

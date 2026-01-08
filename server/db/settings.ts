@@ -46,7 +46,7 @@ export function initSettingsTables(): void {
   try {
     const checkShareUrlColumn = db.prepare('SELECT share_url FROM umami_config LIMIT 1')
     checkShareUrlColumn.get()
-  } catch (error) {
+  } catch {
     // 如果列不存在，则添加
     console.log('⚠️ umami_config 表缺少 share_url 列，正在添加...')
     db.prepare('ALTER TABLE umami_config ADD COLUMN share_url TEXT DEFAULT \'\'').run()
@@ -75,7 +75,13 @@ export const dbCommentConfig = {
      */
   getConfig: () => {
     const sql = 'SELECT * FROM comment_config LIMIT 1'
-    const result = dbCommon.get<any>(sql)
+    const result = dbCommon.get<{
+      enable_comments: number
+      repo: string
+      repo_id: string
+      category: string
+      category_id: string
+    }>(sql)
     if (!result) return null
     return {
       enableComments: result.enable_comments === 1,
@@ -120,7 +126,12 @@ export const dbUmamiConfig = {
      */
   getConfig: () => {
     const sql = 'SELECT * FROM umami_config LIMIT 1'
-    const result = dbCommon.get<any>(sql)
+    const result = dbCommon.get<{
+      enable_umami: number
+      script_url: string
+      website_id: string
+      share_url: string
+    }>(sql)
     if (!result) return null
     return {
       enableUmami: result.enable_umami === 1,

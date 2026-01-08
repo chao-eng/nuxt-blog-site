@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import type { Result } from '~/types'
 
 definePageMeta({
   layout: 'default',
@@ -22,20 +23,20 @@ const toast = useToast()
 async function loadConfig() {
   loading.value = true
   try {
-    const response: any = await $fetch('/api/comments/config')
+    const response = await $fetch<Result<Record<string, unknown>>>('/api/comments/config')
     if (response.success && response.data) {
-      const config = response.data
+      const config = response.data as any
       enableComments.value = config.enableComments
       repo.value = config.repo
       repoId.value = config.repoId
       category.value = config.category
       categoryId.value = config.categoryId
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: t('admin.set.comments.loadFailed'),
-      description: error.message || t('admin.set.comments.loadError'),
-      color: 'red'
+      description: (error as Error).message || t('admin.set.comments.loadError'),
+      color: 'error'
     })
   } finally {
     loading.value = false
@@ -49,7 +50,7 @@ async function saveConfig() {
       toast.add({
         title: t('admin.set.comments.incompleteConfig'),
         description: t('admin.set.comments.allFieldsRequired'),
-        color: 'red'
+        color: 'error'
       })
       return
     }
@@ -71,13 +72,13 @@ async function saveConfig() {
     toast.add({
       title: t('admin.set.comments.saveSuccess'),
       description: t('admin.set.comments.configUpdated'),
-      color: 'green'
+      color: 'success'
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: t('admin.set.comments.saveFailed'),
-      description: error.message || t('admin.set.comments.saveError'),
-      color: 'red'
+      description: (error as Error).message || t('admin.set.comments.saveError'),
+      color: 'error'
     })
   } finally {
     saving.value = false
@@ -137,7 +138,7 @@ onMounted(() => {
 
           <UAlert
             icon="i-lucide-info"
-            color="blue"
+            color="primary"
             variant="soft"
             :title="t('admin.set.comments.configInstructions')"
             :description="t('admin.set.comments.configInstructionsDesc')"

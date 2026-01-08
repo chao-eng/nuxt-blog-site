@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import type { Result } from '~/types'
 
 definePageMeta({
   layout: 'default',
@@ -21,19 +22,19 @@ const toast = useToast()
 async function loadConfig() {
   loading.value = true
   try {
-    const response: any = await $fetch('/api/umami/config')
+    const response = await $fetch<Result<Record<string, unknown>>>('/api/umami/config')
     if (response.success && response.data) {
-      const config = response.data
+      const config = response.data as any
       enableUmami.value = config.enableUmami
       scriptUrl.value = config.scriptUrl
       websiteId.value = config.websiteId
       shareUrl.value = config.shareUrl || ''
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: t('admin.set.umami.loadFailed'),
-      description: error.message || t('admin.set.umami.loadError'),
-      color: 'red'
+      description: (error as Error).message || t('admin.set.umami.loadError'),
+      color: 'error'
     })
   } finally {
     loading.value = false
@@ -46,7 +47,7 @@ async function saveConfig() {
     toast.add({
       title: t('admin.set.umami.incompleteConfig'),
       description: t('admin.set.umami.allFieldsRequired'),
-      color: 'red'
+      color: 'error'
     })
     return
   }
@@ -66,13 +67,13 @@ async function saveConfig() {
     toast.add({
       title: t('admin.set.umami.saveSuccess'),
       description: t('admin.set.umami.configUpdated'),
-      color: 'green'
+      color: 'success'
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     toast.add({
       title: t('admin.set.umami.saveFailed'),
-      description: error.message || t('admin.set.umami.saveError'),
-      color: 'red'
+      description: (error as Error).message || t('admin.set.umami.saveError'),
+      color: 'error'
     })
   } finally {
     saving.value = false
@@ -117,7 +118,7 @@ onMounted(() => {
 
           <UAlert
             icon="i-lucide-info"
-            color="blue"
+            color="primary"
             variant="soft"
             :title="t('admin.set.umami.configInstructions')"
             :description="t('admin.set.umami.configInstructionsDesc')"

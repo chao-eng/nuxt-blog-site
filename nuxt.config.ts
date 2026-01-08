@@ -6,10 +6,10 @@ import yaml from 'js-yaml'
 // 编译时加载 app_config.yml 作为默认配置
 // Docker 运行时可通过环境变量覆盖
 const appConfigPath = resolve(process.cwd(), 'app_config.yml')
-let appConfig: Record<string, any> = {}
+let appConfig: Record<string, unknown> = {}
 try {
   const fileContents = fs.readFileSync(appConfigPath, 'utf8')
-  appConfig = yaml.load(fileContents) as Record<string, any>
+  appConfig = yaml.load(fileContents) as Record<string, unknown>
   console.log('✅ Successfully loaded app config from:', appConfigPath)
 } catch (e) {
   console.error('❌ Failed to load app config:', e)
@@ -140,7 +140,6 @@ export default defineNuxtConfig({
         name: '简体中文'
       }
     ],
-    lazy: true,
     langDir: 'locales',
     defaultLocale: 'zh-CN',
     strategy: 'prefix_except_default',

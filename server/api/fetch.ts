@@ -2,7 +2,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { createReadStream } from 'fs'
 
-export default eventHandler(async (event) => {
+export default defineEventHandler(async (event) => {
   try {
     const query = getQuery(event)
     const filePath = query.path as string
@@ -71,8 +71,9 @@ export default eventHandler(async (event) => {
     // 流式传输文件（MD 文本文件同样适用流式传输）
     const readStream = createReadStream(normalizedPath)
     return sendStream(event, readStream)
-  } catch (error: any) {
-    if (error.statusCode) {
+  } catch (error: unknown) {
+    const typedError = error as { statusCode?: number }
+    if (typedError.statusCode) {
       return error
     }
 

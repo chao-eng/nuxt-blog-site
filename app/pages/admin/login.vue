@@ -8,7 +8,6 @@
       >
         <UButton
           icon="i-lucide-languages"
-          color="gray"
           variant="ghost"
           size="lg"
           trailing
@@ -72,10 +71,10 @@
         <UAlert
           v-if="error"
           icon="i-heroicons-exclamation-triangle"
-          color="red"
+          color="error"
           variant="soft"
           :title="error"
-          :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'gray', variant: 'link', size: '2xs' }"
+          :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'neutral', variant: 'link', size: '2xs' }"
           @close="error = ''"
         />
 
@@ -139,7 +138,7 @@ const currentLocaleName = computed(() => {
 })
 
 const switchLanguage = (lang: string) => {
-  setLocale(lang)
+  setLocale(lang as 'en' | 'zh-CN')
 }
 
 const languageItems = computed(() => [[
@@ -173,9 +172,12 @@ const formErrors = reactive({
 })
 
 function onError(event: any) {
-  const element = document.getElementById(event.errors[0].path)
-  element?.focus()
-  element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  const errors = event.errors || []
+  if (errors.length > 0) {
+    const element = document.getElementById(errors[0].path)
+    element?.focus()
+    element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }
 }
 
 // 登录处理函数
@@ -209,20 +211,22 @@ async function handleLogin(event: FormSubmitEvent<Schema>) {
         icon: 'i-heroicons-check-circle'
       })
     }
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('登录错误:', err)
+    const errorMsg = (err as { message?: string }).message || t('login.validation.networkError')
+    const statusCode = (err as { statusCode?: number }).statusCode
 
     // 处理不同类型的错误
-    if (err.statusCode === 401) {
+    if (statusCode === 401) {
       error.value = t('login.validation.invalidCredentials')
       formErrors.username = t('login.validation.checkUsername')
       formErrors.password = t('login.validation.checkPassword')
-    } else if (err.statusCode === 400) {
+    } else if (statusCode === 400) {
       error.value = t('login.validation.badRequest')
-    } else if (err.statusCode >= 500) {
+    } else if (statusCode && statusCode >= 500) {
       error.value = t('login.validation.serverError')
     } else {
-      error.value = err.message || t('login.validation.networkError')
+      error.value = errorMsg
     }
 
     toast.add({
