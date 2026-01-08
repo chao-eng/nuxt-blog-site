@@ -8,7 +8,6 @@
       >
         <UButton
           icon="i-lucide-languages"
-          color="gray"
           variant="ghost"
           size="lg"
           trailing
