@@ -1,10 +1,9 @@
 <script lang="ts" setup>
-import type { Result } from '../../types'
+import type { Result } from '~/types'
 import { format } from 'date-fns'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
-import 'highlight.js/styles/github.css' // 代码高亮样式（可选择其他主题）
-import 'github-markdown-css/github-markdown-light.css'
+import 'github-markdown-css/github-markdown.css'
 import Giscus from '@giscus/vue'
 import { onMounted } from 'vue'
 
@@ -203,7 +202,9 @@ const md = new MarkdownIt({
   highlight: function (str, lang) {
     if (lang && hljs.getLanguage(lang)) {
       try {
-        return hljs.highlight(str, { language: lang }).value
+        // 手动包裹并添加 hljs 类，确保样式匹配
+        const highlighted = hljs.highlight(str, { language: lang }).value
+        return `<pre class="hljs"><code>${highlighted}</code></pre>`
       } catch (err) {
         console.error('代码高亮失败:', err)
       }
@@ -409,6 +410,9 @@ watch(() => $router.currentRoute.value.path, () => {
               <div
                 id="preview-container"
                 class="markdown-body prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-code:text-primary-600 dark:prose-code:text-primary-400 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700"
+                :data-color-mode="colorMode.value"
+                data-light-theme="light"
+                data-dark-theme="dark"
                 v-html="renderedHtml"
               />
               <!-- eslint-enable vue/no-v-html -->
@@ -696,6 +700,11 @@ watch(() => $router.currentRoute.value.path, () => {
 .dark #preview-container pre {
   background-color: #111827;
   border-color: #374151;
+}
+
+/* 确保 markdown-body 背景透明 */
+:deep(.markdown-body) {
+  background-color: transparent !important;
 }
 
 /* 引用块样式 */
@@ -996,5 +1005,36 @@ watch(() => $router.currentRoute.value.path, () => {
 
 .dark .toc-content::-webkit-scrollbar-thumb:hover {
   background: #64748b;
+}
+</style>
+
+<style lang="less">
+/* 定义亮色和暗色的官方样式混入 */
+.hljs-light-theme() {
+  @import (less) "highlight.js/styles/github.css";
+}
+.hljs-dark-theme() {
+  @import (less) "highlight.js/styles/github-dark.css";
+}
+
+#preview-container {
+  // 默认应用官方亮色主题
+  .hljs-light-theme();
+
+  // 当顶级标签有 .dark 类时，强制应用官方暗色主题，使用 !important 确保覆盖
+  :global(.dark) & {
+    .hljs-dark-theme() !important;
+  }
+
+  // 同时也适配 data-color-mode 属性
+  &[data-color-mode="dark"] {
+    .hljs-dark-theme() !important;
+  }
+}
+
+/* 保持代码块的圆角和间距 */
+#preview-container .hljs {
+  padding: 1.25rem !important;
+  border-radius: 0.75rem !important;
 }
 </style>
