@@ -3,7 +3,7 @@ import { db, dbCommon } from './db'
 import { dbUser, initUserTable } from './user'
 import { dbArticle, initArticleTable } from './article'
 import { dbTravel, initTravelTable } from './travel'
-import { dbCommentConfig, dbUmamiConfig, initSettingsTables } from './settings'
+import { dbCommentConfig, dbUmamiConfig, dbS3Config, initSettingsTables } from './settings'
 
 // 导出数据库连接和通用操作
 export { db, dbCommon }
@@ -12,7 +12,7 @@ export { db, dbCommon }
 export { dbUser }
 export { dbArticle }
 export { dbTravel }
-export { dbCommentConfig, dbUmamiConfig }
+export { dbCommentConfig, dbUmamiConfig, dbS3Config }
 
 /**
  * 初始化数据库（创建所有表，首次运行时执行）
@@ -36,7 +36,8 @@ const dbUtils = {
   article: dbArticle,
   travelRecords: dbTravel,
   commentConfig: dbCommentConfig,
-  umamiConfig: dbUmamiConfig
+  umamiConfig: dbUmamiConfig,
+  s3Config: dbS3Config
 }
 
 export default dbUtils

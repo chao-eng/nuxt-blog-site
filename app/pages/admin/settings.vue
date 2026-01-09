@@ -19,6 +19,10 @@ const links = computed(() => [[{
   label: t('admin.set.umami.title'),
   icon: 'i-lucide-bar-chart',
   to: localePath('/admin/settings/umami')
+}, {
+  label: t('admin.set.s3.title'),
+  icon: 'i-lucide-image',
+  to: localePath('/admin/settings/s3')
 }], [{
   label: t('admin.set.documentation'),
   icon: 'i-lucide-book-open',

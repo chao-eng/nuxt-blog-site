@@ -69,6 +69,13 @@ const links = computed<NavigationMenuItem[]>(() => [
       onSelect: () => {
         open.value = false
       }
+    },
+    {
+      label: t('admin.s3'),
+      to: localePath('/admin/settings/s3'),
+      onSelect: () => {
+        open.value = false
+      }
     }]
   },
   {
@@ -145,6 +152,12 @@ const groups = computed(() => [
         label: t('admin.umami'),
         icon: 'i-lucide-bar-chart',
         to: localePath('/admin/settings/umami')
+      },
+      {
+        id: 's3-settings',
+        label: t('admin.s3'),
+        icon: 'i-lucide-image',
+        to: localePath('/admin/settings/s3')
       }
     ]
   },

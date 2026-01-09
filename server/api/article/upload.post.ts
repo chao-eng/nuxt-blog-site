@@ -2,6 +2,7 @@ import { promises as fs } from 'fs'
 import { join, resolve, relative } from 'path'
 import { randomUUID } from 'crypto'
 import type { Result } from '~/types'
+import { uploadToS3 } from '../../utils/s3'
 
 export default defineEventHandler(async (event): Promise<Result<unknown>> => {
   try {
@@ -98,6 +99,25 @@ export default defineEventHandler(async (event): Promise<Result<unknown>> => {
     // 生成唯一文件名
     const fileExtension = file.filename?.split('.').pop() || 'jpg'
     const uniqueFilename = `${randomUUID()}.${fileExtension}`
+
+    // 尝试上传到 S3
+    const s3Url = await uploadToS3(file.data, uniqueFilename, file.type || 'image/jpeg')
+
+    if (s3Url) {
+      return {
+        success: true,
+        err: '',
+        data: {
+          originalName: file.filename,
+          filename: uniqueFilename,
+          url: s3Url,
+          path: uploadPath,
+          size: file.data.length,
+          type: file.type
+        }
+      }
+    }
+
     const filePath = join(fullUploadDir, uniqueFilename)
 
     // 保存文件到指定路径
