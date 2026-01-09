@@ -16,7 +16,7 @@ watch(() => route.query.search, (newSearch) => {
 
 const handleSearch = () => {
   navigateTo({
-    path: localePath('/blogs'),
+    path: localePath('/'),
     query: {
       ...route.query,
       search: search.value || undefined,
@@ -25,12 +25,24 @@ const handleSearch = () => {
   })
 }
 
-const navItems = computed(() => [
-  { label: t('nav.articles'), to: localePath('/blogs') },
-  { label: t('nav.tags'), to: localePath('/tags') },
-  { label: t('nav.about'), to: localePath('/about') },
-  { label: t('nav.admin'), to: localePath('/admin/travel') }
-])
+const { data: travelData } = await useFetch<{ success: boolean, visible: boolean }>('/api/travel/records')
+const showTravel = computed(() => travelData.value?.success && travelData.value?.visible)
+
+const navItems = computed(() => {
+  const items = [
+    { label: t('nav.articles'), to: localePath('/') },
+    { label: t('nav.tags'), to: localePath('/tags') }
+  ]
+
+  if (showTravel.value) {
+    items.push({ label: t('nav.travel'), to: localePath('/travel') })
+  }
+
+  items.push({ label: t('nav.about'), to: localePath('/about') })
+  items.push({ label: t('nav.admin'), to: localePath('/admin/travel') })
+
+  return items
+})
 
 const navigationState = computed(() => {
   return navItems.value.map(item => ({

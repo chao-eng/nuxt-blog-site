@@ -33,13 +33,24 @@ const socialItems = computed(() => {
 
 const localePath = useLocalePath()
 
+// 获取旅行记录可见性
+const { data: travelData } = await useFetch<{ success: boolean, visible: boolean }>('/api/travel/records')
+const showTravel = computed(() => travelData.value?.success && travelData.value?.visible)
+
 // 导航链接
-const navLinks = computed(() => [
-  { label: t('nav.home'), to: localePath('/') },
-  { label: t('nav.articles'), to: localePath('/blogs') },
-  { label: t('nav.tags'), to: localePath('/tags') },
-  { label: t('nav.about'), to: localePath('/about') }
-])
+const navLinks = computed(() => {
+  const links = [
+    { label: t('nav.home'), to: localePath('/') },
+    { label: t('nav.tags'), to: localePath('/tags') }
+  ]
+
+  if (showTravel.value) {
+    links.push({ label: t('nav.travel'), to: localePath('/travel') })
+  }
+
+  links.push({ label: t('nav.about'), to: localePath('/about') })
+  return links
+})
 
 // 时间范围选择
 const selectedRange = ref('7d')
