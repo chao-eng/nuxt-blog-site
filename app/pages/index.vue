@@ -15,7 +15,7 @@ definePageMeta({
 const blogsPage = useBlogsPage()
 
 // 响应式变量
-const elementPerPage = ref(5)
+const elementPerPage = ref(16)
 const pageNumber = ref(1)
 
 // 监听每页数量变化，重置页码
@@ -65,10 +65,10 @@ const totalPage = computed(() => {
 
 // 每页显示数量选项
 const pageSizeOptions = computed(() => [
-  { label: `5 ${t('blog.itemsPerPage')}`, value: 5 },
-  { label: `10 ${t('blog.itemsPerPage')}`, value: 10 },
-  { label: `20 ${t('blog.itemsPerPage')}`, value: 20 },
-  { label: `50 ${t('blog.itemsPerPage')}`, value: 50 }
+  { label: `12 ${t('blog.itemsPerPage')}`, value: 12 },
+  { label: `16 ${t('blog.itemsPerPage')}`, value: 16 },
+  { label: `24 ${t('blog.itemsPerPage')}`, value: 24 },
+  { label: `48 ${t('blog.itemsPerPage')}`, value: 48 }
 ])
 
 // 搜索状态计算属性
@@ -115,11 +115,11 @@ useHead({
 </script>
 
 <template>
-  <main class="container max-w-5xl mx-auto text-zinc-600">
+  <main class="container max-w-7xl mx-auto text-zinc-600">
     <UContainer class="py-8 ">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none">
+      <div class="rounded-xl overflow-hidden">
         <!-- 统计与筛选栏 -->
-        <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm shadow-sm rounded-t-xl">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
               <span v-if="searchStats.hasSearch">
@@ -155,16 +155,16 @@ useHead({
           </div>
         </div>
 
-        <div class="mb-0">
+        <div class="p-6">
           <TransitionGroup
             appear
             name="list"
             tag="div"
-            class=""
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
             <template v-for="(post, index) in paginatedData" :key="post.path">
-              <div :style="{ '--i': index }">
-                <BlogsArchiveCard
+              <div :style="{ '--i': index }" class="h-full">
+                <BlogsGridCard
                   :path="post.path"
                   :title="post.title"
                   :date="post.date"

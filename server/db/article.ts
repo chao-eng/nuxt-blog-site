@@ -261,7 +261,7 @@ export const dbArticle = {
       SELECT t.* 
       FROM articles t
       WHERE ${whereClause}
-      ORDER BY ${validSortBy} ${validSortOrder}, path ${validSortOrder} 
+      ORDER BY t.isSticky DESC, ${validSortBy} ${validSortOrder}, path ${validSortOrder} 
       LIMIT ? OFFSET ?
     `
     const countSql = `

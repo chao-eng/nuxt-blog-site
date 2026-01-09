@@ -27,7 +27,7 @@ const localePath = useLocalePath()
             <!-- 头像 -->
             <div class="flex justify-center">
               <img
-                src="/logo.png"
+                src="/logo.webp"
                 alt="个人头像"
                 class="w-20 h-20 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700"
               >
