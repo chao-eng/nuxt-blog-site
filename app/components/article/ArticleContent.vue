@@ -707,7 +707,8 @@ const editArticle = async (refresh = true) => {
             })
 
             if (response.success) {
-              const imgUrl = window.location.origin + response.data.url
+              const url = response.data.url
+              const imgUrl = url.startsWith('http') ? url : window.location.origin + url
               vditorInstance.value?.insertValue(`![${response.data.filename}](${imgUrl})`)
             }
           } catch {
