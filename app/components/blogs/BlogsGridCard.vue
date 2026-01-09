@@ -41,16 +41,12 @@ const formatDate = (dateString: string) => {
     <NuxtLink :to="path" class="flex flex-col h-full">
       <!-- 封面图区域 -->
       <div class="aspect-video relative overflow-hidden bg-gray-100 dark:bg-gray-700">
-        <!-- 封面图直接使用 img -->
+        <!-- 封面图直接使用 img，如果没有则使用默认图 -->
         <img
-          v-if="image"
-          :src="image"
+          :src="image || '/not-found.webp'"
           :alt="alt"
           class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         >
-        <div v-else class="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50 dark:bg-gray-900/50">
-          <UIcon name="i-lucide-image" class="w-10 h-10 opacity-20" />
-        </div>
         
         <!-- 置顶标识 -->
         <div v-if="isSticky" class="absolute top-2 right-2">

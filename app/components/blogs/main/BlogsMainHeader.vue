@@ -30,7 +30,6 @@ const showTravel = computed(() => travelData.value?.success && travelData.value?
 
 const navItems = computed(() => {
   const items = [
-    { label: t('nav.articles'), to: localePath('/') },
     { label: t('nav.tags'), to: localePath('/tags') }
   ]
 

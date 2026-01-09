@@ -116,45 +116,8 @@ useHead({
 
 <template>
   <main class="container max-w-7xl mx-auto text-zinc-600">
-    <UContainer class="py-8 ">
+    <UContainer class="py-1 ">
       <div class="rounded-xl overflow-hidden">
-        <!-- 统计与筛选栏 -->
-        <div class="px-6 py-3 border-b border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm shadow-sm rounded-t-xl">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-              <span v-if="searchStats.hasSearch">
-                {{ $t('blog.found') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ searchStats.filtered }}</span> {{ $t('blog.articles') }}
-                （{{ $t('blog.total') }} {{ searchStats.total }} {{ $t('blog.piece') }}）
-              </span>
-              <span v-else>
-                {{ $t('blog.total') }} <span class="font-medium text-primary-600 dark:text-primary-400">{{ searchStats.total }}</span> {{ $t('blog.articles') }}
-              </span>
-              <UBadge
-                v-if="searchStats.hasSearch"
-                variant="soft"
-                color="primary"
-                size="sm"
-              >
-                {{ $t('blog.searchResults') }}
-              </UBadge>
-            </div>
-
-            <!-- 每页数量选择 -->
-            <USelectMenu
-              v-model="elementPerPage"
-              :items="pageSizeOptions"
-              :search-input="false"
-              value-key="value"
-              label-key="label"
-              size="md"
-              class="min-w-[120px]"
-              :ui="{
-                base: 'h-9  border-0 focus:ring-2 focus:ring-primary-500'
-              }"
-            />
-          </div>
-        </div>
-
         <div class="p-6">
           <TransitionGroup
             appear
@@ -216,14 +179,6 @@ useHead({
             @update:page="handlePageChange"
           />
         </div>
-      </div>
-
-      <div v-if="paginatedData.length > 0" class="mt-8 text-center">
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          {{ $t('blog.showing') }} {{ (pageNumber - 1) * elementPerPage + 1 }} {{ $t('blog.to') }}
-          {{ Math.min(pageNumber * elementPerPage, blogsData?.total || 0) }} {{ $t('blog.items') }}
-          （{{ $t('blog.total') }} {{ blogsData?.total || 0 }} {{ $t('blog.items') }}{{ searchStats.hasSearch ? $t('blog.searchResults') : '' }}）
-        </p>
       </div>
     </UContainer>
   </main>
