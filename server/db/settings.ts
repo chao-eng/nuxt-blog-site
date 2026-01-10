@@ -76,18 +76,30 @@ export function initSettingsTables(): void {
       bucket TEXT DEFAULT '',
       endpoint TEXT DEFAULT '',
       public_url TEXT DEFAULT '',
+      path TEXT DEFAULT '',
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `)
   createS3ConfigTable.run()
+
+  // 检查是否已有 path 列（用于迁移）
+  try {
+    const checkPathColumn = db.prepare('SELECT path FROM s3_config LIMIT 1')
+    checkPathColumn.get()
+  } catch {
+    // 如果列不存在，则添加
+    console.log('⚠️ s3_config 表缺少 path 列，正在添加...')
+    db.prepare("ALTER TABLE s3_config ADD COLUMN path TEXT DEFAULT ''").run()
+    console.log('✅ 已添加 path 列')
+  }
 
   // 检查是否已有配置，如果没有则插入默认记录
   const checkS3Config = db.prepare('SELECT COUNT(*) as count FROM s3_config')
   const s3ConfigResult = checkS3Config.get() as { count: number }
   if (s3ConfigResult.count === 0) {
     const insertS3Config = db.prepare(`
-      INSERT INTO s3_config (enable_s3, access_key_id, secret_access_key, region, bucket, endpoint, public_url)
-      VALUES (0, '', '', '', '', '', '')
+      INSERT INTO s3_config (enable_s3, access_key_id, secret_access_key, region, bucket, endpoint, public_url, path)
+      VALUES (0, '', '', '', '', '', '', '')
     `)
     insertS3Config.run()
     console.log('✅ 已创建 s3_config 表并插入默认配置')
@@ -212,6 +224,7 @@ export const dbS3Config = {
       bucket: string
       endpoint: string
       public_url: string
+      path: string
     }>(sql)
     if (!result) return null
     return {
@@ -221,7 +234,8 @@ export const dbS3Config = {
       region: result.region,
       bucket: result.bucket,
       endpoint: result.endpoint,
-      publicUrl: result.public_url
+      publicUrl: result.public_url,
+      path: result.path || ''
     }
   },
 
@@ -236,6 +250,7 @@ export const dbS3Config = {
     bucket: string
     endpoint: string
     publicUrl: string
+    path: string
   }) => {
     const existingConfig = dbCommon.get<{ id: number }>('SELECT id FROM s3_config LIMIT 1')
     const enableValue = config.enableS3 ? 1 : 0
@@ -243,7 +258,7 @@ export const dbS3Config = {
     if (existingConfig) {
       const sql = `
         UPDATE s3_config 
-        SET enable_s3 = ?, access_key_id = ?, secret_access_key = ?, region = ?, bucket = ?, endpoint = ?, public_url = ?, updated_at = CURRENT_TIMESTAMP 
+        SET enable_s3 = ?, access_key_id = ?, secret_access_key = ?, region = ?, bucket = ?, endpoint = ?, public_url = ?, path = ?, updated_at = CURRENT_TIMESTAMP 
         WHERE id = ?
       `
       return dbCommon.run(sql, [
@@ -254,12 +269,13 @@ export const dbS3Config = {
         config.bucket,
         config.endpoint,
         config.publicUrl,
+        config.path || '',
         existingConfig.id
       ])
     } else {
       const sql = `
-        INSERT INTO s3_config (enable_s3, access_key_id, secret_access_key, region, bucket, endpoint, public_url)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO s3_config (enable_s3, access_key_id, secret_access_key, region, bucket, endpoint, public_url, path)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `
       return dbCommon.run(sql, [
         enableValue,
@@ -268,7 +284,8 @@ export const dbS3Config = {
         config.region,
         config.bucket,
         config.endpoint,
-        config.publicUrl
+        config.publicUrl,
+        config.path || ''
       ])
     }
   }

@@ -18,9 +18,12 @@ export async function uploadToS3(fileData: Buffer, fileName: string, contentType
         forcePathStyle: true
     })
 
+    const s3Path = s3Config.path ? (s3Config.path.endsWith('/') ? s3Config.path : `${s3Config.path}/`) : ''
+    const key = `${s3Path}${fileName}`
+
     const command = new PutObjectCommand({
         Bucket: s3Config.bucket,
-        Key: fileName,
+        Key: key,
         Body: fileData,
         ContentType: contentType
     })
@@ -28,7 +31,7 @@ export async function uploadToS3(fileData: Buffer, fileName: string, contentType
     await client.send(command)
 
     const publicUrl = s3Config.publicUrl.endsWith('/') ? s3Config.publicUrl : `${s3Config.publicUrl}/`
-    return `${publicUrl}${fileName}`
+    return `${publicUrl}${key}`
 }
 
 export async function testS3Connection(config: {

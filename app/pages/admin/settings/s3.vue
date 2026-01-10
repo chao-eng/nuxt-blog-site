@@ -16,6 +16,7 @@ const region = ref('')
 const bucket = ref('')
 const endpoint = ref('')
 const publicUrl = ref('')
+const path = ref('')
 
 const loading = ref(false)
 const saving = ref(false)
@@ -35,6 +36,7 @@ async function loadConfig() {
       bucket.value = config.bucket || ''
       endpoint.value = config.endpoint || ''
       publicUrl.value = config.publicUrl || ''
+      path.value = config.path || ''
     }
   } catch (error: unknown) {
     toast.add({
@@ -71,7 +73,8 @@ async function saveConfig() {
         region: region.value,
         bucket: bucket.value,
         endpoint: endpoint.value,
-        publicUrl: publicUrl.value
+        publicUrl: publicUrl.value,
+        path: path.value
       }
     })
 
@@ -178,6 +181,10 @@ onMounted(() => {
 
             <UFormField :label="t('admin.set.s3.publicUrl')" required class="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-center gap-4">
               <UInput v-model="publicUrl" :placeholder="t('admin.set.s3.publicUrlPlaceholder')" class="w-full" />
+            </UFormField>
+
+            <UFormField :label="t('admin.set.s3.path')" class="grid grid-cols-1 sm:grid-cols-[200px_1fr] items-center gap-4">
+              <UInput v-model="path" :placeholder="t('admin.set.s3.pathPlaceholder')" class="w-full" />
             </UFormField>
           </div>
         </div>
