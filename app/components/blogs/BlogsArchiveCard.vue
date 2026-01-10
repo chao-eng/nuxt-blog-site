@@ -50,7 +50,8 @@ const formatDate = (dateString: string) => {
 
 // 计算是否有有效图片
 const hasImage = computed(() => {
-  return props.image && props.image !== '' && props.image !== '/not-found.jpg'
+  // 始终返回 true，因为我们有默认图兜底
+  return true
 })
 </script>
 
@@ -68,7 +69,7 @@ const hasImage = computed(() => {
         <div v-if="hasImage" class="flex-shrink-0">
           <div class="w-28 h-20 sm:w-32 sm:h-24 rounded-md overflow-hidden bg-gray-100 dark:bg-gray-700">
             <img
-              :src="image"
+              :src="image && image !== '' ? image : '/not-found.webp'"
               :alt="alt"
               class="w-full h-full object-cover group-hover:brightness-105 transition-all duration-300"
             >

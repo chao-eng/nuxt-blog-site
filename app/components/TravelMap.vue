@@ -378,7 +378,7 @@ onUnmounted(() => {
 <style scoped>
 .travel-map-container {
   width: 100%;
-  padding: 40px 0;
+  padding: 0; /* 移除外层内边距 */
 }
 
 .map-wrapper {
@@ -386,16 +386,18 @@ onUnmounted(() => {
   width: 100%;
 }
 
-/* 核心修改 1: 地图容器样式
-  增加 border-radius 和 overflow: hidden
-*/
 .chart-wrapper {
   width: 100%;
-  height: 600px;
+  height: 650px; /* 稍微增加高度，在独立页面效果更佳 */
   min-height: 500px;
-  border-radius: 24px; /* 大圆角 */
-  overflow: hidden;    /* 关键：防止地图 Canvas 溢出圆角 */
+  border-radius: 24px;
+  overflow: hidden;
   transition: all 0.3s ease;
+  border: 1px solid rgba(229, 231, 235, 0.5); /* 增加浅浅的边框增强质感 */
+}
+
+.dark .chart-wrapper {
+  border-color: rgba(75, 85, 99, 0.3);
 }
 
 /* 核心修改 2: 加载和错误状态容器

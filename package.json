@@ -11,6 +11,7 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.965.0",
     "@giscus/vue": "^3.1.1",
     "@iconify-json/lucide": "^1.2.71",
     "@iconify-json/simple-icons": "^1.2.55",
@@ -20,8 +21,6 @@
     "@sidebase/nuxt-auth": "^1.1.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/markdown-it": "^14.1.2",
-    "@unovis/ts": "^1.6.1",
-    "@unovis/vue": "^1.6.1",
     "@vueuse/nuxt": "^13.9.0",
     "better-sqlite3": "^12.4.1",
     "date-fns": "^4.1.0",
@@ -32,11 +31,11 @@
     "jsonwebtoken": "^9.0.2",
     "markdown-it": "^14.1.0",
     "nuxt": "^4.2.0",
+    "sharp": "^0.34.5",
     "vditor": "^3.11.2",
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@iconify-json/mdi": "^1.2.3",
     "@nuxt/eslint": "^1.10.0",
     "@types/better-sqlite3": "^7.6.13",
     "@types/js-yaml": "^4.0.9",

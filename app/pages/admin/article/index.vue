@@ -150,7 +150,7 @@ watch(newArticlePath, () => {
     :max-size="30"
     resizable
   >
-    <UDashboardNavbar :title="t('admin.art.title')">
+    <UDashboardNavbar :title="t('admin.articles')">
       <!-- 左侧插槽：侧边栏折叠按钮 -->
       <template #leading>
         <UDashboardSidebarCollapse />

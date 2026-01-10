@@ -49,8 +49,6 @@ export default defineNuxtConfig({
         '/api/auth/login',
         '/api/notifications',
         '/api/_nuxt_icon/*',
-        '/api/blogs/recent',
-        '/api/blogs/sticky',
         '/api/blogs/all',
         '/api/blogs/content',
         '/api/blogs/tags',

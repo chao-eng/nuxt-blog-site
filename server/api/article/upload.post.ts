@@ -2,6 +2,8 @@ import { promises as fs } from 'fs'
 import { join, resolve, relative } from 'path'
 import { randomUUID } from 'crypto'
 import type { Result } from '~/types'
+import { uploadToS3 } from '../../utils/s3'
+import sharp from 'sharp'
 
 export default defineEventHandler(async (event): Promise<Result<unknown>> => {
   try {
@@ -95,13 +97,42 @@ export default defineEventHandler(async (event): Promise<Result<unknown>> => {
       }
     }
 
-    // 生成唯一文件名
-    const fileExtension = file.filename?.split('.').pop() || 'jpg'
-    const uniqueFilename = `${randomUUID()}.${fileExtension}`
+    // 生成唯一文件名 (统一改为 .webp)
+    const uniqueFilename = `${randomUUID()}.webp`
+
+    // 使用 sharp 进行自动压缩和 WebP 转换
+    let processedBuffer = file.data
+    try {
+      processedBuffer = await sharp(file.data)
+        .webp({ quality: 80 }) // 转换为 WebP，质量设为 80%
+        .toBuffer()
+      console.log(`✅ 图片已处理: ${file.filename} -> ${uniqueFilename}, 压缩前: ${file.data.length}B, 压缩后: ${processedBuffer.length}B`)
+    } catch (e) {
+      console.error('❌ Sharp 处理图片失败，将使用原始文件:', e)
+    }
+
+    // 尝试上传到 S3
+    const s3Url = await uploadToS3(processedBuffer, uniqueFilename, 'image/webp')
+
+    if (s3Url) {
+      return {
+        success: true,
+        err: '',
+        data: {
+          originalName: file.filename,
+          filename: uniqueFilename,
+          url: s3Url,
+          path: uploadPath,
+          size: processedBuffer.length,
+          type: 'image/webp'
+        }
+      }
+    }
+
     const filePath = join(fullUploadDir, uniqueFilename)
 
     // 保存文件到指定路径
-    await fs.writeFile(filePath, file.data)
+    await fs.writeFile(filePath, processedBuffer)
 
     // 构建访问 URL
     const pathValue = `${uploadPath}/${uniqueFilename}`.replace(/\/+/g, '/')
@@ -114,8 +145,8 @@ export default defineEventHandler(async (event): Promise<Result<unknown>> => {
       url: accessUrl,
       path: uploadPath,
       fullPath: filePath,
-      size: file.data.length,
-      type: file.type
+      size: processedBuffer.length,
+      type: 'image/webp'
     }
 
     return {

@@ -28,7 +28,7 @@ useHead({
           <!-- 头像和基本信息 -->
           <div class="text-center space-y-6">
             <img
-              src="/logo.png"
+              src="/logo.webp"
               :alt="aboutPage.title"
               class="w-24 h-24 mx-auto rounded-full object-cover ring-4 ring-gray-100 dark:ring-gray-700"
             >

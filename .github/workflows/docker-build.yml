@@ -2,7 +2,7 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "master" ]  # 监听 master 和 latest_branch 分支的提交
+    branches: [ "latest_branch" ]  # 监听 master 和 latest_branch 分支的提交
     # tags: [ "v*" ]      # (可选) 也可以配置打 tag 时触发
   workflow_dispatch:  # 允许手动触发构建
 
