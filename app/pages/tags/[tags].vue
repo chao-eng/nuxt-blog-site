@@ -128,7 +128,7 @@ useHead({
         </p>
       </div>
 
-      <div class="bg-gradient-to-br from-orange-50/50 via-white to-rose-50/30 dark:bg-none bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <!-- 筛选控制区域 -->
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
           <div class="space-y-4">
