@@ -46,9 +46,13 @@ const links = computed(() => [[{
     </template>
 
     <template #body>
-      <div class="flex flex-col gap-4 sm:gap-6 lg:gap-12 w-full lg:max-w-2xl mx-auto">
+      <div class="flex flex-col gap-4 sm:gap-6 lg:gap-12 w-full lg:max-w-4xl mx-auto px-4">
         <NuxtPage />
       </div>
     </template>
   </UDashboardPanel>
 </template>
+
+<style scoped>
+/* 已完全恢复至原始版本，仅将内容宽度调整为 4xl 并修正了间距 */
+</style>

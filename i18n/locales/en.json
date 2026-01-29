@@ -9,6 +9,8 @@
         "loading": "Loading..."
     },
     "admin": {
+        "adminSystemTitle": "Bujidao's Blog",
+        "adminConsole": "Admin Console",
         "dashboard": "Dashboard",
         "articles": "Articles",
         "travel": "Travel",
@@ -352,6 +354,12 @@
         "loginSuccess": "Login Successful",
         "loginFailed": "Login Failed",
         "welcome": "Welcome back!",
+        "welcomeBack": "Welcome Back",
+        "enterCredentials": "Please enter your login credentials",
+        "secure": "Secure & Reliable",
+        "fast": "Fast Performance",
+        "friendly": "Easy to Use",
+        "poweredBy": "Powered by",
         "validation": {
             "usernameRequired": "Please enter username",
             "usernameMin": "Username must be at least 3 characters",

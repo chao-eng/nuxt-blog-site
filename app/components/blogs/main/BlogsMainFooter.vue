@@ -71,8 +71,8 @@ const { data: umamiStats } = await useFetch<any>('/api/umami/stats', {
 </script>
 
 <template>
-  <footer class=" border-t border-gray-200/20 dark:border-gray-700/30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm mt-auto">
-    <UContainer class="max-w-6xl py-6">
+  <footer class="footer-modern">
+    <UContainer class="max-w-6xl py-8"
       <!-- 主要内容区 -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <!-- 左侧信息 -->
@@ -194,3 +194,20 @@ const { data: umamiStats } = await useFetch<any>('/api/umami/stats', {
     </UContainer>
   </footer>
 </template>
+
+<style scoped>
+.footer-modern {
+  margin-top: auto;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.dark .footer-modern {
+  border-top-color: rgba(255, 255, 255, 0.1);
+  background: rgba(9, 9, 11, 0.8);
+  box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+</style>

@@ -34,6 +34,8 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const isVisible = ref(true)
 
+const { t } = useI18n()
+
 // 悬停交互相关
 const hoveredCity = ref<TravelCity | null>(null)
 const popoverPosition = ref({ x: 0, y: 0 })
@@ -104,15 +106,15 @@ const isDarkMode = () => {
 const getThemeColors = () => {
   const dark = isDarkMode()
   return {
-    areaColor: dark ? '#1f2937' : '#f9fafb',
-    areaEmphasisColor: dark ? '#374151' : '#f3f4f6',
-    borderColor: dark ? '#4b5563' : '#d1d5db',
-    labelColor: dark ? '#e5e7eb' : '#374151',
-    labelBgColor: dark ? 'rgba(31, 41, 55, 0.9)' : 'rgba(255, 255, 255, 0.8)',
-    markerColor: dark ? '#60a5fa' : '#3b82f6',
-    markerEmphasisColor: dark ? '#3b82f6' : '#2563eb',
-    markerShadowColor: dark ? 'rgba(96, 165, 250, 0.5)' : 'rgba(59, 130, 246, 0.5)',
-    markerEmphasisShadowColor: dark ? 'rgba(59, 130, 246, 0.8)' : 'rgba(37, 99, 235, 0.8)'
+    areaColor: dark ? '#0f172a' : '#f1f5f9',
+    areaEmphasisColor: dark ? '#1e293b' : '#e2e8f0',
+    borderColor: dark ? '#334155' : '#cbd5e1',
+    labelColor: dark ? '#94a3b8' : '#64748b',
+    labelBgColor: dark ? '#1e293b' : '#ffffff',
+    markerColor: '#4f46e5',
+    markerEmphasisColor: '#8b5cf6',
+    markerShadowColor: 'rgba(79, 70, 229, 0.4)',
+    markerEmphasisShadowColor: 'rgba(139, 92, 246, 0.6)'
   }
 }
 
@@ -133,7 +135,6 @@ async function initMap() {
       throw new Error(mapResponse.error || 'Failed to load map data')
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     echarts.registerMap('china', mapResponse.data as any)
 
     loading.value = false
@@ -146,16 +147,6 @@ async function initMap() {
 
     const option: echarts.EChartsOption = {
       backgroundColor: 'transparent',
-      title: {
-        text: '',
-        left: 'center',
-        top: '20',
-        textStyle: {
-          color: colors.labelColor,
-          fontSize: 24,
-          fontWeight: 'bold'
-        }
-      },
       tooltip: { show: false },
       geo: {
         map: 'china',
@@ -165,14 +156,18 @@ async function initMap() {
         label: { show: false },
         emphasis: {
           label: { show: false },
-          itemStyle: { areaColor: colors.areaEmphasisColor }
+          itemStyle: { 
+            areaColor: colors.areaEmphasisColor,
+            borderColor: '#4f46e5',
+            borderWidth: 1.2
+          }
         },
         itemStyle: {
           areaColor: colors.areaColor,
           borderColor: colors.borderColor,
-          borderWidth: 1,
-          shadowColor: isDarkMode() ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)',
-          shadowBlur: 10
+          borderWidth: 0.8,
+          shadowColor: 'rgba(0, 0, 0, 0.05)',
+          shadowBlur: 5
         }
       },
       series: [
@@ -181,18 +176,20 @@ async function initMap() {
           type: 'scatter',
           coordinateSystem: 'geo',
           data: travelCities.value,
-          symbolSize: 16,
+          symbolSize: 12,
           cursor: 'pointer',
           label: {
             show: true,
             formatter: '{b}',
             position: 'right',
             color: colors.labelColor,
-            fontSize: 13,
+            fontSize: 10,
             fontWeight: 'bold',
             backgroundColor: colors.labelBgColor,
             padding: [4, 8],
-            borderRadius: 4
+            borderRadius: 6,
+            borderWidth: 1,
+            borderColor: colors.borderColor
           },
           itemStyle: {
             color: colors.markerColor,
@@ -212,9 +209,11 @@ async function initMap() {
           type: 'effectScatter',
           coordinateSystem: 'geo',
           data: travelCities.value,
-          symbolSize: 16,
-          rippleEffect: { brushType: 'stroke', scale: 3, period: 4 },
-          itemStyle: { color: colors.markerColor },
+          symbolSize: 12,
+          rippleEffect: { brushType: 'stroke', scale: 3.5, period: 4 },
+          itemStyle: { 
+            color: colors.markerColor
+          },
           zlevel: 1
         }
       ]
@@ -230,7 +229,7 @@ async function initMap() {
         currentPhotoIndex.value = 0
         const event = p.event?.event as MouseEvent
         if (event) {
-          popoverPosition.value = { x: event.clientX + 15, y: event.clientY - 10 }
+          popoverPosition.value = { x: event.clientX + 20, y: event.clientY }
         }
         showPopover.value = true
       }
@@ -247,26 +246,20 @@ async function initMap() {
       if (chartInstance) {
         const newColors = getThemeColors()
         chartInstance.setOption({
-          title: { textStyle: { color: newColors.labelColor } },
           geo: {
-            label: { color: newColors.labelColor },
-            emphasis: { itemStyle: { areaColor: newColors.areaEmphasisColor } },
             itemStyle: {
               areaColor: newColors.areaColor,
-              borderColor: newColors.borderColor,
-              shadowColor: isDarkMode() ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.1)'
+              borderColor: newColors.borderColor
             }
           },
           series: [
             {
               label: {
                 color: newColors.labelColor,
-                backgroundColor: newColors.labelBgColor
-              },
-              itemStyle: { color: newColors.markerColor },
-              emphasis: { itemStyle: { color: newColors.markerEmphasisColor } }
-            },
-            { itemStyle: { color: newColors.markerColor } }
+                backgroundColor: newColors.labelBgColor,
+                borderColor: newColors.borderColor
+              }
+            }
           ]
         })
       }
@@ -290,84 +283,92 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-if="isVisible" class="travel-map-container">
-    <div v-if="loading" class="loading-container">
-      <div class="loading-spinner" />
-      <p class="loading-text">
-        加载地图中...
+  <div v-if="isVisible" class="travel-map-container animate-in">
+    <div v-if="loading" class="travel-loading-glass">
+      <div class="spinner-container">
+        <div class="cyber-spinner" />
+      </div>
+      <p class="loading-text uppercase tracking-widest text-[10px] font-bold text-slate-400">
+        {{ t('nav.loading') }}
       </p>
     </div>
+    
     <div v-else-if="error" class="error-container">
-      <p class="error-text">
+      <p class="text-red-500 font-bold text-sm">
         {{ error }}
       </p>
     </div>
-    <div v-else class="map-wrapper">
-      <div ref="chartContainer" class="shadow-lg chart-wrapper bg-white/50 dark:bg-slate-800/50" />
 
-      <Transition name="popover-fade">
+    <div v-else class="map-wrapper relative">
+      <div ref="chartContainer" class="chart-wrapper-main" />
+
+      <!-- 足迹浮窗 -->
+      <Transition name="popover-clean">
         <div
           v-if="showPopover && hoveredCity"
-          class="city-popover"
+          class="city-popover-clean"
           :style="{ left: `${popoverPosition.x}px`, top: `${popoverPosition.y}px` }"
           @mouseenter="keepPopover"
           @mouseleave="hidePopover"
         >
-          <div class="popover-content">
-            <div class="popover-header">
+          <div class="popover-card shadow-xl">
+            <!-- 头部 -->
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                <UIcon name="i-lucide-map-pin" class="w-5 h-5 text-indigo-600" />
+              </div>
               <div>
-                <h3 class="popover-city-name">
-                  {{ hoveredCity.name }}
-                </h3>
-                <p class="popover-city-time">
-                  {{ hoveredCity.time }}
-                </p>
+                <h3 class="text-slate-900 dark:text-white font-black text-lg leading-tight">{{ hoveredCity.name }}</h3>
+                <span class="text-xs font-bold text-slate-400 tracking-wider">{{ hoveredCity.time }}</span>
               </div>
             </div>
-            <p class="popover-description">
-              {{ hoveredCity.description }}
-            </p>
 
-            <div v-if="hoveredCity.photos && hoveredCity.photos.length > 0" class="popover-photos">
-              <div class="photo-preview-wrapper">
-                <div class="photo-preview">
+            <!-- 描述 -->
+            <div class="description-area mb-4">
+              <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300 font-medium">
+                {{ hoveredCity.description }}
+              </p>
+            </div>
+
+            <!-- 图片 -->
+            <div v-if="hoveredCity.photos && hoveredCity.photos.length > 0" class="photo-area mb-4 relative group">
+              <div class="aspect-video rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
+                <Transition name="fade-fast" mode="out-in">
                   <img
+                    :key="currentPhotoIndex"
                     :src="hoveredCity.photos[currentPhotoIndex]"
-                    class="preview-image"
+                    class="w-full h-full object-cover"
+                    @error="(e: any) => e.target.style.display = 'none'"
                   >
-                </div>
-                <div v-if="hoveredCity.photos.length > 1" class="photo-controls">
-                  <button class="photo-nav-btn" @click.stop="prevPhoto">
+                </Transition>
+                
+                <!-- 切换 -->
+                <div v-if="hoveredCity.photos.length > 1" class="absolute inset-0 flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button class="nav-btn" @click.stop="prevPhoto">
                     <UIcon name="i-lucide-chevron-left" class="w-4 h-4" />
                   </button>
-                  <button class="photo-nav-btn" @click.stop="nextPhoto">
+                  <button class="nav-btn" @click.stop="nextPhoto">
                     <UIcon name="i-lucide-chevron-right" class="w-4 h-4" />
                   </button>
                 </div>
-                <div v-if="hoveredCity.photos.length > 1" class="photo-indicators">
-                  <div
-                    v-for="(_, idx) in hoveredCity.photos"
-                    :key="idx"
-                    class="photo-indicator"
-                    :class="{ active: idx === currentPhotoIndex }"
-                  />
-                </div>
               </div>
             </div>
 
+            <!-- 底部 -->
             <UButton
               v-if="hoveredCity.articleLink"
               :to="hoveredCity.articleLink"
               target="_blank"
-              label="查看文章"
-              icon="i-lucide-arrow-right"
-              trailing
               color="primary"
-              variant="soft"
-              size="xs"
+              variant="solid"
               block
-              class="mt-3 rounded-xl"
-            />
+              class="rounded-xl font-bold py-2.5 shadow-lg shadow-primary-500/20"
+            >
+              {{ t('nav.articles') === '文章' ? '查看游记' : 'SEE ARTICLE' }}
+              <template #trailing>
+                <UIcon name="i-lucide-arrow-right" class="w-4 h-4" />
+              </template>
+            </UButton>
           </div>
         </div>
       </Transition>
@@ -378,230 +379,77 @@ onUnmounted(() => {
 <style scoped>
 .travel-map-container {
   width: 100%;
-  padding: 0; /* 移除外层内边距 */
+  background: white;
+  border-radius: 2rem;
 }
 
-.map-wrapper {
-  position: relative;
-  width: 100%;
-}
+.dark .travel-map-container { background: #020617; }
 
-.chart-wrapper {
-  width: 100%;
-  height: 650px; /* 稍微增加高度，在独立页面效果更佳 */
-  min-height: 500px;
-  border-radius: 24px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(229, 231, 235, 0.5); /* 增加浅浅的边框增强质感 */
-}
-
-.dark .chart-wrapper {
-  border-color: rgba(75, 85, 99, 0.3);
-}
-
-/* 核心修改 2: 加载和错误状态容器
-  同样增加圆角和背景，保持视觉一致性
-*/
-.loading-container,
-.error-container {
-  width: 100%;
+.travel-loading-glass {
   height: 600px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  border-radius: 24px; /* 保持一致的大圆角 */
-  background-color: rgba(255, 255, 255, 0.5); /* 浅色背景 */
-  backdrop-filter: blur(8px); /* 可选：毛玻璃效果 */
+  gap: 1.5rem;
 }
 
-.dark .loading-container,
-.dark .error-container {
-  background-color: rgba(31, 41, 55, 0.3); /* 深色背景 */
-}
-
-.loading-spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid #e5e7eb;
-  border-top-color: #3b82f6;
+.spinner-container {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #4f46e5;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+.chart-wrapper-main { width: 100%; height: 650px; }
 
-.loading-text { color: #6b7280; font-size: 16px; }
-.error-text { color: #ef4444; font-size: 16px; }
-
-/* 悬浮弹窗相关样式 (保持圆角风格) */
-.city-popover {
+.city-popover-clean {
   position: fixed;
-  z-index: 1000;
-  max-width: 320px;
+  z-index: 9999;
+  width: 320px;
   pointer-events: auto;
   transform: translateY(-50%);
 }
 
-.popover-content {
+.popover-card {
   background: white;
-  border-radius: 24px;
-  padding: 20px;
-  box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
-  border: none;
-  backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #f1f5f9;
+  border-radius: 1.75rem;
+  padding: 1.25rem;
 }
 
-.dark .popover-content {
-  background: rgba(17, 24, 39, 0.95);
-  border: 1px solid rgba(75, 85, 99, 0.3);
-  box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.5),
-    0 10px 10px -5px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+.dark .popover-card {
+  background: #1e293b;
+  border-color: #334155;
 }
 
-.popover-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
-}
-.dark .popover-header { border-bottom-color: rgba(75, 85, 99, 0.3); }
-
-.popover-city-name {
-  font-size: 20px;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 4px;
-  line-height: 1.3;
-}
-.dark .popover-city-name { color: #f9fafb; }
-
-.popover-city-time {
-  font-size: 13px;
-  color: #6b7280;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.popover-city-time::before { content: "📅"; font-size: 12px; }
-.dark .popover-city-time { color: #d1d5db; }
-
-.popover-description {
-  font-size: 14px;
-  line-height: 1.7;
-  color: #374151;
-  margin-bottom: 16px;
-  padding: 12px;
-  background: rgba(249, 250, 251, 0.8);
-  border-radius: 16px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  font-weight: 400;
-}
-.dark .popover-description { color: #e5e7eb; background: rgba(31, 41, 55, 0.4); }
-
-.popover-photos { margin-bottom: 4px; position: relative; }
-
-.photo-preview {
-  aspect-ratio: 16/9;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #f3f4f6;
-  position: relative;
-}
-.dark .photo-preview { background: #374151; }
-
-.preview-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-.photo-preview:hover .preview-image { transform: scale(1.05); }
-
-.photo-preview-wrapper { position: relative; }
-
-.photo-controls {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  display: flex;
-  justify-content: space-between;
-  padding: 0 8px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-}
-.photo-preview-wrapper:hover .photo-controls { opacity: 1; pointer-events: auto; }
-
-.photo-nav-btn {
+.nav-btn {
+  width: 28px;
+  height: 28px;
   background: rgba(255, 255, 255, 0.9);
-  border: none;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-.dark .photo-nav-btn { background: rgba(31, 41, 55, 0.9); }
-.photo-nav-btn:hover { transform: scale(1.1); background: #fff; }
-.dark .photo-nav-btn:hover { background: #374151; }
-.photo-nav-btn:active { transform: scale(0.95); }
-
-.photo-indicators {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 6px;
-  z-index: 10;
-}
-.photo-indicator {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-.photo-indicator.active {
-  background: rgba(255, 255, 255, 0.95);
-  width: 18px;
-  border-radius: 999px;
+  color: #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.popover-fade-enter-active, .popover-fade-leave-active { transition: all 0.2s ease; }
-.popover-fade-enter-from { opacity: 0; transform: translateY(-50%) scale(0.95); }
-.popover-fade-leave-to { opacity: 0; transform: translateY(-50%) scale(0.98); }
-.popover-fade-enter-to, .popover-fade-leave-from { opacity: 1; transform: translateY(-50%) scale(1); }
+.popover-clean-enter-active, .popover-clean-leave-active {
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+.popover-clean-enter-from { opacity: 0; transform: translateY(-40%) scale(0.95); }
+.popover-clean-leave-to { opacity: 0; transform: translateY(-60%) scale(0.95); }
+
+.fade-fast-enter-active, .fade-fast-leave-active { transition: opacity 0.2s ease; }
+.fade-fast-enter-from, .fade-fast-leave-to { opacity: 0; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 768px) {
-  .chart-wrapper, .loading-container, .error-container { height: 400px; }
-  .city-popover { max-width: 280px; }
-  .popover-content { padding: 12px; }
-  .popover-city-name { font-size: 16px; }
-  .popover-description { font-size: 12px; -webkit-line-clamp: 2; line-clamp: 2; }
+  .chart-wrapper-main { height: 400px; }
+  .city-popover-clean { width: 280px; }
 }
 </style>

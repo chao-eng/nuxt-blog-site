@@ -149,164 +149,297 @@ watch(newArticlePath, () => {
     :min-size="20"
     :max-size="30"
     resizable
+    class="article-sidebar"
   >
-    <UDashboardNavbar :title="t('admin.articles')">
+    <UDashboardNavbar class="navbar-modern">
       <!-- 左侧插槽：侧边栏折叠按钮 -->
       <template #leading>
-        <UDashboardSidebarCollapse />
+        <div class="flex items-center gap-2">
+          <UDashboardSidebarCollapse />
+          <div class="flex items-center gap-2.5 ml-1">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center shadow-inner">
+               <UIcon name="i-lucide-library" class="w-4 h-4 text-indigo-500" />
+            </div>
+            <span class="text-base font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+              {{ t('admin.articles') }}
+            </span>
+          </div>
+        </div>
       </template>
 
       <template #right>
-        <UTooltip :text="t('admin.art.rebuildIndex')">
-          <UButton
-            icon="i-lucide-database-backup"
-            color="neutral"
-            variant="ghost"
-            @click="rebuildIndex"
-          />
-        </UTooltip>
-        <UTooltip :text="t('admin.art.refreshList')">
-          <UButton
-            icon="i-lucide-refresh-ccw"
-            color="neutral"
-            variant="ghost"
-            @click="refreshArticle"
-          />
-        </UTooltip>
-        <UTooltip :text="t('admin.art.newArticle')">
+        <div class="flex items-center gap-1.5 px-2">
+          <UTooltip :text="t('admin.art.rebuildIndex')">
+            <UButton
+              icon="i-lucide-database-backup"
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              class="toolbar-btn rounded-xl"
+              @click="rebuildIndex"
+            />
+          </UTooltip>
+          <UTooltip :text="t('admin.art.refreshList')">
+            <UButton
+              icon="i-lucide-refresh-ccw"
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              class="toolbar-btn rounded-xl"
+              @click="refreshArticle"
+            />
+          </UTooltip>
+          <div class="w-px h-4 bg-gray-200 dark:bg-gray-800 mx-1" />
           <UButton
             icon="i-lucide-plus"
-            color="neutral"
-            variant="ghost"
+            color="primary"
+            variant="solid"
+            size="sm"
+            class="action-btn-glow rounded-xl px-3"
             @click="openCreateModal"
           />
-        </UTooltip>
+        </div>
       </template>
     </UDashboardNavbar>
 
     <!-- 文章列表组件 -->
-    <ArticleList v-model="selectedArticle" :articles="articleLst" />
+    <ArticleList v-model="selectedArticle" :articles="articleLst" class="article-list-container" />
   </UDashboardPanel>
 
   <!-- 文章详情组件 -->
   <ArticleContent v-if="selectedArticle" :article="selectedArticle" @close="selectedArticle = null" />
-  <div v-else class="hidden lg:flex flex-1 items-center justify-center">
-    <UIcon name="i-lucide-inbox" class="size-32 text-dimmed" />
+  <div v-else class="hidden lg:flex flex-1 items-center justify-center bg-gray-50/50 dark:bg-black/20">
+    <div class="empty-state">
+      <div class="empty-icon-pulse">
+        <Icon name="i-lucide-scroll-text" class="w-12 h-12 text-primary-500/50" />
+      </div>
+      <p class="mt-4 text-sm text-gray-400 font-medium tracking-wider">{{ t('admin.art.selectToView') || '选择一篇文章开始编辑' }}</p>
+    </div>
   </div>
 
   <!-- 新增文章 Modal -->
   <UModal
-    :open="isCreateModalOpen"
-    :title="t('admin.art.newArticle')"
-    :description="t('admin.art.setPath')"
+    v-model:open="isCreateModalOpen"
+    :dismissible="false"
+    :ui="{
+      content: 'sm:max-w-lg overflow-hidden rounded-3xl border border-white/20 shadow-2xl backdrop-blur-xl bg-white/95 dark:bg-gray-950/95'
+    }"
   >
-    <template #content>
-      <div class="p-8 space-y-6">
-        <!-- 标题区域 -->
-        <div class="text-center space-y-2">
-          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+    <template #header>
+      <div class="flex items-center gap-4 p-2">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary-500/10 border border-primary-500/20 shadow-lg shadow-primary-500/5">
+          <Icon name="i-lucide-file-plus-2" class="w-7 h-7 text-primary-500" />
+        </div>
+        <div>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white">
             {{ t('admin.art.createNew') }}
           </h3>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
+          <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
             {{ t('admin.art.setPath') }}
           </p>
         </div>
+      </div>
+    </template>
 
-        <!-- 输入区域 - 修改为一行布局 -->
-        <div class="space-y-4">
-          <div class="space-y-3">
-            <!-- 标签和输入框放在一行 -->
-            <div class="flex items-center gap-4">
-              <label class="text-sm font-semibold text-gray-900 dark:text-white whitespace-nowrap">
-                {{ t('admin.art.articlePath') }}
-                <span class="text-red-500">*</span>
-              </label>
+    <template #body>
+      <div class="modal-cyber-glow">
+        <!-- 装饰背景 -->
+        <div class="modal-bg-pattern" />
 
-              <div class="relative flex-1">
-                <UInput
-                  ref="pathInputRef"
-                  v-model="newArticlePath"
-                  class="transition-all duration-200 w-full"
-                  :class="{
-                    'ring-red-500 border-red-500 focus:ring-red-500': createError,
-                    'ring-green-500 border-green-500': newArticlePath.trim() && !createError
-                  }"
-                  @keyup.enter="createArticle"
-                  @keyup.escape="closeCreateModal"
-                />
-                <!-- 输入状态指示器 -->
-                <div class="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <UIcon
-                    v-if="newArticlePath.trim() && !createError"
-                    name="i-heroicons-check-circle"
-                    class="w-5 h-5 text-green-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- 规则提示 -->
-            <div class="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <UIcon name="i-heroicons-information-circle" class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" />
-              <div class="text-xs text-blue-700 dark:text-blue-300 space-y-1">
-                <p class="font-medium">
-                  {{ t('admin.art.pathRules') }}
-                </p>
-                <ul class="list-disc list-inside space-y-0.5 text-blue-600 dark:text-blue-400">
-                  <li>{{ t('admin.art.rule1') }}</li>
-                  <li>{{ t('admin.art.rule2') }}</li>
-                  <li>{{ t('admin.art.rule3') }}</li>
-                </ul>
-              </div>
+        <div class="space-y-6 relative z-10">
+          <div class="form-group">
+            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">
+              {{ t('admin.art.articlePath') }}
+            </label>
+            <div class="relative group">
+              <UInput
+                ref="pathInputRef"
+                v-model="newArticlePath"
+                placeholder="example-article-path"
+                size="xl"
+                variant="none"
+                class="cyber-input"
+                :class="{ 'input-error': createError }"
+                @keyup.enter="createArticle"
+              />
+              <div class="input-glow" />
             </div>
           </div>
 
-          <!-- 错误提示 -->
-          <div
-            v-if="createError"
-            class="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
-          >
-            <div class="flex items-center gap-2">
-              <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 text-red-500" />
-              <span class="text-sm font-medium text-red-800 dark:text-red-200">{{ createError }}</span>
+          <!-- 规则卡片 -->
+          <div class="rule-card">
+            <div class="flex items-center gap-2 mb-3">
+              <Icon name="i-lucide-shield-info" class="w-4 h-4 text-primary-500" />
+              <span class="text-[10px] font-black text-primary-500 tracking-wider uppercase">{{ t('admin.art.pathRules') }}</span>
             </div>
+            <ul class="space-y-2">
+              <li v-for="i in [1,2,3]" :key="i" class="flex items-start gap-2">
+                <Icon name="i-lucide-check-circle-2" class="w-3.5 h-3.5 text-green-500 mt-0.5" />
+                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">{{ t(`admin.art.rule${i}`) }}</span>
+              </li>
+            </ul>
           </div>
 
-          <!-- 成功预提示 -->
-          <div
-            v-if="newArticlePath.trim() && !createError"
-            class="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
-          >
-            <div class="flex items-center gap-2">
-              <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-green-500" />
-              <span class="text-sm text-green-800 dark:text-green-200">{{ t('admin.art.validPath') }}</span>
+          <!-- 错误区域 -->
+          <Transition name="fade-slide">
+            <div v-if="createError" class="error-alert">
+              <Icon name="i-lucide-alert-circle" class="w-4 h-4" />
+              <span class="font-bold">{{ createError }}</span>
             </div>
-          </div>
+          </Transition>
         </div>
+      </div>
+    </template>
 
-        <!-- 按钮组 -->
-        <div class="flex gap-3 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <UButton
-            color="neutral"
-            variant="ghost"
-            :disabled="isCreating"
-            class="flex-1 justify-center transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-            @click="closeCreateModal"
-          >
-            <UIcon name="i-heroicons-x-mark" class="w-4 h-4 mr-2" />
-            {{ t('admin.art.cancel') }}
-          </UButton>
-          <UButton
-            :loading="isCreating"
-            :disabled="!newArticlePath.trim() || !!createError"
-            class="flex-1 justify-center bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40"
-            @click="createArticle"
-          >
-            <UIcon v-if="!isCreating" name="i-heroicons-plus" class="w-4 h-4 mr-2" />
-            {{ isCreating ? t('admin.art.creating') : t('admin.art.create') }}
-          </UButton>
-        </div>
+    <template #footer>
+      <div class="flex gap-4 w-full">
+        <UButton
+          color="neutral"
+          variant="subtle"
+          class="flex-1 h-12 rounded-xl font-bold uppercase tracking-widest transition-all"
+          @click="closeCreateModal"
+        >
+          {{ t('admin.art.cancel') }}
+        </UButton>
+        <UButton
+          color="primary"
+          :loading="isCreating"
+          :disabled="!newArticlePath.trim() || !!createError"
+          class="flex-1 h-12 rounded-xl font-bold uppercase tracking-widest action-btn-glow"
+          @click="createArticle"
+        >
+          {{ isCreating ? t('admin.art.creating') : t('admin.art.create') }}
+        </UButton>
       </div>
     </template>
   </UModal>
 </template>
+
+<style scoped>
+/* ===== 布局与面板样式 ===== */
+.article-sidebar {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark .article-sidebar {
+  background: rgba(10, 10, 15, 0.4);
+  border-right-color: rgba(255, 255, 255, 0.05);
+}
+
+.navbar-modern {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.dark .navbar-modern {
+  border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* ===== 按钮特效 ===== */
+.toolbar-btn {
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.toolbar-btn:hover {
+  opacity: 1;
+  background: rgba(99, 102, 241, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+.action-btn-glow {
+  background: linear-gradient(135deg, #6366f1, #a855f7) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.action-btn-glow:hover {
+  transform: scale(1.05) translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.6) !important;
+}
+
+/* ===== 空状态动画 ===== */
+.empty-state {
+  text-align: center;
+  animation: fadeIn 1s ease-out;
+}
+
+.empty-icon-pulse {
+  display: inline-flex;
+  padding: 2rem;
+  border-radius: 3rem;
+  background: rgba(99, 102, 241, 0.05);
+  animation: pulse-glow 3s infinite ease-in-out;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+/* ===== Modal 极客样式 ===== */
+.modal-cyber-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-bg-pattern {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+  filter: blur(20px);
+  z-index: 0;
+}
+
+.cyber-input :deep(input) {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border: 1.5px solid rgba(0, 0, 0, 0.05);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+}
+
+.dark .cyber-input :deep(input) {
+  background: rgba(15, 23, 42, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.cyber-input:focus-within :deep(input) {
+  border-color: #6366f1;
+  background: white !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.rule-card {
+  padding: 1.25rem;
+  background: rgba(99, 102, 241, 0.03);
+  border: 1px solid rgba(99, 102, 241, 0.1);
+  border-radius: 1rem;
+}
+
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(ef, 68, 68, 0.1);
+  border-left: 3px solid #ef4444;
+  border-radius: 0.5rem;
+  color: #ef4444;
+  font-size: 0.875rem;
+}
+
+/* 动画 */
+.fade-slide-enter-active, .fade-slide-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-slide-enter-from, .fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+</style>

@@ -9,6 +9,8 @@
         "loading": "加载中..."
     },
     "admin": {
+        "adminSystemTitle": "布吉岛的博客",
+        "adminConsole": "控制台",
         "dashboard": "仪表盘",
         "articles": "文章管理",
         "travel": "旅行记录",
@@ -352,6 +354,12 @@
         "loginSuccess": "登录成功",
         "loginFailed": "登录失败",
         "welcome": "欢迎回来！",
+        "welcomeBack": "欢迎回来",
+        "enterCredentials": "请输入您的登录凭据",
+        "secure": "安全可靠",
+        "fast": "快速响应",
+        "friendly": "简单易用",
+        "poweredBy": "构建自",
         "validation": {
             "usernameRequired": "请输入用户名",
             "usernameMin": "用户名至少需要3个字符",

@@ -115,84 +115,207 @@ useHead({
 </script>
 
 <template>
-  <main class="container max-w-7xl mx-auto text-zinc-600">
-    <UContainer class="py-1 ">
-      <div class="rounded-xl overflow-hidden">
-        <div class="p-6">
-          <TransitionGroup
-            appear
-            name="list"
-            tag="div"
-            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-          >
-            <template v-for="(post, index) in paginatedData" :key="post.path">
-              <div :style="{ '--i': index }" class="h-full">
-                <BlogsGridCard
-                  :path="post.path"
-                  :title="post.title"
-                  :date="post.date"
-                  :description="post.description"
-                  :image="post.image"
-                  :alt="post.alt"
-                  :tags="post.tags"
-                  :published="post.published"
-                  :is-sticky="post.isSticky"
-                />
-              </div>
-            </template>
-          </TransitionGroup>
-
-          <div v-if="paginatedData.length === 0" class="text-center py-12">
-            <div class="flex flex-col items-center space-y-4">
-              <UIcon
-                name="i-lucide-search-x"
-                class="text-6xl text-gray-400 dark:text-gray-600"
+  <main class="deep-space-bg min-h-screen">
+    <UContainer class="max-w-7xl py-8">
+      <!-- 文章网格 -->
+      <div class="blog-grid-container">
+        <TransitionGroup
+          appear
+          name="blog-list"
+          tag="div"
+          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        >
+          <template v-for="(post, index) in paginatedData" :key="post.path">
+            <div :style="{ '--i': index }" class="h-full">
+              <BlogsGridCard
+                :path="post.path"
+                :title="post.title"
+                :date="post.date"
+                :description="post.description"
+                :image="post.image"
+                :alt="post.alt"
+                :tags="post.tags"
+                :published="post.published"
+                :is-sticky="post.isSticky"
               />
-              <div class="space-y-2 text-center">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                  {{ searchStats.hasSearch ? $t('blog.noMatch') : $t('blog.noArticles') }}
-                </h3>
-                <p class="text-gray-500 dark:text-gray-400">
-                  {{ searchStats.hasSearch ? $t('blog.tryModifySearch') : $t('blog.noPublishedArticles') }}
-                </p>
-              </div>
-              <UButton
-                v-if="searchStats.hasSearch"
-                variant="soft"
-                icon="i-lucide-rotate-ccw"
-                @click="clearSearch"
-              >
-                {{ $t('blog.clearSearch') }}
-              </UButton>
             </div>
+          </template>
+        </TransitionGroup>
+
+        <!-- 空状态 -->
+        <div v-if="paginatedData.length === 0" class="empty-state">
+          <div class="empty-state-content">
+            <div class="empty-icon-wrapper">
+              <Icon
+                :name="searchStats.hasSearch ? 'i-lucide-search-x' : 'i-lucide-file-text'"
+                class="empty-icon"
+              />
+            </div>
+            <div class="empty-text">
+              <h3 class="empty-title">
+                {{ searchStats.hasSearch ? $t('blog.noMatch') : $t('blog.noArticles') }}
+              </h3>
+              <p class="empty-description">
+                {{ searchStats.hasSearch ? $t('blog.tryModifySearch') : $t('blog.noPublishedArticles') }}
+              </p>
+            </div>
+            <UButton
+              v-if="searchStats.hasSearch"
+              variant="soft"
+              color="primary"
+              size="lg"
+              icon="i-lucide-rotate-ccw"
+              class="empty-action"
+              @click="clearSearch"
+            >
+              {{ $t('blog.clearSearch') }}
+            </UButton>
           </div>
         </div>
+      </div>
 
-        <!-- 分页控件 -->
-        <div v-if="totalPage > 1" class="flex justify-center py-6 border-t border-gray-100 dark:border-gray-800">
-          <UPagination
-            :page="pageNumber"
-            :total="blogsData?.total || 0"
-            :items-per-page="elementPerPage"
-            :sibling-count="1"
-            show-edges
-            @update:page="handlePageChange"
-          />
-        </div>
+      <!-- 分页控件 -->
+      <div v-if="totalPage > 1" class="pagination-wrapper">
+        <UPagination
+          :page="pageNumber"
+          :total="blogsData?.total || 0"
+          :items-per-page="elementPerPage"
+          :sibling-count="1"
+          show-edges
+          class="pagination-modern"
+          @update:page="handlePageChange"
+        />
       </div>
     </UContainer>
   </main>
 </template>
 
 <style scoped>
-.list-enter-active {
-  transition: all 0.3s ease;
+/* ===== 博客网格容器 ===== */
+.blog-grid-container {
+  min-height: 60vh;
 }
-.list-enter-from {
+
+/* ===== 列表动画 ===== */
+.blog-list-enter-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blog-list-enter-from {
   opacity: 0;
-  transform: translateX(-30px);
+  transform: translateY(20px) scale(0.95);
 }
-.list-enter-active {
-  transition-delay: calc(var(--i) * 0.03s);
+
+.blog-list-enter-active {
+  transition-delay: calc(var(--i) * 0.05s);
+}
+
+/* ===== 空状态 ===== */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 3rem 1.5rem;
+}
+
+.empty-state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  max-width: 28rem;
+  text-align: center;
+}
+
+.empty-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.1));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.dark .empty-icon-wrapper {
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.1), rgba(99, 102, 241, 0.1));
+  border-color: rgba(129, 140, 248, 0.2);
+}
+
+.empty-icon {
+  width: 3rem;
+  height: 3rem;
+  color: #6366F1;
+}
+
+.dark .empty-icon {
+  color: #818CF8;
+}
+
+.empty-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.empty-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgb(24, 24, 27);
+}
+
+.dark .empty-title {
+  color: rgb(250, 250, 250);
+}
+
+.empty-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgb(113, 113, 122);
+}
+
+.dark .empty-description {
+  color: rgb(161, 161, 170);
+}
+
+.empty-action {
+  margin-top: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.empty-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== 分页器 ===== */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.dark .pagination-wrapper {
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.pagination-modern {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  padding: 0.75rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.dark .pagination-modern {
+  background: rgba(39, 39, 42, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 </style>
