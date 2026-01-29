@@ -27,46 +27,57 @@ const getArticles = async (): Promise<Result<Article[]>> => {
         data: []
       }
     }
-    // 读取数据库中的文章列表，找出已保存的文章
-    const articlePaths: { path: string }[] = dbUtils.article.getAllArticlePaths()
+    // 读取数据库中的文章元数据列表（传入 published: null 以获取包括草稿在内的所有文章）
+    const dbArticles = dbUtils.article.getArticles({ pageSize: 1000, published: null })
+    const dbArticlesMap = new Map(dbArticles.list.map(a => [a.path, a]))
 
     const articles: Article[] = []
     // 2. 遍历目录，获取每个目录的修改时间
     for (const dirent of dirents) {
       const fullPath = path.join(dir, dirent.name)
+      const articlePath = dirent.name
 
-      // 只处理目录（保留原有逻辑）
+      // 只处理目录
       if (dirent.isDirectory()) {
         try {
-          // 关键：通过 stat 获取目录的详细信息（含修改时间）
           const stats = await fs.stat(fullPath)
-          // 收集文章信息，新增 modifyTime 字段（存储最后修改时间）
-          articles.push({
-            content: '', // 内容仍为空（需后续单独获取）
-            path: path.basename(fullPath), // 目录名
-            modifyTime: stats.mtime.toISOString(), // mtime 是 Date 类型，代表最后修改时间
-            isSaved: articlePaths.some(item => item.path === path.basename(fullPath)),
-            title: path.basename(fullPath),
-            date: stats.birthtime.toISOString(),
-            description: null,
-            image: null,
-            tags: [],
-            published: false,
-            author: '',
-            avatar: '',
-            newBlog: false,
-            isSticky: false
-          })
+          const dbArticle = dbArticlesMap.get(articlePath)
+
+          if (dbArticle) {
+            // 如果数据库中有记录，合并数据库信息
+            articles.push({
+              ...dbArticle,
+              isSaved: true,
+              modifyTime: stats.mtime.toISOString(), // 仍然优先使用文件系统的修改时间，或合并
+              content: '' // 列表页不传内容
+            })
+          } else {
+            // 如果数据库中没有记录，使用文件系统默认信息
+            articles.push({
+              content: '',
+              path: articlePath,
+              modifyTime: stats.mtime.toISOString(),
+              isSaved: false,
+              title: articlePath,
+              date: stats.birthtime.toISOString(),
+              description: null,
+              image: null,
+              tags: [],
+              published: false,
+              author: '',
+              avatar: '',
+              newBlog: false,
+              isSticky: false
+            })
+          }
         } catch (statError: unknown) {
-          // 单独捕获某个目录的 stat 错误（避免单个目录异常导致整个循环中断）
           console.error(`获取目录 ${fullPath} 信息失败:`, (statError as Error).message)
-          // 可选：跳过错误目录，或添加标记为异常的文章
           articles.push({
             content: '',
-            path: path.basename(fullPath),
-            modifyTime: new Date(0).toISOString(), // 用“1970-01-01”标记异常目录
+            path: articlePath,
+            modifyTime: new Date(0).toISOString(),
             isSaved: false,
-            title: path.basename(fullPath),
+            title: articlePath,
             date: new Date(0).toISOString(),
             description: null,
             image: null,

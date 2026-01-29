@@ -5,7 +5,6 @@ import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
 import 'github-markdown-css/github-markdown.css'
 import Giscus from '@giscus/vue'
-import { onMounted } from 'vue'
 
 interface TocItem {
   id: string
@@ -129,10 +128,17 @@ const generateSafeId = (text: string, index: number): string => {
 const formatDate = (dateString: string): string => {
   if (!dateString) return ''
   try {
-    return format(new Date(dateString), 'yyyy年MM月dd日')
+    return format(new Date(dateString), 'yyyy.MM.dd')
   } catch {
     return dateString
   }
+}
+
+const scrollPercent = ref(0)
+const handleScroll = () => {
+  const winScroll = document.documentElement.scrollTop
+  const height = document.documentElement.scrollHeight - document.documentElement.clientHeight
+  scrollPercent.value = (winScroll / height) * 100
 }
 
 const localePath = useLocalePath()
@@ -225,6 +231,7 @@ const renderedHtml = computed(() => {
 onMounted(() => {
   detectNavbarHeight()
   window.addEventListener('resize', detectNavbarHeight)
+  window.addEventListener('scroll', handleScroll)
 
   // 复制功能逻辑
   const previewContainer = document.getElementById('preview-container')
@@ -261,6 +268,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('resize', detectNavbarHeight)
+  window.removeEventListener('scroll', handleScroll)
 })
 
 // SEO优化
@@ -365,210 +373,205 @@ watch(() => $router.currentRoute.value.path, () => {
 </script>
 
 <template>
-  <div class="article-page">
-    <div class="page-content ">
+  <div class="article-page-premium animate-article-entrance">
+    <!-- 全局背景装饰 -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      <div class="absolute -top-[10%] -right-[10%] w-[40%] h-[40%] bg-primary-500/5 blur-[120px] rounded-full animate-pulse" />
+      <div class="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-indigo-500/5 blur-[120px] rounded-full animate-pulse" style="animation-delay: 2s" />
+    </div>
+
+    <!-- 顶部全宽进度条 -->
+    <div class="reading-progress-container">
+      <div class="reading-progress-bar" :style="{ width: `${scrollPercent}%` }" />
+    </div>
+
+    <div class="page-content relative z-10">
       <!-- 主要文章内容区域 -->
       <main class="article-content">
-        <UContainer class="py-8">
-          <div class="article-container max-w-4xl mx-auto bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm">
-            <!-- 文章头部信息 -->
-            <header class="px-6 lg:px-8 py-8 border-b border-gray-200 dark:border-gray-700">
-              <!-- 标题 -->
-              <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white leading-tight mb-6">
+        <UContainer class="py-8 lg:py-12">
+          <!-- 文章卡片主体 - 极致玻璃态 -->
+          <div class="article-glass-card shadow-2xl overflow-hidden">
+            <!-- 文章头部：动态渐变设计 -->
+            <header class="header-section p-6 lg:p-12 border-b border-gray-100 dark:border-gray-800/50">
+              <!-- 标签展示 -->
+              <div v-if="article.tags?.length" class="flex flex-wrap gap-2 mb-6">
+                <span
+                  v-for="tag in article.tags"
+                  :key="tag"
+                  class="premium-tag"
+                  @click="navigateToTag(tag)"
+                >
+                  <UIcon name="i-lucide-hash" class="w-3 h-3 mr-1 opacity-50" />
+                  {{ tag }}
+                </span>
+              </div>
+
+              <!-- 标题：极简化大尺寸渐变 -->
+              <h1 class="premium-title mb-8">
                 {{ article.title }}
               </h1>
 
-              <!-- 作者信息和元数据 -->
-              <div class="flex items-center justify-between flex-wrap gap-4 mb-6">
+              <!-- 精简元数据卡片 -->
+              <div class="meta-card-premium">
                 <div class="flex items-center gap-4">
-                  <!-- 作者头像和信息 -->
-                  <div class="flex items-center gap-3">
-                    <UAvatar
-                      :src="article.avatar"
-                      :alt="$t('blog.avatar')"
-                      size="md"
-                    />
-                    <div>
-                      <div class="font-medium text-gray-900 dark:text-white">
-                        {{ article.author }}
-                      </div>
-                      <div class="text-sm text-gray-500 dark:text-gray-400">
+                  <UAvatar
+                    :src="article.avatar"
+                    :alt="article.author"
+                    size="lg"
+                    class="ring-2 ring-primary-500/20 shadow-xl"
+                  />
+                  <div class="flex flex-col">
+                    <span class="text-base font-black text-gray-900 dark:text-white leading-none mb-1.5">
+                      {{ article.author }}
+                    </span>
+                    <div class="flex items-center gap-3 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
+                      <span class="flex items-center gap-1.5">
+                        <UIcon name="i-lucide-calendar" class="w-3.5 h-3.5" />
                         {{ formatDate(article.date) }}
-                      </div>
+                      </span>
+                      <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+                      <span class="flex items-center gap-1.5">
+                        <UIcon name="i-lucide-clock" class="w-3.5 h-3.5" />
+                        {{ $t('blog.readTime', { time: Math.ceil(article.content.length / 500) }) }}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- 文章摘要 -->
-              <div v-if="article.description" class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-lg p-6 mb-6 border-l-4 border-primary-500">
-                <p class="text-lg text-gray-700 dark:text-gray-200 leading-relaxed font-medium">
+              <!-- 文章摘要：引述风格 -->
+              <div v-if="article.description" class="premium-abstract mt-8">
+                <div class="abstract-accent" />
+                <p class="text-lg lg:text-xl text-gray-600 dark:text-gray-300 font-medium leading-[1.8]">
                   {{ article.description }}
                 </p>
               </div>
-
-              <!-- 标签 -->
-              <div v-if="article.tags && article.tags.length > 0" class="flex flex-wrap gap-3">
-                <UBadge
-                  v-for="(tag) in article.tags"
-                  :key="tag"
-                  variant="solid"
-                  size="md"
-                  class="hover:scale-105 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
-                  @click="navigateToTag(tag)"
-                >
-                  # {{ tag }}
-                </UBadge>
-              </div>
             </header>
 
-            <!-- 文章封面图 -->
-            <div v-if="article.image" class="px-6 lg:px-8 py-6 border-b border-gray-100 dark:border-gray-700">
-              <img
-                :src="article.image"
-                :alt="article.title"
-                class="w-full max-h-96 object-cover rounded-xl shadow-md border border-gray-200 dark:border-gray-600"
-              >
+            <!-- 文章封面图：移动到标题和摘要下方 -->
+            <div v-if="article.image" class="cover-image-container group px-6 lg:px-12 mt-8">
+              <div class="cover-image-inner">
+                <img
+                  :src="article.image"
+                  :alt="article.title"
+                  class="cover-image w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-1000"
+                >
+                <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
             </div>
 
-            <!-- 文章正文 -->
-            <article class="px-6 lg:px-8 py-8">
+            <!-- 文章正文区域 -->
+            <article class="px-6 lg:px-12 py-12">
               <!-- eslint-disable vue/no-v-html -->
               <div
                 id="preview-container"
-                class="markdown-body prose prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-code:text-primary-600 dark:prose-code:text-primary-400 prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700"
+                class="markdown-body premium-markdown-body"
                 :data-color-mode="colorMode.value"
-                data-light-theme="light"
-                data-dark-theme="dark"
                 v-html="renderedHtml"
               />
               <!-- eslint-enable vue/no-v-html -->
             </article>
 
-            <!-- 文章底部 -->
-            <footer class="px-6 lg:px-8 py-8 border-t border-gray-200 dark:border-gray-700 dark:bg-gray-900">
-              <!-- 标签重复展示 -->
-              <div v-if="article.tags && article.tags.length > 0" class="mb-8">
-                <h4 class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-4 flex items-center gap-2">
-                  <span class="i-lucide-tag w-4 h-4" />
-                  {{ $t('blog.relatedTags') }}
-                </h4>
-                <div class="flex flex-wrap gap-2">
-                  <UBadge
-                    v-for="tag in article.tags"
-                    :key="`footer-${tag}`"
-                    variant="outline"
-                    size="md"
-                    class="hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer border-2 hover:scale-105"
-                    @click="navigateToTag(tag)"
-                  >
-                    {{ tag }}
-                  </UBadge>
-                </div>
+            <!-- 文章底部：互动与导航 -->
+            <footer class="footer-section px-6 lg:px-12 py-12 border-t border-gray-100 dark:border-gray-800/50 bg-gray-50/30 dark:bg-black/20">
+              <!-- 结束语 -->
+              <div class="flex flex-col items-center mb-12 text-center opacity-70">
+                <div class="w-24 h-1 bg-gradient-to-r from-transparent via-primary-500/50 to-transparent mb-6 transition-all hover:w-32" />
+                <p class="text-[10px] font-black uppercase tracking-[0.4em] font-outfit text-gray-400">End of Article</p>
               </div>
 
-              <!-- 互动区域 -->
-              <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-                <div class="flex items-center gap-4" />
-
-                <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span class="i-lucide-clock w-4 h-4" />
-                  <span>{{ $t('blog.readTime', { time: Math.ceil(article.content.length / 500) }) }}</span>
-                </div>
+              <!-- 相关标签 -->
+              <div v-if="article.tags?.length" class="mb-12 flex flex-wrap gap-4 justify-center">
+                <span v-for="tag in article.tags" :key="`footer-${tag}`" class="text-xs font-bold text-gray-400 hover:text-primary-500 cursor-pointer transition-colors" @click="navigateToTag(tag)">
+                  #{{ tag }}
+                </span>
               </div>
 
-              <!-- 上一篇/下一篇导航 -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 py-8 border-t border-gray-200 dark:border-gray-700 mt-6">
-                <!-- 上一篇 -->
+              <!-- 上一篇/下一篇：极简卡片 -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
                 <NuxtLink
                   v-if="article.adjacent?.prev"
                   :to="`/blogs/${article.adjacent.prev.path}`"
-                  class="group flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                  class="nav-link-premium prev group"
                 >
-                  <UIcon name="i-heroicons-arrow-left" class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" />
-                  <div class="flex-1 min-w-0 text-left">
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('blog.prevArticle') }}</div>
-                    <div class="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                  <div class="nav-icon-premium group-hover:-translate-x-1">
+                    <UIcon name="i-heroicons-arrow-left" />
+                  </div>
+                  <div class="flex flex-col min-w-0">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{{ $t('blog.prevArticle') }}</span>
+                    <span class="text-sm font-bold truncate group-hover:text-primary-500 transition-colors">
                       {{ article.adjacent.prev.title }}
-                    </div>
+                    </span>
                   </div>
                 </NuxtLink>
-                <div v-else class="hidden sm:block" /> <!-- 占位符 -->
+                <div v-else />
 
-                <!-- 下一篇 -->
                 <NuxtLink
                   v-if="article.adjacent?.next"
                   :to="`/blogs/${article.adjacent.next.path}`"
-                  class="group flex items-center justify-end gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-primary-500 dark:hover:border-primary-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                  class="nav-link-premium next text-right group"
                 >
-                  <div class="flex-1 min-w-0 text-right">
-                    <div class="text-xs text-gray-500 dark:text-gray-400 mb-1">{{ $t('blog.nextArticle') }}</div>
-                    <div class="text-sm font-medium text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                  <div class="flex flex-col min-w-0 order-2 md:order-1">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{{ $t('blog.nextArticle') }}</span>
+                    <span class="text-sm font-bold truncate group-hover:text-primary-500 transition-colors">
                       {{ article.adjacent.next.title }}
-                    </div>
+                    </span>
                   </div>
-                  <UIcon name="i-heroicons-arrow-right" class="w-5 h-5 text-gray-400 group-hover:text-primary-500 transition-colors" />
+                  <div class="nav-icon-premium group-hover:translate-x-1 order-1 md:order-2">
+                    <UIcon name="i-heroicons-arrow-right" />
+                  </div>
                 </NuxtLink>
               </div>
 
-              <Giscus
-                v-if="commentConfig.enableComments"
-                id="comments"
-                :repo="giscusConfig.repo as `${string}/${string}`"
-                :repo-id="giscusConfig.repoId"
-                :category="giscusConfig.category"
-                :category-id="giscusConfig.categoryId"
-                mapping="specific"
-                :term="giscusConfig.term"
-                reactions-enabled="1"
-                emit-metadata="1"
-                input-position="top"
-                :theme="giscusConfig.theme"
-                :lang="locale"
-                loading="lazy"
-              />
+              <!-- 评论区 -->
+              <div v-if="commentConfig.enableComments" class="comments-section-premium pt-8 border-t border-gray-100 dark:border-gray-800">
+                <Giscus
+                  id="comments"
+                  :repo="giscusConfig.repo as `${string}/${string}`"
+                  :repo-id="giscusConfig.repoId"
+                  :category="giscusConfig.category"
+                  :category-id="giscusConfig.categoryId"
+                  mapping="specific"
+                  :term="giscusConfig.term"
+                  reactions-enabled="1"
+                  emit-metadata="1"
+                  input-position="top"
+                  :theme="giscusConfig.theme"
+                  :lang="locale"
+                  loading="lazy"
+                />
+              </div>
             </footer>
           </div>
         </UContainer>
       </main>
 
-      <!-- 右侧大纲区域 -->
+      <!-- 侧边大纲：极简导航 -->
       <ClientOnly>
         <aside class="toc-aside">
-          <nav class="toc-nav" :aria-label="$t('blog.toc')">
-            <div class="toc-container bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg overflow-hidden">
-              <div class="p-4">
-                <h4 class="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2 border-b border-gray-200 dark:border-gray-700 pb-3">
-                  <span class="i-lucide-list w-4 h-4" />
+          <div class="toc-sticky-container">
+            <nav class="toc-nav-premium shadow-2xl">
+              <div class="toc-header px-5 py-4 border-b border-gray-100 dark:border-gray-800/50">
+                <h4 class="text-xs font-black uppercase tracking-[0.3em] flex items-center gap-2">
+                  <span class="i-lucide-list-tree w-3.5 h-3.5 text-primary-500" />
                   {{ $t('blog.toc') }}
                 </h4>
+              </div>
 
-                <!-- 使用 UPageAnchors 组件 -->
-                <div class="toc-content">
-                  <div v-if="anchors.length > 0">
-                    <UPageAnchors :links="anchors" />
-                  </div>
-
-                  <!-- 目录为空时的提示 -->
-                  <div v-else class="text-sm text-gray-400 dark:text-gray-500 text-center py-12">
-                    <div class="flex flex-col items-center gap-3">
-                      <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <span class="i-lucide-file-text w-6 h-6" />
-                      </div>
-                      <div>
-                        <p class="font-medium">
-                          {{ $t('blog.noToc') }}
-                        </p>
-                        <p class="text-xs mt-1 text-gray-400">
-                          {{ $t('blog.tocGenerating') }}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+              <div class="toc-body p-2 max-h-[500px] overflow-y-auto scrollbar-thin">
+                <div v-if="anchors.length > 0">
+                  <UPageAnchors
+                    :links="anchors"
+                    class="premium-anchors"
+                  />
+                </div>
+                <div v-else class="empty-toc py-12 text-center opacity-20">
+                  <UIcon name="i-lucide-bookmark" class="w-8 h-8 mx-auto mb-2" />
+                  <p class="text-[10px] font-bold uppercase tracking-widest">{{ $t('blog.tocGenerating') }}</p>
                 </div>
               </div>
-            </div>
-          </nav>
+            </nav>
+          </div>
         </aside>
       </ClientOnly>
     </div>
@@ -576,462 +579,298 @@ watch(() => $router.currentRoute.value.path, () => {
 </template>
 
 <style scoped>
-/* CSS 自定义属性定义 */
-.article-page {
-  --content-max-width: 1024px;
-  --toc-width: 288px;
-  --layout-gap: 2rem;
-  --navbar-height: 64px; /* 默认值，会被 JS 动态更新 */
-  --layout-padding: 1rem;
+.article-page-premium {
+  --content-max-width: 900px;
+  --toc-width: 260px;
+  --layout-gap: 3.5rem;
+  --navbar-height: 64px;
+  --article-img-radius: 1.5rem;
 }
 
-/* 主要布局容器 */
+/* 阅读进度条 */
+.reading-progress-container {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 3px;
+  z-index: 9999; pointer-events: none;
+}
+
+.reading-progress-bar {
+  height: 100%;
+  background: linear-gradient(to right, #6366f1, #a855f7);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
+  transition: width 0.15s ease-out;
+}
+
+/* 布局 */
 .page-content {
   display: grid;
-  grid-template-columns:
-    minmax(var(--layout-padding), 1fr)
-    min(var(--content-max-width), calc(100vw - var(--toc-width) - var(--layout-gap) - 2 * var(--layout-padding)))
-    var(--toc-width)
-    minmax(var(--layout-padding), 1fr);
+  grid-template-columns: 1fr minmax(0, var(--content-max-width)) var(--toc-width) 1fr;
   grid-template-areas: ". content toc .";
   gap: var(--layout-gap);
-  min-height: calc(100vh - var(--navbar-height));
 }
 
-/* 文章内容区域 */
-.article-content {
-  grid-area: content;
-  min-width: 0; /* 防止内容溢出 */
+.article-content { grid-area: content; }
+.toc-aside { grid-area: toc; }
+
+/* 玻璃态卡片 */
+.article-glass-card {
+  background: white;
+  border-radius: 2.5rem;
+  border: 1px solid #f1f5f9;
 }
 
-/* 大纲侧边栏 */
-.toc-aside {
-  grid-area: toc;
-  width: var(--toc-width);
+.dark .article-glass-card {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(30px);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
-/* 大纲导航容器 */
-.toc-nav {
-  position: sticky;
-  top: calc(var(--navbar-height) + 3rem);
-  height: fit-content;
-}
-
-/* 大纲容器 */
-.toc-container {
-  max-height: calc(100vh - var(--navbar-height) - 2rem);
+/* 文章封面 */
+.cover-image-inner {
+  position: relative;
   overflow: hidden;
+  border-radius: var(--article-img-radius);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* 比例与高度约束：防止长图灾难 */
+  aspect-ratio: 16 / 7; 
+  min-height: 240px;
+  max-height: 460px;
+  width: 100%;
 }
 
-/* 大纲内容滚动区域 */
-.toc-content {
-  max-height: calc(100vh - var(--navbar-height) - 8rem);
-  overflow-y: auto;
-}
-
-/* 响应式：大屏幕优化 */
-@media (min-width: 1536px) {
-  .article-page {
-    --layout-gap: 3rem;
-    --layout-padding: 2rem;
+@media (max-width: 768px) {
+  .cover-image-inner {
+    aspect-ratio: 16 / 9;
+    max-height: 300px;
   }
 }
 
-/* 响应式：中大屏幕 */
-@media (max-width: 1399px) and (min-width: 1280px) {
-  .page-content {
-    grid-template-columns:
-      minmax(var(--layout-padding), 1fr)
-      calc(100vw - var(--toc-width) - var(--layout-gap) - 2 * var(--layout-padding))
-      var(--toc-width)
-      minmax(var(--layout-padding), 1fr);
-  }
+.dark .cover-image-inner {
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
 }
 
-/* 响应式：小屏幕时隐藏大纲 */
-@media (max-width: 1279px) {
-  .page-content {
-    grid-template-columns:
-      minmax(var(--layout-padding), 1fr)
-      min(var(--content-max-width), calc(100vw - 2 * var(--layout-padding)))
-      minmax(var(--layout-padding), 1fr);
-    grid-template-areas: ". content .";
-  }
-
-  .toc-aside {
-    display: none;
-  }
+.cover-image-container {
+  width: 100%;
+  position: relative;
+  z-index: 5; /* 确保不被后面内容遮挡，也不遮挡导航 */
 }
 
-/* 文章内容样式 */
-#preview-container {
-  color: #374151;
-  line-height: 1.75;
+.cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 1.2s cubic-bezier(0.2, 0, 0, 1);
 }
 
-.dark #preview-container {
-  color: #d1d5db;
+/* 标题美学 */
+.premium-title {
+  font-size: 3rem;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.04em;
+  color: #1e293b;
 }
 
-#preview-container h1,
-#preview-container h2,
-#preview-container h3,
-#preview-container h4,
-#preview-container h5,
-#preview-container h6 {
-  color: #111827;
-  font-weight: 700;
-  margin-top: 2rem;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #f3f4f6;
-  scroll-margin-top: calc(var(--navbar-height) + 1rem);
+.dark .premium-title { color: #f8fafc; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+
+.premium-tag {
+  display: inline-flex; align-items: center;
+  padding: 0.4rem 1rem; background: #f1f5f9;
+  color: #64748b; border-radius: 99px;
+  font-size: 0.75rem; font-weight: 800; cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dark #preview-container h1,
-.dark #preview-container h2,
-.dark #preview-container h3,
-.dark #preview-container h4,
-.dark #preview-container h5,
-.dark #preview-container h6 {
-  color: #f9fafb;
-  border-bottom-color: #374151;
+.premium-tag:hover { background: #4f46e5; color: white; transform: translateY(-3px) scale(1.05); }
+
+.dark .premium-tag { background: rgba(255, 255, 255, 0.05); color: #94a3b8; }
+.dark .premium-tag:hover { background: #6366f1; color: white; }
+
+/* 摘要 */
+.premium-abstract {
+  position: relative; padding: 1.75rem 2.25rem;
+  background: #f8fafc; border-radius: 1.5rem;
 }
 
-/* 代码块样式 */
-#preview-container code {
-  background-color: #f3f4f6;
-  color: #dc2626;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  border: 1px solid #e5e7eb;
+.dark .premium-abstract { background: rgba(255, 255, 255, 0.02); }
+
+.abstract-accent {
+  position: absolute; left: 0; top: 1.75rem; bottom: 1.75rem;
+  width: 4px; background: linear-gradient(to bottom, #6366f1, #a855f7);
+  border-radius: 99px;
 }
 
-.dark #preview-container code {
-  background-color: #1f2937;
-  color: #f87171;
-  border-color: #374151;
-}
-
-#preview-container pre {
-  background-color: #f9fafb;
-  border: 2px solid #e5e7eb;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  overflow-x: auto;
-  margin: 1.5rem 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.dark #preview-container pre {
-  background-color: #111827;
-  border-color: #374151;
-}
-
-/* 确保 markdown-body 背景透明 */
+/* Markdown 正文排版深度优化 */
 :deep(.markdown-body) {
+  font-size: 1.125rem;
+  line-height: 1.9;
+  color: #334155;
   background-color: transparent !important;
 }
 
-/* 引用块样式 */
-#preview-container blockquote {
-  border-left: 4px solid #3b82f6;
-  background-color: #f8fafc;
-  padding: 1.25rem;
-  margin: 1.5rem 0;
-  font-style: italic;
-  border-radius: 0 0.5rem 0.5rem 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.dark :deep(.markdown-body) { color: #cbd5e1; }
+
+/* 行内代码样式还原 */
+:deep(.markdown-body code:not(pre code)) {
+  background-color: #f3f4f6 !important;
+  color: #dc2626 !important;
+  padding: 0.2rem 0.4rem !important;
+  border-radius: 0.375rem !important;
+  font-size: 0.85em !important;
+  border: 1px solid #e5e7eb !important;
 }
 
-.dark #preview-container blockquote {
-  background-color: #0f172a;
+.dark :deep(.markdown-body code:not(pre code)) {
+  background-color: #1f2937 !important;
+  color: #f87171 !important;
+  border-color: #374151 !important;
 }
 
-/* 段落样式 */
-#preview-container p {
-  margin-bottom: 1.25rem;
-  line-height: 1.75;
+/* 代码块容器样式还原 (匹配截图) */
+:deep(.markdown-body pre) {
+  background-color: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 0.75rem !important;
+  padding: 1.5rem !important;
+  margin: 2rem 0 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
 }
 
-/* 链接样式 - 增强版，使用 !important 覆盖 Vditor 和 Tailwind prose 默认样式 */
-.prose a,
-.prose :where(a):not(:where([class~="not-prose"] *)),
-#preview-container a,
-#preview-container p a,
-#preview-container li a,
-#preview-container td a,
-.vditor-reset a {
-  color: #2563eb !important;
-  text-decoration: underline !important;
-  text-decoration-color: #93c5fd !important;
-  text-decoration-thickness: 2px !important;
-  text-underline-offset: 3px !important;
-  font-weight: 500 !important;
-  transition: all 0.2s ease !important;
-  position: relative;
+.dark :deep(.markdown-body pre) {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+  box-shadow: none !important;
 }
 
-.prose a:hover,
-.prose :where(a):not(:where([class~="not-prose"] *)):hover,
-#preview-container a:hover,
-#preview-container p a:hover,
-#preview-container li a:hover,
-#preview-container td a:hover,
-.vditor-reset a:hover {
-  color: #1d4ed8 !important;
-  text-decoration-color: #2563eb !important;
-  text-decoration-thickness: 2px !important;
-  background-color: #eff6ff !important;
-  padding: 0 4px !important;
-  border-radius: 4px !important;
-}
-
-.dark .prose a,
-.dark .prose :where(a):not(:where([class~="not-prose"] *)),
-.dark #preview-container a,
-.dark #preview-container p a,
-.dark #preview-container li a,
-.dark #preview-container td a,
-.dark .vditor-reset a {
-  color: #60a5fa !important;
-  text-decoration-color: #3b82f6 !important;
-}
-
-.dark .prose a:hover,
-.dark .prose :where(a):not(:where([class~="not-prose"] *)):hover,
-.dark #preview-container a:hover,
-.dark #preview-container p a:hover,
-.dark #preview-container li a:hover,
-.dark #preview-container td a:hover,
-.dark .vditor-reset a:hover {
-  color: #93c5fd !important;
-  text-decoration-color: #60a5fa !important;
-  background-color: #1e3a8a !important;
-}
-
-/* 图片样式 */
-#preview-container img {
+/* 图片 */
+:deep(.premium-markdown-body img) {
   max-width: 100%;
-  height: auto;
-  border-radius: 0.75rem;
-  margin: 1.5rem 0;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 1.5rem;
+  margin: 2.5rem auto;
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.2);
+  border: 1px solid #f1f5f9;
 }
 
-.dark #preview-container img {
-  border-color: #374151;
-}
+.dark :deep(.premium-markdown-body img) { border-color: rgba(255, 255, 255, 0.05); }
 
-/* 表格样式 */
-#preview-container table {
+/* 表格 */
+:deep(.premium-markdown-body table) {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  margin: 1.5rem 0;
-  border: 2px solid #e5e7eb;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-#preview-container th,
-#preview-container td {
-  border-bottom: 1px solid #e5e7eb;
-  border-right: 1px solid #e5e7eb;
-  padding: 0.875rem 1rem;
-  text-align: left;
-}
-
-#preview-container th:last-child,
-#preview-container td:last-child {
-  border-right: none;
-}
-
-#preview-container tr:last-child td {
-  border-bottom: none;
-}
-
-.dark #preview-container table {
-  border-color: #374151;
-}
-
-.dark #preview-container th,
-.dark #preview-container td {
-  border-color: #374151;
-}
-
-#preview-container th {
-  background-color: #f3f4f6;
-  font-weight: 600;
-}
-
-.dark #preview-container th {
-  background-color: #1f2937;
-}
-
-/* 列表样式 */
-#preview-container ul,
-#preview-container ol {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
-}
-
-#preview-container li {
-  margin-bottom: 0.5rem;
-  line-height: 1.6;
-}
-
-/* 分割线样式 */
-#preview-container hr {
   margin: 2rem 0;
-  border: none;
-  border-top: 2px solid #e5e7eb;
-  border-radius: 1px;
-}
-
-.dark #preview-container hr {
-  border-top-color: #374151;
-}
-
-/* UPageAnchors 自定义样式 - 掘金风格 */
-:deep(.ui-page-anchors) {
-  --ui-page-anchors-depth-padding: 0.75rem;
-}
-
-:deep(.ui-page-anchors a) {
-  font-size: 0.8125rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.375rem;
-  transition: all 0.2s ease;
-  display: block;
-  margin-bottom: 0.125rem;
-  text-decoration: none;
-  border-left: 3px solid transparent;
-  position: relative;
-  color: #64748b;
-  line-height: 1.4;
+  border: 1px solid #f1f5f9;
+  border-radius: 1.25rem;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-:deep(.ui-page-anchors a:hover) {
-  background-color: #f8fafc;
-  border-left-color: #e2e8f0;
-  color: #374151;
-  transform: translateX(2px);
-}
+.dark :deep(.premium-markdown-body table) { border-color: rgba(255, 255, 255, 0.1); }
 
-:deep(.dark .ui-page-anchors a) {
-  color: #94a3b8;
-}
-
-:deep(.dark .ui-page-anchors a:hover) {
-  background-color: #1e293b;
-  border-left-color: #475569;
-  color: #e2e8f0;
-}
-
-:deep(.ui-page-anchors a.router-link-active) {
-  background-color: #eff6ff;
-  color: #2563eb;
-  border-left-color: #3b82f6;
-  font-weight: 500;
-  transform: translateX(2px);
-}
-
-:deep(.dark .ui-page-anchors a.router-link-active) {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #60a5fa;
-  border-left-color: #3b82f6;
-}
-
-/* 不同层级的样式 - 掘金风格 */
-:deep(.ui-page-anchors a[style*="--depth: 0"]) {
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-:deep(.ui-page-anchors a[style*="--depth: 1"]) {
-  padding-left: 1.25rem;
-  font-size: 0.8125rem;
-  position: relative;
-}
-
-:deep(.ui-page-anchors a[style*="--depth: 1"]::before) {
-  content: '';
-  position: absolute;
-  left: 0.875rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 4px;
-  height: 4px;
-  background-color: #cbd5e1;
-  border-radius: 50%;
-}
-
-:deep(.ui-page-anchors a[style*="--depth: 2"]) {
-  padding-left: 1.75rem;
-  font-size: 0.8125rem;
-  color: #9ca3af;
-}
-
-:deep(.ui-page-anchors a[style*="--depth: 3"]) {
-  padding-left: 2.25rem;
-  font-size: 0.75rem;
-  color: #9ca3af;
-}
-
-:deep(.ui-page-anchors a[style*="--depth: 4"]) {
-  padding-left: 2.75rem;
-  font-size: 0.75rem;
-  color: #9ca3af;
-}
-
-:deep(.ui-page-anchors a[style*="--depth: 5"]) {
-  padding-left: 3.25rem;
-  font-size: 0.75rem;
-  color: #9ca3af;
-}
-
-/* 目录滚动条样式 */
-.toc-content {
-  scrollbar-width: thin;
-  scrollbar-color: #e5e7eb #f8fafc;
-}
-
-.toc-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.toc-content::-webkit-scrollbar-track {
+:deep(.premium-markdown-body th) {
   background: #f8fafc;
-  border-radius: 3px;
+  padding: 1rem;
+  font-weight: 800;
 }
 
-.toc-content::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
-  border-radius: 3px;
-  transition: background 0.2s;
+.dark :deep(.premium-markdown-body th) { background: rgba(255, 255, 255, 0.05); }
+
+:deep(.premium-markdown-body td) {
+  padding: 1rem;
+  border-top: 1px solid #f1f5f9;
 }
 
-.toc-content::-webkit-scrollbar-thumb:hover {
-  background: #d1d5db;
+.dark :deep(.premium-markdown-body td) { border-top-color: rgba(255, 255, 255, 0.1); }
+
+/* 底部导航卡片 */
+.nav-link-premium {
+  display: flex; align-items: center; gap: 1.25rem;
+  padding: 1.25rem; background: white; border-radius: 1.5rem;
+  border: 1px solid #f1f5f9; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.dark .toc-content::-webkit-scrollbar-track {
-  background: #1e293b;
+.dark .nav-link-premium { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.05); }
+
+.nav-link-premium:hover {
+  transform: translateY(-5px); border-color: #4f46e5;
+  box-shadow: 0 15px 30px -10px rgba(79, 70, 229, 0.15);
 }
 
-.dark .toc-content::-webkit-scrollbar-thumb {
-  background: #475569;
+.nav-icon-premium {
+  width: 44px; height: 44px; display: flex; align-items: center; justify-content: center;
+  background: #f8fafc; color: #4f46e5; border-radius: 1rem; font-size: 1.25rem;
+  transition: transform 0.3s;
 }
 
-.dark .toc-content::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+.dark .nav-icon-premium { background: rgba(79, 70, 229, 0.1); }
+
+/* TOC 侧边栏 */
+.toc-sticky-container {
+  position: sticky; top: calc(var(--navbar-height) + 3.5rem);
+  max-height: calc(100vh - var(--navbar-height) - 5rem);
+}
+
+.toc-nav-premium {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(25px); border-radius: 2rem;
+  border: 1px solid #f1f5f9; overflow: hidden;
+}
+
+.dark .toc-nav-premium { background: rgba(15, 23, 42, 0.85); border-color: rgba(255, 255, 255, 0.05); }
+
+.premium-anchors :deep(a) {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+  border-radius: 0.5rem;
+  border-left: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.premium-anchors :deep(a.active) {
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.08);
+  border-left-color: #4f46e5;
+  font-weight: 700;
+  transform: translateX(4px);
+}
+
+.dark .premium-anchors :deep(a.active) {
+  color: #818cf8;
+  background: rgba(129, 140, 248, 0.1);
+}
+
+.premium-anchors :deep(a:hover:not(.active)) {
+  color: #4f46e5;
+  background: #f8fafc;
+}
+
+.dark .premium-anchors :deep(a:hover:not(.active)) {
+  color: #818cf8;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.toc-body::-webkit-scrollbar { width: 4px; }
+.toc-body::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 99px; }
+.dark .toc-body::-webkit-scrollbar-thumb { background: #334155; }
+
+/* 动画 */
+@keyframes entrance { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.animate-article-entrance { animation: entrance 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+
+@media (max-width: 1280px) {
+  .page-content { grid-template-columns: 1fr minmax(0, var(--content-max-width)) 1fr; grid-template-areas: ". content ."; gap: 0; }
+  .toc-aside { display: none; }
+}
+
+@media (max-width: 640px) {
+  .premium-title { font-size: 2rem; }
+  .article-glass-card { border-radius: 2rem; }
 }
 </style>
 
@@ -1059,11 +898,11 @@ watch(() => $router.currentRoute.value.path, () => {
   }
 }
 
-/* 保持代码块的圆角和间距 */
-/* 保持代码块的圆角和间距，并建立定位上下文 */
+/* 保持代码块的圆角和间距 (与 GitHub 样式兼容) */
 #preview-container .hljs {
-  padding: 1.25rem !important;
-  border-radius: 0.75rem !important;
+  padding: 1rem !important; /* pre 已经有 padding */
+  background: transparent !important;
+  border-radius: 0 !important;
   position: relative !important;
 }
 
@@ -1090,9 +929,9 @@ watch(() => $router.currentRoute.value.path, () => {
 }
 
 .copy-btn:hover {
-  background-color: rgba(148, 163, 184, 0.1);
-  border-color: rgba(148, 163, 184, 0.2);
-  color: #475569;
+  background-color: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
 }
 
 :global(.dark) .copy-btn {

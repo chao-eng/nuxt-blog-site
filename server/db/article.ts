@@ -68,8 +68,11 @@ export const dbArticle = {
     // 3. 新增模式：校验核心字段 + 执行插入
     if (!isEditMode) {
       const { title, date, published } = params
-      if (!title || !date || !published) {
-        throw new Error('新增文章必须传入 标题、创建时间 、发布状态等 核心字段')
+      // 核心字段校验：published 可能是布尔值 false（草稿），所以不能用 !published 直接判断
+      if (title === undefined || title === null || title === '' ||
+        date === undefined || date === null || date === '' ||
+        published === undefined || published === null) {
+        throw new Error('新增文章必须传入 标题、创建时间、发布状态等核心字段')
       }
       const sql = `
         INSERT INTO articles (path, title, date, description, image, tags, published, userid, isSticky, content)
@@ -215,7 +218,8 @@ export const dbArticle = {
     sortOrder = 'desc',
     search = '',
     tag = '',
-    isSticky
+    isSticky,
+    published
   }: {
     page?: number
     pageSize?: number
@@ -224,6 +228,7 @@ export const dbArticle = {
     search?: string
     tag?: string
     isSticky?: boolean
+    published?: number | boolean | null
   }): { list: Article[], total: number } => {
     // 1. 参数校验与修正
     const validPage = Math.max(1, Math.floor(Number(page) || 1))
@@ -236,8 +241,20 @@ export const dbArticle = {
     const validSortOrder = sortOrder.toLowerCase() === 'asc' ? 'asc' : 'desc'
 
     // 3. 构建查询条件
-    let whereClause = 't.published = 1'
+    let whereClause = '1=1' // 默认允许所有
     const queryParams: (string | number | boolean | null)[] = []
+
+    // 如果未传 published 参数，默认查询已发布文章(1)，保证前端组件逻辑不变
+    // 如果传了 null 或 undefined 的特殊处理逻辑（此处我们约定 undefined 代表默认，null 或显式布尔代表想要的结果）
+    if (published !== undefined) {
+      if (published !== null) {
+        whereClause += ' AND t.published = ?'
+        queryParams.push(published ? 1 : 0)
+      }
+      // 如果传了 null，则不加该条件，代表查询所有
+    } else {
+      whereClause += ' AND t.published = 1'
+    }
 
     if (search) {
       whereClause += ' AND (t.title LIKE ? OR t.description LIKE ?)'
@@ -245,8 +262,6 @@ export const dbArticle = {
     }
 
     if (tag) {
-      // 简单实现：tags 存储为 JSON 数组字符串，如 '["tag1","tag2"]'
-      // 使用 LIKE '%"tag"%' 来匹配
       whereClause += ' AND t.tags LIKE ?'
       queryParams.push(`%"${tag}"%`)
     }

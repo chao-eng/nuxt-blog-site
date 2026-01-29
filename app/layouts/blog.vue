@@ -1,8 +1,7 @@
 <template>
   <div class="gd-container font-spacegrotesk bg-gray-50 dark:bg-zinc-950">
-    <header class="fixed w-full bg-white dark:bg-gray-900 z-10 border-b border-gray-200 dark:border-gray-800">
-      <BlogsMainHeader />
-    </header>
+    <!-- 使用新的现代化导航栏 -->
+    <BlogsMainHeaderModern />
 
     <main>
       <div class="p-9" />

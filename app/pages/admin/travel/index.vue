@@ -259,107 +259,273 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="h-full w-full overflow-y-auto">
-    <div class="container mx-auto px-4 py-6 max-w-5xl">
-      <UPageCard
-        :title="t('admin.tra.management')"
-        :description="t('admin.tra.managementDesc')"
-        variant="naked"
-        orientation="horizontal"
-        class="mb-4"
-      >
-        <UButton
-          icon="i-lucide-refresh-cw"
-          variant="ghost"
-          :loading="loading"
-          class="w-fit lg:ms-auto"
+  <UDashboardPanel grow class="travel-bg-gradient group/panel">
+    <UDashboardNavbar class="navbar-modern">
+      <template #leading>
+        <div class="flex items-center gap-2">
+           <UDashboardSidebarCollapse />
+           <div class="flex items-center gap-2.5 ml-1">
+             <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center shadow-inner">
+                <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-indigo-500" />
+             </div>
+             <span class="text-base font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+               {{ t('admin.tra.management') }}
+             </span>
+           </div>
+        </div>
+      </template>
+
+      <template #right>
+        <div class="flex items-center gap-1.5 px-2">
+          <UTooltip :text="t('admin.tra.refresh')">
+            <UButton
+              icon="i-lucide-refresh-cw"
+              color="neutral"
+              variant="ghost"
+              size="sm"
+              :loading="loading"
+              class="toolbar-btn rounded-xl"
+              @click="loadData"
+            />
+          </UTooltip>
+          <div class="w-px h-4 bg-gray-200 dark:bg-gray-800 mx-1" />
+          <UButton
+            icon="i-lucide-plus"
+            color="primary"
+            variant="solid"
+            size="sm"
+            class="action-btn-glow rounded-xl px-3"
+            @click="addRecord"
+          >
+            <span class="font-bold">{{ t('admin.tra.add') }}</span>
+          </UButton>
+        </div>
+      </template>
+    </UDashboardNavbar>
+
+    <UDashboardToolbar class="px-6 py-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/40 dark:bg-black/20 backdrop-blur-md">
+      <div class="flex items-center gap-6">
+        <div class="flex flex-col">
+          <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ t('admin.tra.showOnHome') }}</span>
+          <div class="flex items-center gap-2">
+            <USwitch v-model="visible" color="primary" size="sm" />
+            <span class="text-xs font-bold" :class="visible ? 'text-primary-500' : 'text-gray-500'">
+              {{ visible ? t('nav.home') : t('admin.art.draft') }}
+            </span>
+          </div>
+        </div>
+        <div class="w-px h-8 bg-gray-200 dark:bg-gray-800" />
+        <div class="flex flex-col">
+          <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ t('admin.tra.records') }}</span>
+          <span class="text-lg font-black tracking-tighter text-indigo-500">
+            {{ tableData.length }} 
+            <small class="text-[10px] font-bold text-gray-400 ml-1">UNITS</small>
+          </span>
+        </div>
+      </div>
+    </UDashboardToolbar>
+
+    <UDashboardPanelContent class="p-6 space-y-8 scroll-smooth overflow-y-auto">
+      <!-- 表格预览区域 -->
+      <section class="space-y-4">
+        <div class="flex items-center gap-2 px-1">
+          <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1]" />
+          <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">{{ t('admin.tra.preview') }}</h3>
+        </div>
+
+        <div class="travel-table-card overflow-hidden">
+          <UContextMenu :items="contextMenuItems">
+            <UTable
+              v-model:row-selection="rowSelection"
+              :data="tableData"
+              :columns="columns"
+              :loading="loading"
+              class="travel-table"
+            >
+              <template #empty-state>
+                <div class="flex flex-col items-center justify-center py-12 gap-4">
+                  <div class="w-16 h-16 rounded-3xl bg-gray-50 dark:bg-white/5 flex items-center justify-center border border-dashed border-gray-200 dark:border-gray-700">
+                    <UIcon name="i-lucide-map" class="w-8 h-8 text-gray-300 dark:text-gray-600" />
+                  </div>
+                  <span class="text-sm font-bold text-gray-400 tracking-wide">{{ t('admin.tra.empty') }}</span>
+                  <UButton icon="i-lucide-plus" size="sm" class="action-btn-glow" @click="addRecord">
+                    {{ t('admin.tra.add') }}
+                  </UButton>
+                </div>
+              </template>
+            </UTable>
+          </UContextMenu>
+        </div>
+      </section>
+
+      <!-- JSON 数据区域 -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between px-1">
+          <div class="flex items-center gap-2">
+            <div class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">{{ t('admin.tra.jsonData') }}</h3>
+          </div>
+          <div class="flex gap-2">
+            <UButton size="xs" variant="soft" color="neutral" class="rounded-lg font-bold" @click="formatJson">
+              {{ t('admin.tra.format') }}
+            </UButton>
+            <UButton size="xs" variant="ghost" color="neutral" class="rounded-lg font-bold" @click="resetToExample">
+              {{ t('admin.tra.example') }}
+            </UButton>
+          </div>
+        </div>
+
+        <div class="json-editor-container group">
+          <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-focus-within:opacity-100 transition-opacity pointer-events-none" />
+          <UTextarea
+            v-model="jsonData"
+            :rows="15"
+            placeholder="[{&quot;name&quot;: &quot;北京&quot;...}]"
+            autoresize
+            class="json-textarea"
+            :ui="{ base: 'font-mono text-sm leading-relaxed tracking-tight' }"
+          />
+        </div>
+      </section>
+
+      <div class="flex justify-end gap-3 pt-4 pb-12">
+        <UButton 
+          variant="ghost" 
+          color="neutral" 
+          class="h-11 px-6 rounded-xl font-bold uppercase tracking-widest transition-all hover:bg-gray-100 dark:hover:bg-white/5"
           @click="loadData"
         >
-          {{ t('admin.tra.refresh') }}
+          {{ t('admin.tra.cancel') }}
         </UButton>
-        <div class="flex items-center gap-2">
-          <label class="text-xs text-gray-500">{{ t('admin.tra.showOnHome') }}</label>
-          <USwitch v-model="visible" />
-        </div>
-      </UPageCard>
-
-      <UPageCard variant="subtle">
-        <div class="space-y-6">
-          <div class="w-full">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-semibold">
-                {{ t('admin.tra.preview') }} ({{ tableData.length }} {{ t('admin.tra.records') }})
-              </h3>
-              <UButton icon="i-lucide-plus" size="sm" @click="addRecord">
-                {{ t('admin.tra.add') }}
-              </UButton>
-            </div>
-
-            <UContextMenu :items="contextMenuItems">
-              <UTable
-                v-model:row-selection="rowSelection"
-                :data="tableData"
-                :columns="columns"
-                :loading="loading"
-                class="border border-gray-200 dark:border-gray-700 rounded-lg mb-6"
-                @contextmenu="onContextmenu"
-              >
-                <template #empty-state>
-                  <div class="flex flex-col items-center justify-center py-6 gap-3">
-                    <span class="italic text-sm">{{ t('admin.tra.empty') }}</span>
-                    <UButton icon="i-lucide-plus" size="sm" @click="addRecord">
-                      {{ t('admin.tra.add') }}
-                    </UButton>
-                  </div>
-                </template>
-              </UTable>
-            </UContextMenu>
-
-            <div v-if="Object.keys(rowSelection).length > 0" class="text-xs text-gray-500 mb-4">
-              {{ t('admin.tra.selected') }} {{ Object.keys(rowSelection).length }} {{ t('admin.tra.rows') }}
-            </div>
-          </div>
-
-          <div class="w-full">
-            <div class="flex items-center justify-between mb-3">
-              <label class="text-sm font-semibold">{{ t('admin.tra.jsonData') }}</label>
-              <div class="flex gap-2">
-                <UButton size="xs" variant="ghost" @click="formatJson">
-                  {{ t('admin.tra.format') }}
-                </UButton>
-                <UButton size="xs" variant="ghost" @click="resetToExample">
-                  {{ t('admin.tra.example') }}
-                </UButton>
-              </div>
-            </div>
-
-            <UTextarea
-              v-model="jsonData"
-              :rows="20"
-              placeholder="[{&quot;name&quot;: &quot;北京&quot;...}]"
-              class="font-mono text-sm w-full"
-              :ui="{ base: 'w-full resize-none' }"
-            />
-          </div>
-
-          <USeparator />
-
-          <div class="flex justify-end gap-3 pt-2">
-            <UButton variant="outline" @click="loadData">
-              {{ t('admin.tra.cancel') }}
-            </UButton>
-            <UButton color="primary" :loading="saving" @click="saveData">
-              {{ t('admin.tra.save') }}
-            </UButton>
-          </div>
-        </div>
-      </UPageCard>
-    </div>
-  </div>
+        <UButton 
+          color="primary" 
+          :loading="saving" 
+          class="h-11 px-8 rounded-xl font-bold uppercase tracking-widest action-btn-glow"
+          @click="saveData"
+        >
+          {{ t('admin.tra.save') }}
+        </UButton>
+      </div>
+    </UDashboardPanelContent>
+  </UDashboardPanel>
 </template>
 
 <style scoped>
-pre code {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+.travel-bg-gradient {
+  background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.03) 0%, transparent 40%),
+              radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.03) 0%, transparent 40%);
+}
+
+.navbar-modern {
+  background: rgba(255, 255, 255, 0.4) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.dark .navbar-modern {
+  background: rgba(10, 10, 15, 0.4) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.toolbar-btn {
+  transition: all 0.3s ease;
+  opacity: 0.7;
+}
+
+.toolbar-btn:hover {
+  opacity: 1;
+  background: rgba(99, 102, 241, 0.1) !important;
+  transform: translateY(-1px);
+}
+
+.action-btn-glow {
+  background: linear-gradient(135deg, #6366f1, #a855f7) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.action-btn-glow:hover {
+  transform: scale(1.02) translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.5) !important;
+}
+
+.travel-table-card {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
+}
+
+.dark .travel-table-card {
+  background: rgba(15, 23, 42, 0.3);
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.travel-table-card:hover {
+  border-color: rgba(99, 102, 241, 0.2);
+  box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.1);
+}
+
+:deep(.travel-table) {
+  --ui-table-border-color: rgba(0, 0, 0, 0.03);
+}
+
+.dark :deep(.travel-table) {
+  --ui-table-border-color: rgba(255, 255, 255, 0.03);
+}
+
+:deep(.travel-table tr) {
+  transition: background-color 0.2s ease;
+}
+
+:deep(.travel-table tr:hover) {
+  background-color: rgba(99, 102, 241, 0.02) !important;
+}
+
+.dark :deep(.travel-table tr:hover) {
+  background-color: rgba(255, 255, 255, 0.01) !important;
+}
+
+.json-editor-container {
+  position: relative;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 1.25rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.dark .json-editor-container {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.json-editor-container:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.json-textarea :deep(textarea) {
+  background: transparent !important;
+  color: #1e293b !important;
+  padding: 1.25rem !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.dark .json-textarea :deep(textarea) {
+  color: #e2e8f0 !important;
+}
+
+/* 自定义滚动条 */
+.json-textarea :deep(textarea)::-webkit-scrollbar {
+  width: 6px;
+}
+.json-textarea :deep(textarea)::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.2);
+  border-radius: 10px;
 }
 </style>
