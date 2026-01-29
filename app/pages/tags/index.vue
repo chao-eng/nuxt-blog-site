@@ -12,7 +12,7 @@ definePageMeta({
 const tagsPage = useTagsPage()
 
 // 使用 useAsyncData 在服务端获取数据
-const { data: tagsData } = await useAsyncData(
+const { data: tagsData, pending } = await useAsyncData(
   'tags-all',
   async () => {
     const data: Result<[{ tag: string, count: number }]> = await $fetch('/api/blogs/tags')
@@ -26,32 +26,36 @@ const { data: tagsData } = await useAsyncData(
   }
 )
 
-const tags = tagsData.value || []
+const tags = computed(() => tagsData.value || [])
 
 // 计算总文章数
 const totalArticles = computed(() => {
-  return tags.reduce((sum, tag) => sum + tag.count, 0)
+  return tags.value.reduce((sum, tag) => sum + tag.count, 0)
 })
 
 // 按文章数量排序
 const sortedTags = computed(() => {
-  return [...tags].sort((a, b) => b.count - a.count)
+  return [...tags.value].sort((a, b) => b.count - a.count)
 })
 
-// 获取标签大小（基于文章数量）
-const getTagSize = (count: number) => {
-  const max = Math.max(...tags.map(t => t.count))
-  const min = Math.min(...tags.map(t => t.count))
-  const ratio = (count - min) / (max - min || 1)
+// 获取标签大小级别
+const getTagSizeClass = (count: number) => {
+  if (tags.value.length === 0) return 'level-1'
+  const counts = tags.value.map(t => t.count)
+  const max = Math.max(...counts)
+  const min = Math.min(...counts)
+  const range = max - min || 1
+  const ratio = (count - min) / range
   
-  if (ratio > 0.7) return 'xl'
-  if (ratio > 0.4) return 'lg'
-  if (ratio > 0.2) return 'md'
-  return 'sm'
+  if (ratio > 0.8) return 'level-5'
+  if (ratio > 0.6) return 'level-4'
+  if (ratio > 0.4) return 'level-3'
+  if (ratio > 0.2) return 'level-2'
+  return 'level-1'
 }
 
 useHead({
-  title: tagsPage.title,
+  title: `${tagsPage.title} | ${t('blog.allTags')}`,
   meta: [
     {
       name: 'description',
@@ -62,542 +66,268 @@ useHead({
 </script>
 
 <template>
-  <main class="deep-space-bg min-h-screen">
-    <UContainer class="max-w-7xl py-12">
-      <!-- 页面标题区域 -->
-      <div class="tags-header">
-        <div class="header-icon-wrapper">
-          <Icon name="i-lucide-tags" class="header-icon" />
-          <div class="icon-glow" />
+  <div class="tags-explorer-premium animate-page-entrance">
+    <!-- 全局背景装饰 -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+      <div class="absolute -top-[10%] -right-[10%] w-[60%] h-[60%] bg-primary-500/5 blur-[120px] rounded-full animate-pulse-slow" />
+      <div class="absolute -bottom-[10%] -left-[10%] w-[60%] h-[60%] bg-indigo-500/5 blur-[120px] rounded-full animate-pulse-slow" style="animation-delay: 3s" />
+    </div>
+
+    <UContainer class="py-16 relative z-10 max-w-6xl">
+      <!-- 页面头部 -->
+      <header class="mb-20 text-center space-y-6">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-500/5 border border-primary-500/10 mb-4 animate-bounce-subtle">
+          <UIcon name="i-lucide-tags" class="text-primary-500 w-4 h-4" />
+          <span class="text-[10px] font-black uppercase tracking-[0.3em] text-primary-600 dark:text-primary-400">
+            Topic Explorer
+          </span>
         </div>
-        
-        <h1 class="header-title gradient-text">
+
+        <h1 class="tags-hero-title">
           {{ tagsPage.title }}
         </h1>
         
-        <p class="header-description">
+        <p class="text-lg text-gray-500 dark:text-gray-400 font-medium max-w-2xl mx-auto leading-relaxed">
           {{ t('blog.exploreTags', { count: tags.length, total: totalArticles }) }}
         </p>
 
-        <!-- 统计卡片 -->
-        <div class="stats-cards">
-          <div class="stat-card">
-            <Icon name="i-lucide-hash" class="stat-icon" />
-            <div class="stat-content">
-              <div class="stat-value">{{ tags.length }}</div>
-              <div class="stat-label">{{ t('blog.tagsCount') }}</div>
-            </div>
+        <!-- 汇总统计 -->
+        <div class="flex justify-center gap-8 pt-4">
+          <div class="flex flex-col items-center">
+            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Total Tags</span>
+            <span class="text-2xl font-black text-gray-900 dark:text-white">{{ tags.length }}</span>
           </div>
-          
-          <div class="stat-card">
-            <Icon name="i-lucide-file-text" class="stat-icon" />
-            <div class="stat-content">
-              <div class="stat-value">{{ totalArticles }}</div>
-              <div class="stat-label">{{ t('blog.articles') }}</div>
-            </div>
+          <div class="w-px h-10 bg-gray-200 dark:bg-gray-800" />
+          <div class="flex flex-col items-center">
+            <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Total Articles</span>
+            <span class="text-2xl font-black text-gray-900 dark:text-white">{{ totalArticles }}</span>
           </div>
         </div>
+      </header>
+
+      <!-- 标签云网格 -->
+      <div v-if="pending" class="py-32 flex flex-col items-center justify-center space-y-6">
+        <div class="loading-spinner-premium" />
+        <span class="text-xs font-black uppercase tracking-[0.4em] text-gray-400 animate-pulse">Mapping Knowledge Base...</span>
       </div>
 
-      <!-- 标签云 -->
-      <div v-if="sortedTags.length > 0" class="tags-cloud-container">
-        <TransitionGroup
-          appear
-          name="tag-item"
-          tag="div"
-          class="tags-cloud"
+      <div v-else-if="sortedTags.length > 0" class="tags-grid">
+        <div
+          v-for="(tagItem, index) in sortedTags"
+          :key="tagItem.tag"
+          class="stagger-item"
+          :style="{ '--index': index }"
         >
           <NuxtLink
-            v-for="(tagItem, index) in sortedTags"
-            :key="tagItem.tag"
             :to="localePath('/tags/' + tagItem.tag)"
-            class="tag-card"
-            :class="`tag-size-${getTagSize(tagItem.count)}`"
-            :style="{ '--i': index }"
+            class="tag-luxury-card group"
+            :class="getTagSizeClass(tagItem.count)"
           >
-            <div class="tag-card-inner">
-              <!-- 标签图标 -->
-              <div class="tag-icon-wrapper">
-                <Icon name="i-lucide-hash" class="tag-icon" />
-              </div>
+            <div class="card-glass-content">
+              <!-- 装饰背景 -->
+              <div class="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-primary-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               
-              <!-- 标签内容 -->
-              <div class="tag-content">
-                <h3 class="tag-name">
-                  {{ tagItem.tag }}
-                </h3>
-                <div class="tag-count">
-                  <Icon name="i-lucide-file-text" class="count-icon" />
-                  <span>{{ tagItem.count }}</span>
+              <div class="flex items-center justify-between w-full">
+                <div class="flex items-center gap-4">
+                  <div class="tag-icon-box">
+                    <UIcon name="i-lucide-hash" class="w-5 h-5 text-primary-500" />
+                  </div>
+                  <div class="flex flex-col">
+                    <h3 class="tag-label">
+                      {{ tagItem.tag }}
+                    </h3>
+                    <span class="tag-meta">
+                      {{ tagItem.count }} {{ $t('blog.articles') }}
+                    </span>
+                  </div>
+                </div>
+                
+                <div class="go-button opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300">
+                  <UIcon name="i-lucide-arrow-right" class="w-5 h-5 text-primary-500" />
                 </div>
               </div>
-
-              <!-- 悬停效果 -->
-              <div class="tag-hover-effect" />
-              
-              <!-- 箭头指示器 -->
-              <div class="tag-arrow">
-                <Icon name="i-lucide-arrow-right" class="arrow-icon" />
-              </div>
             </div>
+            
+            <!-- 悬浮光影 -->
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-500/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           </NuxtLink>
-        </TransitionGroup>
+        </div>
       </div>
 
       <!-- 空状态 -->
-      <div v-else class="empty-state">
-        <div class="empty-state-content">
-          <div class="empty-icon-wrapper">
-            <Icon name="i-lucide-tags" class="empty-icon" />
-          </div>
-          <div class="empty-text">
-            <h3 class="empty-title">{{ t('blog.noTags') }}</h3>
-            <p class="empty-description">{{ t('blog.noTagsDesc') }}</p>
-          </div>
+      <div v-else class="py-32 text-center">
+        <div class="mb-8 relative inline-block">
+          <div class="absolute inset-0 bg-primary-500/20 blur-3xl rounded-full" />
+          <UIcon name="i-lucide-tag-off" class="text-8xl text-gray-200 dark:text-gray-800 relative z-10" />
         </div>
+        <h3 class="text-2xl font-black text-gray-900 dark:text-white mb-3 uppercase tracking-tight">
+          {{ t('blog.noTags') }}
+        </h3>
+        <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto font-medium">
+          {{ t('blog.noTagsDesc') }}
+        </p>
       </div>
     </UContainer>
-  </main>
+  </div>
 </template>
 
 <style scoped>
-/* ===== 页面标题区域 ===== */
-.tags-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin-bottom: 3rem;
-  gap: 1.5rem;
+.tags-explorer-premium {
+  min-height: 100vh;
 }
 
-.header-icon-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 5rem;
-  height: 5rem;
-  border-radius: 1.5rem;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.1));
-  border: 1px solid rgba(99, 102, 241, 0.2);
+/* 进场动画 */
+@keyframes pageEntrance {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-page-entrance {
+  animation: pageEntrance 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
-.dark .header-icon-wrapper {
-  background: linear-gradient(135deg, rgba(129, 140, 248, 0.1), rgba(99, 102, 241, 0.1));
-  border-color: rgba(129, 140, 248, 0.2);
+/* 标题视觉 */
+.tags-hero-title {
+  font-size: 4rem;
+  font-weight: 950;
+  line-height: 1.1;
+  letter-spacing: -0.06em;
+  color: #0f172a;
 }
-
-.header-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  color: #6366F1;
-  z-index: 1;
-}
-
-.dark .header-icon {
-  color: #818CF8;
-}
-
-.icon-glow {
-  position: absolute;
-  inset: -20%;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.2), transparent 70%);
-  filter: blur(20px);
-  animation: pulse 3s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
-
-.header-title {
-  font-size: 3rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-}
-
-@media (max-width: 768px) {
-  .header-title {
-    font-size: 2rem;
-  }
-}
-
-.header-description {
-  font-size: 1.125rem;
-  line-height: 1.6;
-  color: rgb(113, 113, 122);
-  max-width: 42rem;
-}
-
-.dark .header-description {
-  color: rgb(161, 161, 170);
-}
-
-/* ===== 统计卡片 ===== */
-.stats-cards {
-  display: flex;
-  gap: 1.5rem;
-  margin-top: 1rem;
+.dark .tags-hero-title {
+  color: #f8fafc;
+  text-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 @media (max-width: 640px) {
-  .stats-cards {
-    flex-direction: column;
-    width: 100%;
-  }
+  .tags-hero-title { font-size: 2.75rem; }
 }
 
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.25rem 2rem;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
-}
-
-.dark .stat-card {
-  background: rgba(39, 39, 42, 0.8);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.stat-icon {
-  width: 2rem;
-  height: 2rem;
-  color: #6366F1;
-}
-
-.dark .stat-icon {
-  color: #818CF8;
-}
-
-.stat-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.stat-value {
-  font-size: 1.875rem;
-  font-weight: 700;
-  color: rgb(24, 24, 27);
-  line-height: 1;
-}
-
-.dark .stat-value {
-  color: rgb(250, 250, 250);
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: rgb(113, 113, 122);
-}
-
-.dark .stat-label {
-  color: rgb(161, 161, 170);
-}
-
-/* ===== 标签云容器 ===== */
-.tags-cloud-container {
-  position: relative;
-}
-
-.tags-cloud {
+/* 网格布局 */
+.tags-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 1.5rem;
 }
 
-@media (max-width: 640px) {
-  .tags-cloud {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ===== 标签卡片 ===== */
-.tag-card {
+/* 卡片样式 */
+.tag-luxury-card {
   position: relative;
   display: block;
-  text-decoration: none;
-  border-radius: 1rem;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.tag-card-inner {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1.5rem;
   background: white;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  border-radius: 1rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2rem;
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.dark .tag-card-inner {
-  background: rgba(39, 39, 42, 0.5);
-  border-color: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
+.dark .tag-luxury-card {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
-.tag-card:hover .tag-card-inner {
-  transform: translateY(-4px);
+.card-glass-content {
+  position: relative;
+  z-index: 10;
+  padding: 1.5rem;
+  display: flex;
+  height: 100%;
+}
+
+.tag-luxury-card:hover {
+  transform: translateY(-8px) scale(1.02);
   border-color: rgba(99, 102, 241, 0.3);
-  box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 30px 60px -12px rgba(99, 102, 241, 0.15);
 }
 
-.dark .tag-card:hover .tag-card-inner {
+.dark .tag-luxury-card:hover {
   border-color: rgba(129, 140, 248, 0.3);
-  box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(129, 140, 248, 0.2);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* 标签大小变体 */
-.tag-size-xl .tag-card-inner {
-  padding: 2rem;
-}
+/* 标签大小分级 */
+.level-5 .tag-label { font-size: 1.5rem; font-weight: 900; }
+.level-4 .tag-label { font-size: 1.25rem; font-weight: 800; }
+.level-3 .tag-label { font-size: 1.125rem; font-weight: 800; }
+.level-2 .tag-label { font-size: 1rem; font-weight: 700; }
+.level-1 .tag-label { font-size: 0.9375rem; font-weight: 700; }
 
-.tag-size-xl .tag-name {
-  font-size: 1.5rem;
+.tag-label {
+  color: #1e293b;
+  line-height: 1.2;
+  transition: color 0.3s;
 }
+.dark .tag-label { color: #f1f5f9; }
+.tag-luxury-card:hover .tag-label { color: #6366f1; }
 
-.tag-size-lg .tag-name {
-  font-size: 1.25rem;
-}
-
-.tag-size-md .tag-name {
-  font-size: 1.125rem;
-}
-
-.tag-size-sm .tag-name {
-  font-size: 1rem;
-}
-
-/* 标签图标 */
-.tag-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 0.75rem;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.1));
-  border: 1px solid rgba(99, 102, 241, 0.2);
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-
-.dark .tag-icon-wrapper {
-  background: linear-gradient(135deg, rgba(129, 140, 248, 0.1), rgba(99, 102, 241, 0.1));
-  border-color: rgba(129, 140, 248, 0.2);
-}
-
-.tag-card:hover .tag-icon-wrapper {
-  transform: rotate(12deg) scale(1.1);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(79, 70, 229, 0.2));
-}
-
-.tag-icon {
-  width: 1.5rem;
-  height: 1.5rem;
-  color: #6366F1;
-}
-
-.dark .tag-icon {
-  color: #818CF8;
-}
-
-/* 标签内容 */
-.tag-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.tag-name {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: rgb(24, 24, 27);
-  transition: color 0.2s ease;
-}
-
-.dark .tag-name {
-  color: rgb(250, 250, 250);
-}
-
-.tag-card:hover .tag-name {
-  color: #6366F1;
-}
-
-.dark .tag-card:hover .tag-name {
-  color: #818CF8;
-}
-
-.tag-count {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.875rem;
-  color: rgb(113, 113, 122);
-}
-
-.dark .tag-count {
-  color: rgb(161, 161, 170);
-}
-
-.count-icon {
-  width: 0.875rem;
-  height: 0.875rem;
-}
-
-/* 悬停效果 */
-.tag-hover-effect {
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.1));
-  border-radius: 1rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  z-index: -1;
-}
-
-.tag-card:hover .tag-hover-effect {
-  opacity: 1;
-}
-
-/* 箭头指示器 */
-.tag-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.5rem;
-  background: rgba(99, 102, 241, 0.1);
-  opacity: 0;
-  transform: translateX(-8px);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dark .tag-arrow {
-  background: rgba(129, 140, 248, 0.1);
-}
-
-.tag-card:hover .tag-arrow {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.arrow-icon {
-  width: 1rem;
-  height: 1rem;
-  color: #6366F1;
-}
-
-.dark .arrow-icon {
-  color: #818CF8;
-}
-
-/* ===== 标签动画 ===== */
-.tag-item-enter-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.tag-item-enter-from {
-  opacity: 0;
-  transform: translateY(20px) scale(0.95);
-}
-
-.tag-item-enter-active {
-  transition-delay: calc(var(--i) * 0.05s);
-}
-
-/* ===== 空状态 ===== */
-.empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-  padding: 3rem 1.5rem;
-}
-
-.empty-state-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2rem;
-  max-width: 28rem;
-  text-align: center;
-}
-
-.empty-icon-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 6rem;
-  height: 6rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(79, 70, 229, 0.1));
-  border: 1px solid rgba(99, 102, 241, 0.2);
-}
-
-.dark .empty-icon-wrapper {
-  background: linear-gradient(135deg, rgba(129, 140, 248, 0.1), rgba(99, 102, 241, 0.1));
-  border-color: rgba(129, 140, 248, 0.2);
-}
-
-.empty-icon {
-  width: 3rem;
-  height: 3rem;
-  color: #6366F1;
-}
-
-.dark .empty-icon {
-  color: #818CF8;
-}
-
-.empty-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.empty-title {
-  font-size: 1.5rem;
+.tag-meta {
+  font-size: 0.75rem;
   font-weight: 700;
-  color: rgb(24, 24, 27);
+  color: #94a3b8;
+  letter-spacing: 0.02em;
 }
 
-.dark .empty-title {
-  color: rgb(250, 250, 250);
+.tag-icon-box {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  border-radius: 1rem;
+  transition: all 0.3s;
+}
+.dark .tag-icon-box { background: rgba(99, 102, 241, 0.1); }
+
+.tag-luxury-card:hover .tag-icon-box {
+  transform: rotate(15deg);
+  background: #6366f1;
+}
+.tag-luxury-card:hover .tag-icon-box i,
+.tag-luxury-card:hover .tag-icon-box .w-5 {
+  color: white !important;
 }
 
-.empty-description {
-  font-size: 1rem;
-  line-height: 1.6;
-  color: rgb(113, 113, 122);
+/* 加载动画 */
+.loading-spinner-premium {
+  width: 50px;
+  height: 50px;
+  border: 4px solid rgba(99, 102, 241, 0.1);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spinner 0.8s linear infinite;
 }
 
-.dark .empty-description {
-  color: rgb(161, 161, 170);
+@keyframes spinner {
+  to { transform: rotate(360deg); }
+}
+
+/* Stagger 逐行入场 */
+.stagger-item {
+  opacity: 0;
+  animation: itemSlideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  animation-delay: calc(var(--index) * 0.04s + 0.3s);
+}
+
+@keyframes itemSlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 微动 */
+@keyframes bounceSubtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.animate-bounce-subtle {
+  animation: bounceSubtle 3s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulseExtraSlow 8s ease-in-out infinite;
+}
+@keyframes pulseExtraSlow {
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.15); opacity: 0.6; }
 }
 </style>
