@@ -153,7 +153,7 @@
               </UFormField>
             </div>
 
-            <div class="col-span-12 lg:col-span-3 console-card p-4">
+            <div class="col-span-12 lg:col-span-6 console-card p-4">
               <div class="flex items-center gap-2 mb-3">
                 <div class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('admin.art.tags') }}</span>
@@ -183,7 +183,7 @@
               </div>
             </div>
 
-            <div class="col-span-12 lg:col-span-3 console-card p-4">
+            <div class="col-span-12 lg:col-span-6 console-card p-4">
               <div class="flex items-center gap-2 mb-3">
                 <div class="w-1.5 h-1.5 rounded-full bg-violet-500 shadow-[0_0_8px_#8b5cf6]" />
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('admin.art.cover') }}</span>
@@ -203,6 +203,30 @@
                   variant="soft"
                   class="rounded-xl shadow-sm hover:bg-indigo-500/10"
                   @click="uploadCoverImage"
+                />
+              </div>
+            </div>
+
+            <div class="col-span-12 lg:col-span-6 console-card p-4">
+              <div class="flex items-center gap-2 mb-3">
+                <div class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6]" />
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('admin.art.shortId') }}</span>
+              </div>
+              <div class="flex gap-2">
+                <UInput
+                  v-model="metadata.shortId"
+                  :placeholder="$t('admin.art.shortIdPlaceholder')"
+                  size="md"
+                  variant="none"
+                  class="flex-1 cyber-input-minimal"
+                />
+                <UButton
+                  icon="i-lucide-refresh-cw"
+                  size="md"
+                  color="primary"
+                  variant="soft"
+                  class="rounded-xl shadow-sm hover:bg-indigo-500/10"
+                  @click="metadata.shortId = Math.random().toString(36).substring(2, 8).toUpperCase()"
                 />
               </div>
             </div>
@@ -380,6 +404,7 @@ interface FrontMatter {
   tags?: string[]
   published?: boolean | string | number
   isSticky?: boolean
+  shortId?: string
 }
 
 const { t } = useI18n()
@@ -406,7 +431,8 @@ const metadata = ref({
   image: '',
   tags: [] as string[],
   published: true,
-  isSticky: false
+  isSticky: false,
+  shortId: ''
 })
 const tagsInput = ref('')
 const coverImageInput = ref<HTMLInputElement>()
@@ -443,7 +469,7 @@ const items = computed(() => [
 // 从 API 返回的 frontMatter 填充表单
 const loadMetadata = (frontMatter: FrontMatter) => {
   metadata.value = {
-    title: frontMatter.title || props.article.path,
+    title: frontMatter.title || props.article.path || '',
     date: frontMatter.date
       ? new Date(frontMatter.date).toISOString().slice(0, 16)
       : new Date().toISOString().slice(0, 16),
@@ -451,8 +477,8 @@ const loadMetadata = (frontMatter: FrontMatter) => {
     image: frontMatter.image || '',
     tags: Array.isArray(frontMatter.tags) ? frontMatter.tags : [],
     published: frontMatter.published === true || frontMatter.published === 'true' || frontMatter.published === 1,
-    isSticky: !!frontMatter.isSticky
-
+    isSticky: !!frontMatter.isSticky,
+    shortId: (frontMatter.shortId as string) || (props.article.newBlog ? Math.random().toString(36).substring(2, 8).toUpperCase() : '')
   }
   tagsInput.value = metadata.value.tags.join(', ')
 
@@ -478,7 +504,8 @@ const generateFrontmatter = (): string => {
     image: metadata.value.image || '',
     tags: metadata.value.tags,
     published: metadata.value.published,
-    isSticky: metadata.value.isSticky
+    isSticky: metadata.value.isSticky,
+    shortId: metadata.value.shortId || Math.random().toString(36).substring(2, 8).toUpperCase()
   }
   return matter.stringify('', data).trim()
 }
@@ -764,6 +791,7 @@ const saveArticle = async () => {
 onMounted(() => {
   if (props.article.newBlog) {
     editTextContent.value = ''
+    loadMetadata({})
     editArticle(false)
     return
   }
@@ -789,6 +817,7 @@ watchDeep(
   (article) => {
     if (article.newBlog) {
       editTextContent.value = ''
+      loadMetadata({})
       editArticle(false)
       return
     }

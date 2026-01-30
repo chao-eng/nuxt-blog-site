@@ -17,15 +17,20 @@ export { dbCommentConfig, dbUmamiConfig, dbS3Config }
 /**
  * 初始化数据库（创建所有表，首次运行时执行）
  */
-function initDB(): void {
-  initUserTable()
-  initArticleTable()
-  initTravelTable()
-  initSettingsTables()
+export function initDB(): void {
+  console.log('🚀 [DB] 准备启动初始化流程...')
+  try {
+    initUserTable()
+    console.log('✅ [DB] 用户系统就绪')
+    initArticleTable()
+    console.log('✅ [DB] 文章系统就绪')
+    initTravelTable()
+    initSettingsTables()
+    console.log('✨ [DB] 数据库全部就绪')
+  } catch (error: any) {
+    console.error('❌ [DB] 初始化致命错误:', error.message)
+  }
 }
-
-// 执行初始化
-initDB()
 
 /**
  * 兼容旧版本的默认导出

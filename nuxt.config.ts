@@ -55,6 +55,7 @@ export default defineNuxtConfig({
         '/api/blogs/getArticleTags',
         '/api/fetch*',
         '/api/article/fetch*',
+        '/api/s/*',
         '/api/travel/records',
         '/api/comments/config',
         '/api/umami/config',

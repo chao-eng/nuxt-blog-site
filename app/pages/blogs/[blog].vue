@@ -51,6 +51,7 @@ const { data: articleData, error } = await useAsyncData(
         tags: string[]
         published: boolean
         isSticky: boolean
+        shortId: string
       }
       author: {
         author: string
@@ -84,10 +85,11 @@ const { data: articleData, error } = await useAsyncData(
         /!\[(.*?)\]\(\1\)/g, // 匹配 ![xxx](xxx) 格式（[]和()内容相同）
         `![$1](${prefix}$1)` // 替换为 ![xxx](前缀/xxx)
       ),
-      published: res?.data?.frontMatter?.published ?? false,
+      published: (res?.data?.frontMatter?.published as any) ?? false,
       author: res?.data?.author?.author || '',
       avatar: res?.data?.author?.avatar || '',
-      adjacent: res?.data?.adjacent || { prev: null, next: null }
+      adjacent: res?.data?.adjacent || { prev: null, next: null },
+      shortId: (res?.data?.frontMatter?.shortId as any) || ''
     }
   }
 )
@@ -100,7 +102,7 @@ if (error.value) {
   })
 }
 
-const article = articleData.value!
+const article = computed(() => articleData.value!)
 
 // 客户端逻辑
 const tocItems = ref<TocItem[]>([])
@@ -221,8 +223,8 @@ const md = new MarkdownIt({
 
 // 直接渲染 markdown（在 setup 中执行，服务端和客户端都会运行）
 const renderedHtml = computed(() => {
-  if (article.content) {
-    return md.render(article.content)
+  if (article.value.content) {
+    return md.render(article.value.content)
   }
   return ''
 })
@@ -273,23 +275,23 @@ onUnmounted(() => {
 
 // SEO优化
 useHead({
-  title: article.title,
+  title: article.value.title,
   meta: [
     {
       name: 'description',
-      content: article.description || article.title
+      content: article.value.description || article.value.title
     },
     {
       property: 'og:title',
-      content: article.title
+      content: article.value.title
     },
     {
       property: 'og:description',
-      content: article.description || article.title
+      content: article.value.description || article.value.title
     },
     {
       property: 'og:image',
-      content: article.image
+      content: article.value.image
     }
   ]
 })
@@ -315,7 +317,7 @@ if (configData.value && configData.value.success) {
 
 const giscusConfig = computed(() => ({
   theme: colorMode.value === 'dark' ? 'gruvbox_dark' : 'noborder_light',
-  term: 'blogs/' + article.path,
+  term: 'blogs/' + article.value.path,
   repo: commentConfig.value.repo,
   repoId: commentConfig.value.repoId,
   category: commentConfig.value.category,
@@ -346,7 +348,7 @@ function handleGiscusMessage(event: MessageEvent) {
     }
     if (count > commentState.current && commentState.isReady) {
       const newCount = count - commentState.current
-      showRealTimeNotification(t('blog.newCommentsNotification', { title: article.title, count: newCount }))
+      showRealTimeNotification(t('blog.newCommentsNotification', { title: article.value.title, count: newCount }))
     }
     commentState.current = count
   }
@@ -370,6 +372,39 @@ watch(() => $router.currentRoute.value.path, () => {
   commentState.initial = null
   commentState.isReady = false
 })
+
+const toast = useToast()
+const copyShortLink = () => {
+  const host = window.location.origin
+  // 确保从 computed 属性中正确取值
+  const currentArticle = article.value
+  const shareUrl = currentArticle?.shortId 
+    ? `${host}/s/${currentArticle.shortId}`
+    : window.location.href
+  
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    toast.add({
+      title: t('blog.shortLinkCopied'),
+      description: shareUrl,
+      color: 'primary',
+      icon: 'i-lucide-check-circle'
+    })
+  }).catch(err => {
+    console.error('Copy failed:', err)
+    // 降级处理：手动模拟复制
+    const textArea = document.createElement("textarea")
+    textArea.value = shareUrl
+    document.body.appendChild(textArea)
+    textArea.select()
+    try {
+      document.execCommand('copy')
+      toast.add({ title: t('blog.shortLinkCopied'), color: 'primary' })
+    } catch (e) {
+      toast.add({ title: '复制失败', color: 'error' })
+    }
+    document.body.removeChild(textArea)
+  })
+}
 </script>
 
 <template>
@@ -412,30 +447,51 @@ watch(() => $router.currentRoute.value.path, () => {
               </h1>
 
               <!-- 精简元数据卡片 -->
-              <div class="meta-card-premium">
-                <div class="flex items-center gap-4">
-                  <UAvatar
-                    :src="article.avatar"
-                    :alt="article.author"
-                    size="lg"
-                    class="ring-2 ring-primary-500/20 shadow-xl"
-                  />
+              <div class="meta-card-premium flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 sm:gap-4">
+                <div class="flex items-center gap-5">
+                  <!-- 头像区域（保留高级发光特效） -->
+                  <div class="relative group/avatar">
+                    <div class="absolute -inset-2 bg-gradient-to-tr from-primary-500/30 to-indigo-500/30 rounded-full blur-lg opacity-0 group-hover/avatar:opacity-100 transition-all duration-700" />
+                    <UAvatar
+                      :src="article.avatar"
+                      :alt="article.author"
+                      size="xl"
+                      class="relative z-10 ring-4 ring-white/10 dark:ring-white/5 shadow-2xl"
+                    />
+                  </div>
+
                   <div class="flex flex-col">
-                    <span class="text-base font-black text-gray-900 dark:text-white leading-none mb-1.5">
+                    <h2 class="text-lg lg:text-xl font-black text-gray-900 dark:text-white leading-none mb-2.5 tracking-tight">
                       {{ article.author }}
-                    </span>
-                    <div class="flex items-center gap-3 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                      <span class="flex items-center gap-1.5">
-                        <UIcon name="i-lucide-calendar" class="w-3.5 h-3.5" />
+                    </h2>
+                    <div class="flex flex-wrap items-center gap-y-2 gap-x-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                      <span class="flex items-center gap-2">
+                        <UIcon name="i-lucide-calendar" class="w-4 h-4 text-primary-500/60" />
                         {{ formatDate(article.date) }}
                       </span>
-                      <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
-                      <span class="flex items-center gap-1.5">
-                        <UIcon name="i-lucide-clock" class="w-3.5 h-3.5" />
-                        {{ $t('blog.readTime', { time: Math.ceil(article.content.length / 500) }) }}
+                      <span class="hidden xs:block w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
+                      <span class="flex items-center gap-2">
+                        <UIcon name="i-lucide-clock" class="w-4 h-4 text-indigo-500/60" />
+                        {{ $t('blog.readTime', { time: Math.ceil((article.content?.length || 0) / 500) }) }}
                       </span>
                     </div>
                   </div>
+                </div>
+
+                <!-- 分享区：独立右置，更具仪式感 -->
+                <div class="w-full sm:w-auto flex items-center justify-end border-t sm:border-t-0 border-gray-100 dark:border-white/5 pt-4 sm:pt-0">
+                  <UTooltip :text="$t('blog.copyShortLink')" :shortcuts="['⌘', 'C']">
+                    <button
+                      class="premium-share-action group"
+                      @click="copyShortLink"
+                    >
+                      <div class="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 transition-all duration-300 group-hover:bg-primary-500/10 group-hover:border-primary-500/30 group-hover:translate-y-[-2px] group-active:translate-y-0 shadow-md group-hover:shadow-primary-500/20">
+                        <UIcon name="i-lucide-share-2" class="w-4 h-4 text-primary-500 group-hover:rotate-12 transition-transform" />
+                        <span class="text-[10px] font-black uppercase text-gray-500 dark:text-gray-400 group-hover:text-primary-500 transition-colors">SHARE</span>
+                      </div>
+                      <!-- 这种位置不再需要波纹，改用底座反馈 -->
+                    </button>
+                  </UTooltip>
                 </div>
               </div>
 
@@ -478,6 +534,27 @@ watch(() => $router.currentRoute.value.path, () => {
               <div class="flex flex-col items-center mb-12 text-center opacity-70">
                 <div class="w-24 h-1 bg-gradient-to-r from-transparent via-primary-500/50 to-transparent mb-6 transition-all hover:w-32" />
                 <p class="text-[10px] font-black uppercase tracking-[0.4em] font-outfit text-gray-400">End of Article</p>
+              </div>
+
+              <!-- 底部分享区：更有仪式感的呼吁 -->
+              <div class="flex flex-col items-center mb-16 px-4">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">{{ $t('blog.shareShortLink') || 'Share this Article' }}</p>
+                <button
+                  class="group relative flex items-center justify-center gap-4 px-12 py-4 rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 active:scale-95"
+                  @click="copyShortLink"
+                >
+                  <!-- 动态玻璃背景 -->
+                  <div class="absolute inset-0 bg-primary-500/5 dark:bg-white/5 backdrop-blur-md transition-colors group-hover:bg-primary-500/10" />
+                  <div class="absolute inset-0 border border-primary-500/10 dark:border-white/10 transition-all duration-500 group-hover:border-primary-500/30 group-hover:shadow-[0_0_40px_-10px_rgba(99,102,241,0.2)]" />
+                  
+                  <UIcon name="i-lucide-share-2" class="relative z-10 w-5 h-5 text-primary-500 group-hover:rotate-12 transition-transform duration-500" />
+                  <span class="relative z-10 text-sm font-black uppercase tracking-[0.1em] text-gray-700 dark:text-gray-200 group-hover:text-primary-500 transition-colors">
+                    {{ article.shortId ? $t('blog.copyShortLink') : $t('blog.shareShortLink') }}
+                  </span>
+
+                  <!-- 悬浮扫光特效 -->
+                  <div class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
+                </button>
               </div>
 
               <!-- 相关标签 -->
@@ -689,6 +766,24 @@ watch(() => $router.currentRoute.value.path, () => {
 
 .dark .premium-tag { background: rgba(255, 255, 255, 0.05); color: #94a3b8; }
 .dark .premium-tag:hover { background: #6366f1; color: white; }
+
+.meta-card-premium {
+  padding: 1rem 1.5rem;
+  background: white;
+  border: 1px solid #f1f5f9;
+  border-radius: 2rem;
+  box-shadow: 0 4px 20px -5px rgba(0,0,0,0.05);
+  transition: all 0.3s;
+  position: relative;
+  z-index: 10;
+}
+
+.dark .meta-card-premium {
+  background: rgba(15, 27, 42, 0.4);
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+  backdrop-filter: blur(20px);
+}
 
 /* 摘要 */
 .premium-abstract {

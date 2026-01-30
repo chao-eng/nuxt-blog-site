@@ -33,6 +33,49 @@ export function initArticleTable(): void {
     );
   `)
   createArticleTable.run()
+
+  // 架构演进：添加 shortId 字段（如果不存在）
+  try {
+    console.log('📬 正在检查 articles 表架构更新...')
+    const tableInfo = db.prepare("PRAGMA table_info(articles)").all() as any[]
+    const hasShortId = tableInfo.some(col => col.name === 'shortId')
+
+    if (!hasShortId) {
+      console.log('📝 正在添加 shortId 字段...')
+      db.prepare('ALTER TABLE articles ADD COLUMN shortId TEXT').run()
+      console.log('✅ shortId 字段添加完成')
+    }
+  } catch (e: any) {
+    console.error('❌ 数据库迁移阶段1失败:', e.message)
+  }
+
+  // 历史数据处理：为没有 shortId 的文章生成短 ID
+  const articlesWithoutShortId = dbCommon.all<{ path: string }>('SELECT path FROM articles WHERE shortId IS NULL OR shortId = ""')
+  if (articlesWithoutShortId.length > 0) {
+    console.log(`正在为 ${articlesWithoutShortId.length} 篇文章补全 shortId...`)
+    const generateShortId = () => Math.random().toString(36).substring(2, 8).toUpperCase()
+    const updateStmt = db.prepare('UPDATE articles SET shortId = ? WHERE path = ?')
+
+    // 使用事务提高效率
+    const transaction = db.transaction((articles) => {
+      for (const art of articles) {
+        let sid = generateShortId()
+        // 简单冲突检查（小规模数据够用）
+        updateStmt.run(sid, art.path)
+      }
+    })
+    transaction(articlesWithoutShortId)
+    console.log('✅ 历史数据 shortId 补全完成')
+  }
+
+  // 最后创建唯一索引
+  try {
+    console.log('📇 正在检查并创建 shortId 索引...')
+    db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_shortId ON articles(shortId)').run()
+    console.log('✅ shortId 索引创建/检查完成')
+  } catch (e: any) {
+    console.error('❌ 创建索引失败:', e.message)
+  }
 }
 
 /**
@@ -52,10 +95,11 @@ export const dbArticle = {
     if (!path) throw new Error('文章路径（path）不能为空')
 
     // 1. 检查 path 是否已存在（判断新增/编辑）
-    const existingArticle = dbCommon.get<Article>('SELECT path FROM articles WHERE path = ?', [path])
+    const existingArticle = dbCommon.get<Article>('SELECT path, shortId FROM articles WHERE path = ?', [path])
     const isEditMode = !!existingArticle
 
     const tagsStr = JSON.stringify(tags || [])
+    const shortId = params.shortId || (existingArticle?.shortId) || Math.random().toString(36).substring(2, 8).toUpperCase()
     // 转换为 1/0
     let publishedVal = 0
     const pub = params.published
@@ -75,8 +119,8 @@ export const dbArticle = {
         throw new Error('新增文章必须传入 标题、创建时间、发布状态等核心字段')
       }
       const sql = `
-        INSERT INTO articles (path, title, date, description, image, tags, published, userid, isSticky, content)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO articles (path, title, date, description, image, tags, published, userid, isSticky, content, shortId)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `
       return dbCommon.run(sql, [
         path,
@@ -88,7 +132,8 @@ export const dbArticle = {
         publishedVal,
         rest.userid,
         isStickyVal,
-        rest.content || null
+        rest.content || null,
+        shortId
       ])
     }
 
@@ -128,6 +173,10 @@ export const dbArticle = {
       updateFields.push('content = ?')
       updateParams.push(rest.content)
     }
+    if (params.shortId !== undefined) {
+      updateFields.push('shortId = ?')
+      updateParams.push(params.shortId)
+    }
 
     // 强制更新修改时间
     updateFields.push('modifyTime = CURRENT_TIMESTAMP')
@@ -139,6 +188,40 @@ export const dbArticle = {
     const sql = `UPDATE articles SET ${updateFields.join(', ')} WHERE path = ?`
     updateParams.push(path) // 拼接 path 条件
     return dbCommon.run(sql, updateParams)
+  },
+
+  /**
+   * 根据短 ID 查询文章路径
+   * @param shortId 短 ID
+   * @returns 文章对象或 null
+   */
+  getArticleByShortId: (shortId: string): Article | null => {
+    if (!shortId) return null
+    const sql = 'SELECT * FROM articles WHERE UPPER(shortId) = UPPER(?)'
+    const rawArticle = dbCommon.get<Omit<Article, 'tags'> & { tags: string }>(sql, [shortId])
+
+    if (!rawArticle) return null
+
+    // 解析 tags 字段
+    let tags: string[] = []
+    try {
+      tags = rawArticle.tags ? JSON.parse(rawArticle.tags) : []
+      if (!Array.isArray(tags)) tags = []
+    } catch (e) {
+      console.warn(`解析文章tags失败（shortId: ${shortId}）:`, e)
+      tags = []
+    }
+
+    return {
+      ...rawArticle,
+      tags,
+      isSticky: !!rawArticle.isSticky,
+      published: !!rawArticle.published,
+      isSaved: true,
+      author: '',
+      avatar: '',
+      newBlog: false
+    } as Article
   },
 
   /**

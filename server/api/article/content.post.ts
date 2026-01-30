@@ -3,6 +3,7 @@ import { promisify } from 'node:util'
 import * as fs from 'fs'
 import type { Result } from '~/types'
 import matter from 'gray-matter'
+import dbUtils from '../../db'
 
 const readArticle = async (dir: string): Promise<Result<unknown>> => {
   try {
@@ -11,7 +12,13 @@ const readArticle = async (dir: string): Promise<Result<unknown>> => {
     const filePath = path.join(basePath, dir, 'index.md')
     const content = await promisify(fs.readFile)(filePath, 'utf8')
     const { data: frontMatter, content: mdBody } = matter(content)
-    // console.log('读取到的文章frontMatter:', frontMatter);
+
+    // 从数据库补充元数据（如 shortId）
+    const dbArticle = dbUtils.article.getArticleByPath(dir)
+    if (dbArticle && dbArticle.shortId && !frontMatter.shortId) {
+      frontMatter.shortId = dbArticle.shortId
+    }
+
     return {
       success: true,
       err: '',

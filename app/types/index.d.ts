@@ -45,6 +45,7 @@ export interface Article {
   avatar: string
   newBlog: boolean | false
   isSticky: boolean // 是否置顶
+  shortId: string // 短链 ID
 }
 
 // 保存文章的入参类型（兼容新增和编辑）
@@ -55,6 +56,7 @@ type SaveArticleParams = Omit<Article, 'tags' | 'modifyTime' | 'content' | 'isSa
   date?: string
   content?: string
   userid: number
+  shortId?: string
 }
 
 export interface Customer {
