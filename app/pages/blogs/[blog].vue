@@ -805,9 +805,85 @@ const copyShortLink = () => {
   line-height: 1.9;
   color: #334155;
   background-color: transparent !important;
+
+  /* 标题层级优化 */
+  h1, h2, h3, h4, h5, h6 {
+    color: #1e293b !important;
+    font-weight: 800 !important;
+    margin-top: 2.5rem !important;
+    margin-bottom: 1.25rem !important;
+    line-height: 1.3 !important;
+  }
+
+  h1 { font-size: 2.25rem !important; border-bottom: 1px solid #f1f5f9 !important; padding-bottom: 0.5rem !important; }
+  h2 { font-size: 1.875rem !important; border-bottom: 1px solid #f8fafc !important; padding-bottom: 0.3rem !important; }
+  h3 { font-size: 1.5rem !important; }
+
+  /* 显式修复列表展示问题 */
+  ul {
+    list-style-type: disc !important;
+    padding-left: 1.8rem !important;
+    margin-bottom: 1.5rem !important;
+    list-style-position: outside !important;
+  }
+
+  ol {
+    list-style-type: decimal !important;
+    padding-left: 1.8rem !important;
+    margin-bottom: 1.5rem !important;
+    list-style-position: outside !important;
+  }
+
+  li {
+    margin-bottom: 0.6rem !important;
+    padding-left: 0.2rem !important;
+    &::marker {
+      color: #6366f1 !important; /* 赋予序号/圆点主题色 */
+      font-weight: 700 !important;
+    }
+  }
+
+  /* 处理嵌套列表 */
+  li > ul, li > ol {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* 嵌套列表标识符切换 */
+  ul ul, ol ul { list-style-type: circle !important; }
+  ul ul ul, ol ol ul { list-style-type: square !important; }
+
+  /* 引用块样式 */
+  blockquote {
+    margin: 2rem 0 !important;
+    padding: 1rem 1.5rem !important;
+    color: #475569 !important;
+    background: #f8fafc !important;
+    border-left: 4px solid #6366f1 !important;
+    border-radius: 0.5rem 1rem 1rem 0.5rem !important;
+    font-style: italic !important;
+    p { margin-bottom: 0 !important; }
+  }
+
+  /* 分割线 */
+  hr {
+    height: 1px !important;
+    background: linear-gradient(to right, transparent, #e2e8f0, transparent) !important;
+    border: none !important;
+    margin: 3rem 0 !important;
+  }
 }
 
-.dark :deep(.markdown-body) { color: #cbd5e1; }
+.dark :deep(.markdown-body) {
+  color: #cbd5e1;
+  h1, h2, h3, h4, h5, h6 { color: #f8fafc !important; border-bottom-color: rgba(255,255,255,0.05) !important; }
+  blockquote {
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: #94a3b8 !important;
+    border-left-color: #818cf8 !important;
+  }
+  hr { background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent) !important; }
+}
 
 /* 行内代码样式还原 */
 :deep(.markdown-body code:not(pre code)) {
