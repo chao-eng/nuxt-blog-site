@@ -1001,6 +1001,12 @@ const copyShortLink = () => {
   border-radius: 0.5rem;
   border-left: 2px solid transparent;
   transition: all 0.3s;
+  
+  /* 超出文本省略号截断 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .premium-anchors :deep(a.active) {
@@ -1024,6 +1030,11 @@ const copyShortLink = () => {
 .dark .premium-anchors :deep(a:hover:not(.active)) {
   color: #818cf8;
   background: rgba(255, 255, 255, 0.02);
+}
+
+.toc-body { 
+  overflow-y: auto; 
+  overflow-x: hidden; /* 强制隐藏横向滑块 */
 }
 
 .toc-body::-webkit-scrollbar { width: 4px; }
