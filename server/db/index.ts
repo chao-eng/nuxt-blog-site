@@ -17,15 +17,31 @@ export { dbCommentConfig, dbUmamiConfig, dbS3Config }
 /**
  * 初始化数据库（创建所有表，首次运行时执行）
  */
-function initDB(): void {
-  initUserTable()
-  initArticleTable()
-  initTravelTable()
-  initSettingsTables()
-}
+export function initDB(): void {
+  console.log('🚀 [DB] 准备启动初始化流程...')
+  try {
+    console.log('  - 正在初始化用户系统...')
+    initUserTable()
+    console.log('✅ [DB] 用户系统就绪')
 
-// 执行初始化
-initDB()
+    console.log('  - 正在初始化文章系统...')
+    initArticleTable()
+    console.log('✅ [DB] 文章系统就绪')
+
+    console.log('  - 正在初始化旅行系统...')
+    initTravelTable()
+    console.log('✅ [DB] 旅行系统就绪')
+
+    console.log('  - 正在初始化设置系统...')
+    initSettingsTables()
+    console.log('✅ [DB] 设置系统就绪')
+
+    console.log('✨ [DB] 数据库全部就绪')
+  } catch (error: any) {
+    console.error('❌ [DB] 初始化致命错误:', error.message)
+    console.error('堆栈跟踪:', error.stack)
+  }
+}
 
 /**
  * 兼容旧版本的默认导出

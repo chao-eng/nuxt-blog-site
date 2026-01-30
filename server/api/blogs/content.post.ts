@@ -25,7 +25,8 @@ const readArticle = async (dir: string): Promise<Result<unknown>> => {
         image: dbArticle.image,
         tags: dbArticle.tags,
         published: dbArticle.published,
-        isSticky: dbArticle.isSticky
+        isSticky: dbArticle.isSticky,
+        shortId: dbArticle.shortId
       }
     } else {
       // 回退到从文件系统读取
@@ -35,6 +36,11 @@ const readArticle = async (dir: string): Promise<Result<unknown>> => {
       const parsed = matter(content)
       frontMatter = parsed.data
       mdBody = parsed.content
+
+      // 即使从文件读取内容，也要从数据库补充 shortId
+      if (dbArticle && !frontMatter.shortId) {
+        frontMatter.shortId = dbArticle.shortId
+      }
     }
 
     const author = dbUtils.article.queryAuthor(dir)

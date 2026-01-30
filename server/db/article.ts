@@ -8,31 +8,67 @@ export function initArticleTable(): void {
   // 创建文章表
   const createArticleTable = db.prepare(`
     CREATE TABLE IF NOT EXISTS articles (
-      -- 路径作为主键（唯一标识文章，避免重复）
-      path TEXT PRIMARY KEY NOT NULL UNIQUE,
-      -- 文章标题（非空，确保每篇文章有标题）
-      title TEXT NOT NULL,
-      -- 创建时间（存储字符串格式，如 "2025-11-13" 或 "2025-11-13 14:30:00"）
-      date TEXT NOT NULL,
-      -- 文章描述（允许为空，短文本）
-      description TEXT,
-      -- 文章图片路径（允许为空）
-      image TEXT,
-      -- 标签：SQLite 无原生数组，存储为 JSON 字符串（如 '["mysql","float"]'）
-      tags TEXT NOT NULL DEFAULT '[]',
-      -- 是否发布：1 为发布，0 为草稿
-      published INTEGER NOT NULL DEFAULT 0,
-      -- 发布用户
-      userid INTEGER NOT NULL,
-      -- 是否首页置顶：1 为置顶 0为不指定
-      isSticky INTEGER DEFAULT 0,
-      -- MD 格式正文内容（允许为空，存储完整的 Markdown 内容）
-      content TEXT,
-      -- 修改时间：SQLite 支持 DATETIME 类型，自动存储时间戳
-      modifyTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      path TEXT PRIMARY KEY NOT NULL UNIQUE,  -- 文章路径（唯一标识）
+      title TEXT NOT NULL,                    -- 文章标题
+      date TEXT NOT NULL,                     -- 创建日期
+      description TEXT,                       -- 文章描述
+      image TEXT,                             -- 文章图片/封面
+      tags TEXT NOT NULL DEFAULT '[]',        -- 文章标签（JSON 字符串）
+      published INTEGER NOT NULL DEFAULT 0,   -- 是否发布 (1:是, 0:否)
+      userid INTEGER NOT NULL,                -- 所属用户 ID
+      isSticky INTEGER DEFAULT 0,             -- 是否首页置顶 (1:是, 0:否)
+      content TEXT,                           -- Markdown 正文内容
+      modifyTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 修改时间
     );
   `)
   createArticleTable.run()
+
+  // 架构演进：添加 shortId 字段（如果不存在）
+  try {
+    console.log('📬 正在检查 articles 表架构更新...')
+    const tableInfo = db.prepare("PRAGMA table_info('articles')").all() as any[]
+    const hasShortId = tableInfo.some(col => col.name === 'shortId')
+
+    if (!hasShortId) {
+      console.log('📝 正在添加 shortId 字段...')
+      db.prepare('ALTER TABLE articles ADD COLUMN shortId TEXT').run()
+      console.log('✅ shortId 字段添加完成')
+    }
+  } catch (e: any) {
+    console.error('❌ 数据库迁移阶段1失败:', e.message)
+  }
+
+  // 历史数据处理：为没有 shortId 的文章生成短 ID
+  // 仅在 shortId 字段确实存在时才运行（二次确认）
+  const tableCheck = db.prepare("PRAGMA table_info('articles')").all() as any[]
+  if (tableCheck.some(col => col.name === 'shortId')) {
+    const articlesWithoutShortId = dbCommon.all<{ path: string }>('SELECT path FROM articles WHERE shortId IS NULL OR shortId = \'\'')
+    if (articlesWithoutShortId.length > 0) {
+      console.log(`正在为 ${articlesWithoutShortId.length} 篇文章补全 shortId...`)
+      const generateShortId = () => Math.random().toString(36).substring(2, 8).toUpperCase()
+      const updateStmt = db.prepare('UPDATE articles SET shortId = ? WHERE path = ?')
+
+      // 使用事务提高效率
+      const transaction = db.transaction((articles) => {
+        for (const art of articles) {
+          let sid = generateShortId()
+          // 简单冲突检查（小规模数据够用）
+          updateStmt.run(sid, art.path)
+        }
+      })
+      transaction(articlesWithoutShortId)
+      console.log('✅ 历史数据 shortId 补全完成')
+    }
+  }
+
+  // 最后创建唯一索引
+  try {
+    console.log('📇 正在检查并创建 shortId 索引...')
+    db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_shortId ON articles(shortId)').run()
+    console.log('✅ shortId 索引创建/检查完成')
+  } catch (e: any) {
+    console.error('❌ 创建索引失败:', e.message)
+  }
 }
 
 /**
@@ -52,10 +88,11 @@ export const dbArticle = {
     if (!path) throw new Error('文章路径（path）不能为空')
 
     // 1. 检查 path 是否已存在（判断新增/编辑）
-    const existingArticle = dbCommon.get<Article>('SELECT path FROM articles WHERE path = ?', [path])
+    const existingArticle = dbCommon.get<Article>('SELECT path, shortId FROM articles WHERE path = ?', [path])
     const isEditMode = !!existingArticle
 
     const tagsStr = JSON.stringify(tags || [])
+    const shortId = params.shortId || (existingArticle?.shortId) || Math.random().toString(36).substring(2, 8).toUpperCase()
     // 转换为 1/0
     let publishedVal = 0
     const pub = params.published
@@ -75,8 +112,8 @@ export const dbArticle = {
         throw new Error('新增文章必须传入 标题、创建时间、发布状态等核心字段')
       }
       const sql = `
-        INSERT INTO articles (path, title, date, description, image, tags, published, userid, isSticky, content)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO articles (path, title, date, description, image, tags, published, userid, isSticky, content, shortId)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `
       return dbCommon.run(sql, [
         path,
@@ -88,7 +125,8 @@ export const dbArticle = {
         publishedVal,
         rest.userid,
         isStickyVal,
-        rest.content || null
+        rest.content || null,
+        shortId
       ])
     }
 
@@ -128,6 +166,10 @@ export const dbArticle = {
       updateFields.push('content = ?')
       updateParams.push(rest.content)
     }
+    if (params.shortId !== undefined) {
+      updateFields.push('shortId = ?')
+      updateParams.push(params.shortId)
+    }
 
     // 强制更新修改时间
     updateFields.push('modifyTime = CURRENT_TIMESTAMP')
@@ -139,6 +181,40 @@ export const dbArticle = {
     const sql = `UPDATE articles SET ${updateFields.join(', ')} WHERE path = ?`
     updateParams.push(path) // 拼接 path 条件
     return dbCommon.run(sql, updateParams)
+  },
+
+  /**
+   * 根据短 ID 查询文章路径
+   * @param shortId 短 ID
+   * @returns 文章对象或 null
+   */
+  getArticleByShortId: (shortId: string): Article | null => {
+    if (!shortId) return null
+    const sql = 'SELECT * FROM articles WHERE UPPER(shortId) = UPPER(?)'
+    const rawArticle = dbCommon.get<Omit<Article, 'tags'> & { tags: string }>(sql, [shortId])
+
+    if (!rawArticle) return null
+
+    // 解析 tags 字段
+    let tags: string[] = []
+    try {
+      tags = rawArticle.tags ? JSON.parse(rawArticle.tags) : []
+      if (!Array.isArray(tags)) tags = []
+    } catch (e) {
+      console.warn(`解析文章tags失败（shortId: ${shortId}）:`, e)
+      tags = []
+    }
+
+    return {
+      ...rawArticle,
+      tags,
+      isSticky: !!rawArticle.isSticky,
+      published: !!rawArticle.published,
+      isSaved: true,
+      author: '',
+      avatar: '',
+      newBlog: false
+    } as Article
   },
 
   /**

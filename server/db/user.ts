@@ -4,20 +4,22 @@ import { db, dbCommon } from './db'
  * 初始化用户表
  */
 export function initUserTable(): void {
-  // 创建用户表
+  console.log('  - 正在准备 admin_user 表 SQL...')
   const createUsersTable = db.prepare(`
     CREATE TABLE IF NOT EXISTS admin_user (
       id INTEGER PRIMARY KEY,  -- 自增主键
-      name TEXT NOT NULL, -- 昵称
+      name TEXT NOT NULL,      -- 昵称
       username TEXT UNIQUE NOT NULL, -- 用户名
-      password TEXT NOT NULL, -- 密码
+      password TEXT NOT NULL,  -- 密码
       email TEXT DEFAULT NULL, -- 邮箱
       avatar TEXT DEFAULT NULL, -- 头像
-      bio TEXT DEFAULT NULL, -- 个人简介
+      bio TEXT DEFAULT NULL,   -- 个人简介
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
+    );
   `)
+  console.log('  - 正在执行 admin_user 建表...')
   createUsersTable.run()
+  console.log('  - admin_user 建表完成')
 
   // 检查用户表是否为空
   const checkUserCount = db.prepare('SELECT COUNT(*) as count FROM admin_user')

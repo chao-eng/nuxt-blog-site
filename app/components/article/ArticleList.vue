@@ -22,10 +22,16 @@
             :class="selectedArticle?.path === article.path ? 'text-white' : 'text-primary-500'"
           />
           
-          <!-- 文章路径 -->
-          <span class="text-sm font-bold truncate tracking-tight flex-1">
-            {{ article.path }}
-          </span>
+          <!-- 文章路径与短号组合 -->
+          <div class="flex flex-col flex-1 min-w-0">
+            <span class="text-sm font-bold truncate tracking-tight">
+              {{ article.path }}
+            </span>
+            <span v-if="article.shortId" class="text-[9px] font-mono opacity-50 flex items-center gap-1 mt-0.5 uppercase">
+              <UIcon name="i-lucide-link-2" class="w-2.5 h-2.5" />
+              {{ article.shortId }}
+            </span>
+          </div>
 
           <!-- 状态标识 -->
           <div class="flex items-center gap-1.5 flex-shrink-0">
