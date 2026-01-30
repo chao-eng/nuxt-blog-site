@@ -8,28 +8,17 @@ export function initArticleTable(): void {
   // 创建文章表
   const createArticleTable = db.prepare(`
     CREATE TABLE IF NOT EXISTS articles (
-      -- 路径作为主键（唯一标识文章，避免重复）
-      path TEXT PRIMARY KEY NOT NULL UNIQUE,
-      -- 文章标题（非空，确保每篇文章有标题）
-      title TEXT NOT NULL,
-      -- 创建时间（存储字符串格式，如 "2025-11-13" 或 "2025-11-13 14:30:00"）
-      date TEXT NOT NULL,
-      -- 文章描述（允许为空，短文本）
-      description TEXT,
-      -- 文章图片路径（允许为空）
-      image TEXT,
-      -- 标签：SQLite 无原生数组，存储为 JSON 字符串（如 '["mysql","float"]'）
-      tags TEXT NOT NULL DEFAULT '[]',
-      -- 是否发布：1 为发布，0 为草稿
-      published INTEGER NOT NULL DEFAULT 0,
-      -- 发布用户
-      userid INTEGER NOT NULL,
-      -- 是否首页置顶：1 为置顶 0为不指定
-      isSticky INTEGER DEFAULT 0,
-      -- MD 格式正文内容（允许为空，存储完整的 Markdown 内容）
-      content TEXT,
-      -- 修改时间：SQLite 支持 DATETIME 类型，自动存储时间戳
-      modifyTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      path TEXT PRIMARY KEY NOT NULL UNIQUE,  -- 文章路径（唯一标识）
+      title TEXT NOT NULL,                    -- 文章标题
+      date TEXT NOT NULL,                     -- 创建日期
+      description TEXT,                       -- 文章描述
+      image TEXT,                             -- 文章图片/封面
+      tags TEXT NOT NULL DEFAULT '[]',        -- 文章标签（JSON 字符串）
+      published INTEGER NOT NULL DEFAULT 0,   -- 是否发布 (1:是, 0:否)
+      userid INTEGER NOT NULL,                -- 所属用户 ID
+      isSticky INTEGER DEFAULT 0,             -- 是否首页置顶 (1:是, 0:否)
+      content TEXT,                           -- Markdown 正文内容
+      modifyTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- 修改时间
     );
   `)
   createArticleTable.run()
@@ -37,7 +26,7 @@ export function initArticleTable(): void {
   // 架构演进：添加 shortId 字段（如果不存在）
   try {
     console.log('📬 正在检查 articles 表架构更新...')
-    const tableInfo = db.prepare("PRAGMA table_info(articles)").all() as any[]
+    const tableInfo = db.prepare("PRAGMA table_info('articles')").all() as any[]
     const hasShortId = tableInfo.some(col => col.name === 'shortId')
 
     if (!hasShortId) {
@@ -50,22 +39,26 @@ export function initArticleTable(): void {
   }
 
   // 历史数据处理：为没有 shortId 的文章生成短 ID
-  const articlesWithoutShortId = dbCommon.all<{ path: string }>('SELECT path FROM articles WHERE shortId IS NULL OR shortId = ""')
-  if (articlesWithoutShortId.length > 0) {
-    console.log(`正在为 ${articlesWithoutShortId.length} 篇文章补全 shortId...`)
-    const generateShortId = () => Math.random().toString(36).substring(2, 8).toUpperCase()
-    const updateStmt = db.prepare('UPDATE articles SET shortId = ? WHERE path = ?')
+  // 仅在 shortId 字段确实存在时才运行（二次确认）
+  const tableCheck = db.prepare("PRAGMA table_info('articles')").all() as any[]
+  if (tableCheck.some(col => col.name === 'shortId')) {
+    const articlesWithoutShortId = dbCommon.all<{ path: string }>('SELECT path FROM articles WHERE shortId IS NULL OR shortId = \'\'')
+    if (articlesWithoutShortId.length > 0) {
+      console.log(`正在为 ${articlesWithoutShortId.length} 篇文章补全 shortId...`)
+      const generateShortId = () => Math.random().toString(36).substring(2, 8).toUpperCase()
+      const updateStmt = db.prepare('UPDATE articles SET shortId = ? WHERE path = ?')
 
-    // 使用事务提高效率
-    const transaction = db.transaction((articles) => {
-      for (const art of articles) {
-        let sid = generateShortId()
-        // 简单冲突检查（小规模数据够用）
-        updateStmt.run(sid, art.path)
-      }
-    })
-    transaction(articlesWithoutShortId)
-    console.log('✅ 历史数据 shortId 补全完成')
+      // 使用事务提高效率
+      const transaction = db.transaction((articles) => {
+        for (const art of articles) {
+          let sid = generateShortId()
+          // 简单冲突检查（小规模数据够用）
+          updateStmt.run(sid, art.path)
+        }
+      })
+      transaction(articlesWithoutShortId)
+      console.log('✅ 历史数据 shortId 补全完成')
+    }
   }
 
   // 最后创建唯一索引
