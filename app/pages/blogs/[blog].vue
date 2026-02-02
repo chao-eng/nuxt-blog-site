@@ -106,11 +106,58 @@ const article = computed(() => articleData.value!)
 
 // 客户端逻辑
 const tocItems = ref<TocItem[]>([])
+const activeAnchorId = ref<string>('')
+const isScrollingToTarget = ref(false) // 标记是否正在执行点击目录后的滚动
+let scrollEndTimer: ReturnType<typeof setTimeout> | null = null
+
+// 平滑滚动到指定标题
+const scrollToHeading = (id: string) => {
+  // 立即设置激活状态,避免从第一个目录滑动到目标的动画
+  activeAnchorId.value = id
+  
+  // 设置滚动锁定,防止滚动过程中自动更新激活状态
+  isScrollingToTarget.value = true
+  
+  // 清除之前的定时器
+  if (scrollEndTimer) {
+    clearTimeout(scrollEndTimer)
+  }
+  
+  const element = document.getElementById(id)
+  if (element) {
+    const navbarHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height') || '64')
+    const offset = navbarHeight + 16 // navbar height + 1rem
+    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+    const offsetPosition = elementPosition - offset
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    })
+  } else {
+    isScrollingToTarget.value = false
+  }
+}
+
+// 检测滚动结束
+const checkScrollEnd = () => {
+  if (scrollEndTimer) {
+    clearTimeout(scrollEndTimer)
+  }
+  
+  // 如果正在锁定状态,等待滚动停止后解锁
+  if (isScrollingToTarget.value) {
+    scrollEndTimer = setTimeout(() => {
+      isScrollingToTarget.value = false
+      scrollEndTimer = null
+    }, 150) // 150ms 没有滚动事件就认为滚动结束
+  }
+}
+
 const anchors = computed<PageAnchor[]>(() =>
   tocItems.value.map(item => ({
     id: item.id,
     label: item.text,
-    to: `#${item.id}`,
     depth: item.level - 1
   }))
 )
@@ -141,6 +188,38 @@ const handleScroll = () => {
   const winScroll = document.documentElement.scrollTop
   const height = document.documentElement.scrollHeight - document.documentElement.clientHeight
   scrollPercent.value = (winScroll / height) * 100
+
+  // 检测滚动结束
+  checkScrollEnd()
+
+  // 只有在非点击滚动时才更新当前激活的目录项
+  if (!isScrollingToTarget.value) {
+    updateActiveAnchor()
+  }
+}
+
+// 更新当前激活的目录项
+const updateActiveAnchor = () => {
+  const navbarHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height') || '64')
+  const offset = navbarHeight + 100 // 增加一些缓冲
+
+  for (let i = tocItems.value.length - 1; i >= 0; i--) {
+    const item = tocItems.value[i]
+    if (!item) continue
+    const element = document.getElementById(item.id)
+    if (element) {
+      const rect = element.getBoundingClientRect()
+      if (rect.top <= offset) {
+        activeAnchorId.value = item.id
+        return
+      }
+    }
+  }
+  // 如果没有找到,设置为第一个
+  const firstItem = tocItems.value[0]
+  if (firstItem) {
+    activeAnchorId.value = firstItem.id
+  }
 }
 
 const localePath = useLocalePath()
@@ -636,11 +715,16 @@ const copyShortLink = () => {
               </div>
 
               <div class="toc-body p-2 max-h-[500px] overflow-y-auto scrollbar-thin">
-                <div v-if="anchors.length > 0">
-                  <UPageAnchors
-                    :links="anchors"
-                    class="premium-anchors"
-                  />
+                <div v-if="anchors.length > 0" class="premium-anchors">
+                  <a
+                    v-for="anchor in anchors"
+                    :key="anchor.id"
+                    :class="['toc-link', { active: activeAnchorId === anchor.id }]"
+                    :style="{ paddingLeft: `${(anchor.depth ?? 0) * 0.75 + 0.75}rem` }"
+                    @click.prevent="scrollToHeading(anchor.id!)"
+                  >
+                    {{ anchor.label }}
+                  </a>
                 </div>
                 <div v-else class="empty-toc py-12 text-center opacity-20">
                   <UIcon name="i-lucide-bookmark" class="w-8 h-8 mx-auto mb-2" />
@@ -657,7 +741,7 @@ const copyShortLink = () => {
 
 <style scoped>
 .article-page-premium {
-  --content-max-width: 900px;
+  --content-max-width: 1080px;
   --toc-width: 260px;
   --layout-gap: 3.5rem;
   --navbar-height: 64px;
@@ -805,9 +889,85 @@ const copyShortLink = () => {
   line-height: 1.9;
   color: #334155;
   background-color: transparent !important;
+
+  /* 标题层级优化 */
+  h1, h2, h3, h4, h5, h6 {
+    color: #1e293b !important;
+    font-weight: 800 !important;
+    margin-top: 2.5rem !important;
+    margin-bottom: 1.25rem !important;
+    line-height: 1.3 !important;
+  }
+
+  h1 { font-size: 2.25rem !important; border-bottom: 1px solid #f1f5f9 !important; padding-bottom: 0.5rem !important; }
+  h2 { font-size: 1.875rem !important; border-bottom: 1px solid #f8fafc !important; padding-bottom: 0.3rem !important; }
+  h3 { font-size: 1.5rem !important; }
+
+  /* 显式修复列表展示问题 */
+  ul {
+    list-style-type: disc !important;
+    padding-left: 1.8rem !important;
+    margin-bottom: 1.5rem !important;
+    list-style-position: outside !important;
+  }
+
+  ol {
+    list-style-type: decimal !important;
+    padding-left: 1.8rem !important;
+    margin-bottom: 1.5rem !important;
+    list-style-position: outside !important;
+  }
+
+  li {
+    margin-bottom: 0.6rem !important;
+    padding-left: 0.2rem !important;
+    &::marker {
+      color: #6366f1 !important; /* 赋予序号/圆点主题色 */
+      font-weight: 700 !important;
+    }
+  }
+
+  /* 处理嵌套列表 */
+  li > ul, li > ol {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* 嵌套列表标识符切换 */
+  ul ul, ol ul { list-style-type: circle !important; }
+  ul ul ul, ol ol ul { list-style-type: square !important; }
+
+  /* 引用块样式 */
+  blockquote {
+    margin: 2rem 0 !important;
+    padding: 1rem 1.5rem !important;
+    color: #475569 !important;
+    background: #f8fafc !important;
+    border-left: 4px solid #6366f1 !important;
+    border-radius: 0.5rem 1rem 1rem 0.5rem !important;
+    font-style: italic !important;
+    p { margin-bottom: 0 !important; }
+  }
+
+  /* 分割线 */
+  hr {
+    height: 1px !important;
+    background: linear-gradient(to right, transparent, #e2e8f0, transparent) !important;
+    border: none !important;
+    margin: 3rem 0 !important;
+  }
 }
 
-.dark :deep(.markdown-body) { color: #cbd5e1; }
+.dark :deep(.markdown-body) {
+  color: #cbd5e1;
+  h1, h2, h3, h4, h5, h6 { color: #f8fafc !important; border-bottom-color: rgba(255,255,255,0.05) !important; }
+  blockquote {
+    background: rgba(255, 255, 255, 0.03) !important;
+    color: #94a3b8 !important;
+    border-left-color: #818cf8 !important;
+  }
+  hr { background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent) !important; }
+}
 
 /* 行内代码样式还原 */
 :deep(.markdown-body code:not(pre code)) {
@@ -916,7 +1076,7 @@ const copyShortLink = () => {
 
 .dark .toc-nav-premium { background: rgba(15, 23, 42, 0.85); border-color: rgba(255, 255, 255, 0.05); }
 
-.premium-anchors :deep(a) {
+.premium-anchors .toc-link {
   display: block;
   padding: 0.5rem 0.75rem;
   font-size: 0.8125rem;
@@ -924,30 +1084,40 @@ const copyShortLink = () => {
   color: #64748b;
   border-radius: 0.5rem;
   border-left: 2px solid transparent;
-  transition: all 0.3s;
+  cursor: pointer;
+  
+  /* 超出文本省略号截断 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-.premium-anchors :deep(a.active) {
+.premium-anchors .toc-link.active {
   color: #4f46e5;
   background: rgba(79, 70, 229, 0.08);
-  border-left-color: #4f46e5;
   font-weight: 700;
   transform: translateX(4px);
 }
 
-.dark .premium-anchors :deep(a.active) {
+.dark .premium-anchors .toc-link.active {
   color: #818cf8;
   background: rgba(129, 140, 248, 0.1);
 }
 
-.premium-anchors :deep(a:hover:not(.active)) {
+.premium-anchors .toc-link:hover:not(.active) {
   color: #4f46e5;
   background: #f8fafc;
 }
 
-.dark .premium-anchors :deep(a:hover:not(.active)) {
+.dark .premium-anchors .toc-link:hover:not(.active) {
   color: #818cf8;
   background: rgba(255, 255, 255, 0.02);
+}
+
+.toc-body { 
+  overflow-y: auto; 
+  overflow-x: hidden; /* 强制隐藏横向滑块 */
 }
 
 .toc-body::-webkit-scrollbar { width: 4px; }
