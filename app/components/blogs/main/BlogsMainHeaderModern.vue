@@ -10,6 +10,31 @@ const route = useRoute()
 const search = ref(route.query.search?.toString() || '')
 const isScrolled = ref(false)
 
+// Logo 三连击跳转后台
+let logoClickCount = 0
+let logoClickTimer: ReturnType<typeof setTimeout> | null = null
+
+const handleLogoClick = (e: MouseEvent) => {
+  logoClickCount++
+  
+  // 清除之前的定时器
+  if (logoClickTimer) {
+    clearTimeout(logoClickTimer)
+  }
+  
+  // 如果点击次数达到3次或以上,跳转到后台
+  if (logoClickCount >= 3) {
+    e.preventDefault() // 阻止默认导航
+    navigateTo(localePath('/admin'))
+    logoClickCount = 0
+  } else {
+    // 500ms 内没有新的点击,重置计数
+    logoClickTimer = setTimeout(() => {
+      logoClickCount = 0
+    }, 500)
+  }
+}
+
 // 监听滚动状态，实现导航栏背景变化
 onMounted(() => {
   const handleScroll = () => {
@@ -48,7 +73,6 @@ const navItems = computed(() => {
   }
 
   items.push({ label: t('nav.about'), to: localePath('/about'), icon: 'i-lucide-user' })
-  items.push({ label: t('nav.admin'), to: localePath('/admin/travel'), icon: 'i-lucide-shield' })
 
   return items
 })
@@ -83,6 +107,7 @@ const mobileMenuOpen = ref(false)
             to="/"
             class="logo-link"
             :class="{ 'logo-active': isHomeActive }"
+            @click="handleLogoClick"
           >
             <div class="logo-wrapper">
               <span class="logo-text">{{ navbarData.homeTitle }}</span>
