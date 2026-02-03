@@ -796,9 +796,9 @@ const copyShortLink = () => {
   transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   
   /* 比例与高度约束：防止长图灾难 */
-  aspect-ratio: 16 / 7; 
+  aspect-ratio: 16 / 9; 
   min-height: 240px;
-  max-height: 460px;
+  max-height: 600px;
   width: 100%;
 }
 
