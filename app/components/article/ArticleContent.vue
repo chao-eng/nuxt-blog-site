@@ -79,210 +79,227 @@
 
     <div v-if="vditorInstance" class="flex-shrink-0">
       <div class="metadata-console p-4">
-        <div v-show="isMetadataVisible" class="space-y-4 mb-4">
-          <!-- 第一行：标题、日期、状态 -->
-          <div class="grid grid-cols-12 gap-3">
-            <div class="col-span-12 lg:col-span-6 console-card p-4 transition-all hover:bg-white/10 dark:hover:bg-white/5">
-              <div class="flex items-center gap-2 mb-3">
-                <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1]" />
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('admin.art.title') }}</span>
+        <div v-show="isMetadataVisible" class="mb-6 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 backdrop-blur-sm shadow-sm transition-all">
+          <div class="flex flex-col divide-y divide-gray-100 dark:divide-gray-800">
+            
+            <!-- Title Row -->
+            <div class="flex items-center group hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+              <div class="w-24 md:w-32 shrink-0 px-4 py-3.5 text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider select-none">
+                {{ $t('admin.art.title') }}
               </div>
-              <UFormField required class="w-full">
+              <div class="flex-1 px-2 py-1">
                 <UInput
                   v-model="metadata.title"
                   :placeholder="$t('admin.art.titlePlaceholder')"
-                  size="md"
+                  size="sm"
                   variant="none"
-                  class="cyber-input-minimal w-full"
+                  :ui="{ base: 'p-2 text-sm font-semibold text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 bg-transparent focus:ring-0 shadow-none !text-left' }"
+                  class="w-full"
                 />
-              </UFormField>
+              </div>
             </div>
 
-            <div class="col-span-6 lg:col-span-3 console-card p-4">
-              <div class="flex items-center gap-2 mb-3">
-                <div class="w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_#818cf8]" />
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('admin.art.date') }}</span>
+            <!-- Date Row -->
+            <div class="flex items-center group hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+              <div class="w-24 md:w-32 shrink-0 px-4 py-3.5 text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider select-none">
+                {{ $t('admin.art.date') }}
               </div>
-              <UFormField required class="w-full">
+              <div class="flex-1 px-2 py-1">
                 <UInput
                   v-model="metadata.date"
                   type="datetime-local"
-                  size="md"
+                  size="sm"
                   variant="none"
-                  class="cyber-input-minimal w-full"
+                  :ui="{ base: 'p-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-transparent focus:ring-0 shadow-none !text-left' }"
+                  class="w-full"
                 />
-              </UFormField>
+              </div>
             </div>
 
-            <div class="col-span-6 lg:col-span-3 console-card p-4">
-              <div class="flex items-center gap-2 mb-3">
-                <div class="w-1.5 h-1.5 rounded-full" :class="metadata.published ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-orange-500 shadow-[0_0_8px_#f59e0b]'" />
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('admin.art.status') }}</span>
+            <!-- Status Row -->
+            <div class="flex items-center group hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+              <div class="w-24 md:w-32 shrink-0 px-4 py-3.5 text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider select-none">
+                {{ $t('admin.art.status') }}
               </div>
-              <div class="flex items-center justify-between h-10 px-3 rounded-xl bg-black/5 dark:bg-white/5 border border-white/5">
-                <span class="text-xs font-bold" :class="metadata.published ? 'text-green-500' : 'text-orange-500'">
-                  {{ metadata.published ? $t('admin.art.published') : $t('admin.art.draft') }}
-                </span>
+              <div class="flex-1 px-4 py-2 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                   <div class="relative flex h-2 w-2">
+                      <span v-if="metadata.published" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2" :class="metadata.published ? 'bg-green-500' : 'bg-amber-500'"></span>
+                   </div>
+                   <span class="text-sm font-medium" :class="metadata.published ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'">
+                     {{ metadata.published ? $t('admin.art.published') : $t('admin.art.draft') }}
+                   </span>
+                </div>
                 <USwitch
                   v-model="metadata.published"
-                  checked-icon="i-lucide-check"
-                  unchecked-icon="i-lucide-x"
-                  size="sm"
-                  color="success"
+                  size="md"
+                  class="ml-auto"
                 />
               </div>
             </div>
-          </div>
 
-          <!-- 第二行：描述、标签、封面 -->
-          <div class="grid grid-cols-12 gap-3">
-            <div class="col-span-12 lg:col-span-6 console-card p-4">
-              <div class="flex items-center gap-2 mb-3">
-                <div class="w-1.5 h-1.5 rounded-full bg-indigo-600 shadow-[0_0_8_#4f46e5]" />
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('admin.art.description') }}</span>
+            <!-- Description Row -->
+            <div class="flex group hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+              <div class="w-24 md:w-32 shrink-0 px-4 py-3.5 text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider select-none pt-4">
+                {{ $t('admin.art.description') }}
               </div>
-              <UFormField class="w-full">
+              <div class="flex-1 px-2 py-1.5">
                 <UTextarea
                   v-model="metadata.description"
                   :placeholder="$t('admin.art.descPlaceholder')"
                   :rows="2"
                   variant="none"
-                  class="cyber-input-minimal w-full"
                   autoresize
+                  :ui="{ base: 'p-2 text-sm text-gray-700 dark:text-gray-300 bg-transparent focus:ring-0 shadow-none !text-left' }"
+                  class="w-full"
                 />
-              </UFormField>
+              </div>
             </div>
 
-            <div class="col-span-12 lg:col-span-6 console-card p-4">
-              <div class="flex items-center gap-2 mb-3">
-                <div class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('admin.art.tags') }}</span>
+            <!-- Tags Row -->
+            <div class="flex items-center group hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+              <div class="w-24 md:w-32 shrink-0 px-4 py-3.5 text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider select-none">
+                {{ $t('admin.art.tags') }}
               </div>
-              <UFormField class="w-full">
-                <UInput
-                  v-model="tagsInput"
-                  :placeholder="$t('admin.art.tagsPlaceholder')"
-                  size="md"
-                  variant="none"
-                  class="cyber-input-minimal w-full"
-                  @blur="updateTags"
-                  @keyup.enter="updateTags"
-                />
-              </UFormField>
-              <div v-if="metadata.tags.length" class="flex flex-wrap gap-1 mt-2">
+              <div class="flex-1 px-4 py-2 flex flex-wrap items-center gap-2">
                 <UBadge
                   v-for="(tag, idx) in metadata.tags"
                   :key="idx"
-                  color="primary"
-                  variant="subtle"
-                  class="rounded-full px-2 py-0.5 cursor-pointer hover:bg-indigo-500/10 transition-colors"
-                  @click="removeTag(idx)"
+                  color="neutral"
+                  variant="soft"
+                  size="sm"
+                  class="rounded-md px-2 py-1 text-sm font-medium group/tag"
                 >
-                  <span class="text-[10px]">{{ tag }}</span>
+                  {{ tag }}
+                  <UButton
+                    icon="i-lucide-x"
+                    color="neutral"
+                    variant="link"
+                    :padded="false"
+                    size="xs"
+                    class="ml-1 opacity-50 hover:opacity-100"
+                    @click="removeTag(idx)"
+                  />
                 </UBadge>
-              </div>
-            </div>
-
-            <div class="col-span-12 lg:col-span-6 console-card p-4">
-              <div class="flex items-center gap-2 mb-3">
-                <div class="w-1.5 h-1.5 rounded-full bg-violet-500 shadow-[0_0_8px_#8b5cf6]" />
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('admin.art.cover') }}</span>
-              </div>
-              <div class="flex gap-2">
                 <UInput
-                  v-model="metadata.image"
-                  placeholder="Cover URL"
-                  size="md"
+                  v-model="tagsInput"
+                  :placeholder="metadata.tags.length ? '' : $t('admin.art.tagsPlaceholder')"
+                  size="sm"
                   variant="none"
-                  class="flex-1 cyber-input-minimal"
-                />
-                <UButton
-                  icon="i-lucide-camera"
-                  size="md"
-                  color="primary"
-                  variant="soft"
-                  class="rounded-xl shadow-sm hover:bg-indigo-500/10"
-                  @click="uploadCoverImage"
+                  :ui="{ base: 'p-1 text-sm bg-transparent focus:ring-0 shadow-none min-w-[150px] !text-left' }"
+                  class="min-w-[150px]"
+                  @blur="updateTags"
+                  @keyup.enter="updateTags"
                 />
               </div>
             </div>
 
-            <div class="col-span-12 lg:col-span-6 console-card p-4">
-              <div class="flex items-center gap-2 mb-3">
-                <div class="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6]" />
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $t('admin.art.shortId') }}</span>
+            <!-- Short ID Row -->
+            <div class="flex items-center group hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+              <div class="w-24 md:w-32 shrink-0 px-4 py-3.5 text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider select-none">
+                {{ $t('admin.art.shortId') }}
               </div>
-              <div class="flex gap-2">
-                <UInput
-                  v-model="metadata.shortId"
-                  :placeholder="$t('admin.art.shortIdPlaceholder')"
-                  size="md"
-                  variant="none"
-                  class="flex-1 cyber-input-minimal"
-                />
-                <UButton
-                  icon="i-lucide-refresh-cw"
-                  size="md"
-                  color="primary"
-                  variant="soft"
-                  class="rounded-xl shadow-sm hover:bg-indigo-500/10"
-                  @click="metadata.shortId = Math.random().toString(36).substring(2, 8).toUpperCase()"
-                />
+              <div class="flex-1 px-4 py-2 flex items-center justify-between">
+                 <div class="font-mono text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">
+                   {{ metadata.shortId || '-' }}
+                 </div>
+                 <UTooltip text="Regenerate ID">
+                   <UButton
+                      icon="i-lucide-refresh-cw"
+                      color="neutral"
+                      variant="ghost"
+                      size="xs"
+                      class="opacity-0 group-hover:opacity-100 transition-opacity"
+                      @click="metadata.shortId = Math.random().toString(36).substring(2, 8).toUpperCase()"
+                   />
+                 </UTooltip>
               </div>
             </div>
+
+            <!-- Cover Row -->
+            <div class="flex items-center group hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
+              <div class="w-24 md:w-32 shrink-0 px-4 py-3.5 text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider select-none">
+                {{ $t('admin.art.cover') }}
+              </div>
+              <div class="flex-1 px-2 py-1 flex items-center gap-3">
+                 <UInput
+                    v-model="metadata.image"
+                    placeholder="https://..."
+                    size="sm"
+                    variant="none"
+                    :ui="{ base: 'p-2 text-sm  dark:text-gray-400 bg-transparent focus:ring-0 shadow-none !text-left' }"
+                    class="flex-1"
+                  />
+                  <div v-if="metadata.image" class="relative items-center justify-center hidden sm:flex">
+                     <div class="relative h-8 w-12 rounded overflow-hidden bg-gray-100 border border-gray-200 dark:border-gray-700 shrink-0 group/preview">
+                       <img :src="metadata.image" class="h-full w-full object-cover" />
+                       <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" @click="metadata.image = ''">
+                          <UIcon name="i-lucide-x" class="w-3 h-3 text-white" />
+                       </div>
+                     </div>
+                  </div>
+                  <UButton
+                    icon="i-lucide-image"
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    class="mr-2"
+                    @click="uploadCoverImage"
+                 />
+              </div>
+            </div>
+
+            <!-- Options Row -->
+            <div class="flex items-center justify-between px-4 py-2 bg-gray-50/30 dark:bg-gray-800/20">
+               <div class="flex items-center gap-3">
+                 <span class="text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider">{{ $t('admin.art.options') }}</span>
+                 <div class="h-4 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
+                 <div class="flex items-center gap-2">
+                   <USwitch v-model="metadata.isSticky" size="xs" color="primary" />
+                   <span class="text-xs  dark:text-gray-400">{{ $t('admin.art.homeSticky') }}</span>
+                 </div>
+               </div>
+               
+               <UButton   
+                  :label="$t('admin.art.collapseMetadata')"
+                  icon="i-lucide-chevron-up"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  class=" hover:text-gray-900 dark:hover:text-white"
+                  @click="isMetadataVisible = false"
+                />
+            </div>
+
           </div>
         </div>
 
-        <!-- 第三行：模式切换与置顶（始终可见，用于收纳/展开） -->
-        <div class="flex flex-wrap lg:flex-nowrap gap-3 h-full">
-          <div v-if="metadata.image && isMetadataVisible" class="w-full lg:w-48 flex-shrink-0">
-            <div class="console-card p-2 h-full relative group overflow-hidden">
-              <img :src="metadata.image" class="w-full aspect-video object-cover rounded-lg border border-white/10 shadow-inner" />
-              <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg backdrop-blur-sm">
-                 <UButton icon="i-lucide-trash-2" color="error" size="xs" variant="ghost" @click="metadata.image = ''" />
+        <!-- Collapsed state (simplified bar) -->
+        <div v-show="!isMetadataVisible" class="flex items-center justify-between p-3 border border-gray-200/60 dark:border-gray-800/60 rounded-xl mb-4 bg-primary-50/10 dark:bg-primary-950/10 backdrop-blur-md shadow-sm transition-all hover:bg-primary-50/20 dark:hover:bg-primary-950/20 group/bar">
+           <div class="flex items-center gap-6 px-2">
+              <div class="flex items-center gap-3">
+               <div class="w-24 md:w-32 shrink-0 px-4 py-3.5 text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider select-none">
+                {{ $t('admin.art.editorMode') }}
               </div>
-            </div>
-          </div>
-
-          <div class="flex-1 min-w-[300px]">
-            <div class="console-card p-3 h-full flex items-center justify-between">
-              <div class="flex items-center gap-4 px-2">
-                <div class="flex flex-col">
-                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ $t('admin.art.editorMode') }}</span>
-                  <URadioGroup
-                    v-model="currentMode"
-                    orientation="horizontal"
-                    :items="items"
-                    :ui="{ fieldset: 'flex gap-2' }"
-                  />
-                </div>
-                <div class="w-px h-10 bg-white/10 mx-2" />
-                <div class="flex items-center gap-3">
-                  <div class="flex flex-col">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">{{ $t('admin.art.homeSticky') }}</span>
-                    <div class="flex items-center gap-2">
-                       <USwitch v-model="metadata.isSticky" color="warning" size="sm" />
-                       <span class="text-[10px] font-bold" :class="metadata.isSticky ? 'text-orange-500' : 'text-gray-500'">
-                         {{ metadata.isSticky ? $t('admin.art.sticked') : $t('admin.art.notSticked') }}
-                       </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <UTooltip :text="isMetadataVisible ? $t('admin.art.collapseMetadata') : $t('admin.art.expandMetadata')">
-                <UButton
-                  :icon="isMetadataVisible ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-                  color="primary"
-                  :variant="isMetadataVisible ? 'ghost' : 'soft'"
-                  size="sm"
-                  class="rounded-xl transition-all hover:scale-110"
-                  :class="{ 'shadow-lg shadow-primary-500/20': !isMetadataVisible }"
-                  @click="isMetadataVisible = !isMetadataVisible"
+                <URadioGroup
+                  v-model="currentMode"
+                  orientation="horizontal"
+                  :items="items"
+                  class="scale-90 origin-left"
                 />
-              </UTooltip>
-            </div>
-          </div>
+              </div>
+           </div>
+           
+           <UButton
+              icon="i-lucide-chevron-down"
+              color="neutral"
+              variant="ghost"
+              size="xs"
+              class=" hover:text-gray-900 dark:hover:text-white"
+              :label="$t('admin.art.expandMetadata')" 
+              @click="isMetadataVisible = true"
+            />
         </div>
       </div>
     </div>
@@ -290,7 +307,7 @@
     <div class="flex-1 min-h-0 overflow-hidden dark:bg-gray-900/50 px-4 pb-4">
       <div 
         id="editor-canvas" 
-        class="w-full h-full bg-white dark:bg-slate-950 rounded-3xl border border-gray-200/50 dark:border-gray-800/50 shadow-sm overflow-hidden flex flex-col"
+        class="w-full h-full bg-white dark:bg-slate-950   overflow-hidden flex flex-col"
       >
         <iframe
           v-if="!vditorInstance"
@@ -338,7 +355,7 @@
           </div>
 
           <div class="form-group font-bold">
-            <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3 px-1">
+            <label class="block text-[10px] font-black  uppercase tracking-widest mb-3 px-1">
               {{ $t('admin.art.confirmDeleteLabel') }}
             </label>
             <div class="relative group">
@@ -877,6 +894,7 @@ watchDeep(
   letter-spacing: -0.01em;
   width: 100% !important;
   flex: 1;
+  text-align: left !important;
 }
 
 .cyber-input-minimal :deep(input:focus),
@@ -929,6 +947,11 @@ watchDeep(
   border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
   padding: 0 1.25rem !important;
   border-radius: 0 !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  mix-blend-mode: normal !important;
+  /* 确保不裁剪溢出的弹框 */
+  overflow: visible !important;
 }
 
 .dark :deep(.vditor-toolbar) {
