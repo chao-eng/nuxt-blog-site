@@ -2,7 +2,7 @@
 # ============= 构建阶段 =============
 FROM node:22-alpine AS builder
 
-RUN corepack enable && corepack prepare yarn@stable --activate
+RUN corepack enable
 WORKDIR /app
 
 # 安装编译依赖
@@ -12,21 +12,18 @@ RUN apk add --no-cache --virtual .build-deps \
     g++ \
     sqlite-dev
 
-COPY package.json yarn.lock .yarnrc ./
+COPY package.json yarn.lock .yarnrc.yml ./
 
-# 强制替换锁文件中的镜像源地址为官方源，确保下载稳定性
-RUN sed -i 's|https://registry.npmmirror.com|https://registry.npmjs.org|g' yarn.lock && \
-    sed -i 's|https://mirrors.huaweicloud.com/repository/npm|https://registry.npmjs.org|g' yarn.lock && \
-    yarn config set registry https://registry.npmjs.org/ && \
-    yarn install --frozen-lockfile
+# Yarn 4 完全忽略 ~/.npmrc，不需要替换 lockfile 中的镜像源
+RUN yarn install --frozen-lockfile
 
 COPY . .
 RUN yarn build
 
 
 # 关键：在构建产物中重新安装 better-sqlite3，确保编译产物完整适配
-RUN cp /app/yarn.lock /app/.output/server/
-RUN cd /app/.output/server && yarn add better-sqlite3 --registry https://registry.npmjs.org/ --production
+RUN cp /app/yarn.lock /app/.yarnrc.yml /app/.output/server/
+RUN cd /app/.output/server && yarn add better-sqlite3
 
 # 移除编译依赖
 RUN apk del .build-deps
