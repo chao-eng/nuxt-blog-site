@@ -28,7 +28,8 @@ export default defineNuxtConfig({
 
   devtools: {
     enabled: true
-  }, app: {
+  },
+  app: {
     head: {
       script: [],
       link: [
@@ -84,6 +85,11 @@ export default defineNuxtConfig({
     '/api/**': {
       cors: true
     }
+  },
+
+  sourcemap: {
+    server: false,
+    client: false
   },
 
   devServer: {

@@ -9,10 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        platform: [linux/amd64, linux/arm64] # 矩阵分发
 
     steps:
       - name: Checkout code
@@ -30,14 +26,16 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push
+      - name: Build and push multi-arch image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          platforms: ${{ matrix.platform }} # 每次只跑一个平台
-          cache-from: type=gha,scope=${{ matrix.platform }} # 分开缓存，防止冲突
-          cache-to: type=gha,mode=max,scope=${{ matrix.platform }}
+          # 关键修改：一次性指定两个平台，Docker 会自动生成合并的 manifest 清单
+          platforms: linux/amd64,linux/arm64
+          # 合并缓存
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/nuxt-blog-site:latest-${{ strategy.job-index }}
-            ${{ secrets.DOCKER_USERNAME }}/nuxt-blog-site:${{ github.sha }}-${{ strategy.job-index }}
+            ${{ secrets.DOCKER_USERNAME }}/nuxt-blog-site:latest
+            ${{ secrets.DOCKER_USERNAME }}/nuxt-blog-site:${{ github.sha }}
