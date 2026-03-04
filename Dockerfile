@@ -13,7 +13,12 @@ RUN apk add --no-cache --virtual .build-deps \
     sqlite-dev
 
 COPY package.json yarn.lock .yarnrc ./
-RUN yarn install --frozen-lockfile
+
+# 强制替换锁文件中的镜像源地址为官方源，确保下载稳定性
+RUN sed -i 's|https://registry.npmmirror.com|https://registry.npmjs.org|g' yarn.lock && \
+    sed -i 's|https://mirrors.huaweicloud.com/repository/npm|https://registry.npmjs.org|g' yarn.lock && \
+    yarn config set registry https://registry.npmjs.org/ && \
+    yarn install --frozen-lockfile
 
 COPY . .
 RUN yarn build
@@ -21,7 +26,7 @@ RUN yarn build
 
 # 关键：在构建产物中重新安装 better-sqlite3，确保编译产物完整适配
 RUN cp /app/yarn.lock /app/.output/server/
-RUN cd /app/.output/server && yarn add better-sqlite3 --frozen-lockfile --production
+RUN cd /app/.output/server && yarn add better-sqlite3 --registry https://registry.npmjs.org/ --production
 
 # 移除编译依赖
 RUN apk del .build-deps
