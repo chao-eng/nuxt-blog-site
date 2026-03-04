@@ -2,24 +2,26 @@
 # ============= 构建阶段 =============
 FROM node:22-alpine AS builder
 
-# 启用 Corepack 并在第一步就准备好 Yarn
-RUN corepack enable && corepack prepare yarn@1.22.22 --activate
+# 启用 Corepack 并安装构建依赖
+RUN corepack enable
 WORKDIR /app
 
-# 安装编译依赖
+# 安装编译依赖 (增加了 vips-dev 以支持 sharp，以及 git 等常用构建工具)
 RUN apk add --no-cache --virtual .build-deps \
     python3 \
     make \
     g++ \
-    sqlite-dev
+    git \
+    sqlite-dev \
+    vips-dev \
+    fftw-dev
 
 # 复制依赖定义
 COPY package.json yarn.lock .yarnrc ./
 
-# 使用 Docker BuildKit 的缓存挂载来加速 yarn install
-# 这可以在多次构建间共享 /usr/local/share/.cache/yarn，极大地提升 QEMU 下的构建速度
-RUN --mount=type=cache,target=/usr/local/share/.cache/yarn \
-    yarn install --frozen-lockfile
+# 使用更标准的 Yarn 缓存路径并暂时移除缓存挂载，以排除并发或路径权限导致的问题
+# 如果确定没有 lockfile 冲突，可以重新加回缓存挂载
+RUN yarn install --network-timeout 600000
 
 COPY . .
 RUN yarn build
