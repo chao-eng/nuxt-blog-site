@@ -49,7 +49,7 @@ const mapHistory = ref<{ mapName: string, adCode: string }[]>(
   [{ mapName: 'china', adCode: '100000' }] // 初始为全国
 )
 // 缓存已加载的 GeoJSON
-const geoJsonCache: Record<string, any> = {}
+const geoJsonCache: Record<string, unknown> = {}
 
 // 表单数据
 const formData = ref<TravelCity>({
@@ -105,10 +105,10 @@ async function loadAndRegisterNextMap(adCode: string): Promise<string> {
     throw new Error(`Failed to load map data for AdCode ${adCode}: ${mapResponse.err}`)
   }
 
-  const geoJson = mapResponse.data as any
+  const geoJson = mapResponse.data as Parameters<typeof echarts.registerMap>[1]
 
   // 3. 注册地图
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   echarts.registerMap(mapName, geoJson)
   geoJsonCache[adCode] = geoJson
 
@@ -128,7 +128,7 @@ function updateMapMarker() {
     backgroundColor: 'transparent',
     tooltip: {
       trigger: 'item',
-      formatter: (params: any) => {
+      formatter: (params: unknown) => {
         const p = params as { componentSubType: string, name: string }
         if (p.componentSubType === 'scatter') {
           return `
@@ -140,7 +140,7 @@ function updateMapMarker() {
               `
         }
         // 显示行政区划名称
-        return params.name
+        return p.name
       },
       backgroundColor: 'rgba(255, 255, 255, 0.95)',
       borderColor: '#e5e7eb',
@@ -150,8 +150,8 @@ function updateMapMarker() {
     geo: {
       map: currentMap.mapName, // 动态切换地图名称
       roam: true,
-      zoom: (chartInstance.getOption() as any)?.geo?.[0]?.zoom || 1, // 保持缩放
-      center: (chartInstance.getOption() as any)?.geo?.[0]?.center || undefined, // 保持中心
+      zoom: (chartInstance.getOption() as unknown as { geo: { zoom: number }[] })?.geo?.[0]?.zoom || 1, // 保持缩放
+      center: (chartInstance.getOption() as unknown as { geo: { center: [number, number] }[] })?.geo?.[0]?.center || undefined, // 保持中心
       label: {
         show: true,
         formatter: (params: { name: string }) => params.name,
@@ -288,9 +288,9 @@ async function initMap() {
     updateMapMarker()
 
     // 监听地图点击事件：实现钻取和选点
-    chartInstance.on('click', (params: any) => {
+    chartInstance.on('click', (params: unknown) => {
       const p = params as { componentType?: string, componentSubType?: string, name: string, event: { offsetX: number, offsetY: number } }
-      
+
       const handleClick = async () => {
         if (p.componentType === 'geo' || p.componentSubType === 'map') {
           if (!p.event) return
@@ -319,7 +319,8 @@ async function initMap() {
           } else {
             // 省级/市级地图 -> 查找下一级 AdCode
             const currentGeoJson = geoJsonCache[currentAdCode]
-            const feature = currentGeoJson?.features?.find((f: any) => f.properties.name === p.name)
+            const currentGeo = currentGeoJson as { features: { properties: { name: string, adcode: string } }[] }
+            const feature = currentGeo?.features?.find(f => f.properties.name === p.name)
             nextAdCode = feature?.properties?.adcode || ''
           }
 

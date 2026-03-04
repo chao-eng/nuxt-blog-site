@@ -116,6 +116,7 @@
             "shortId": "Short ID",
             "shortIdPlaceholder": "Enter or auto-generate...",
             "shortIdGenerated": "Short ID auto-generated",
+            "options": "More Options",
             "collapseMetadata": "Collapse Metadata",
             "expandMetadata": "Expand Metadata",
             "wysiwyg": "WYSIWYG",
@@ -139,7 +140,8 @@
             "coverUploadFailed": "Cover image upload failed",
             "loadFailed": "Failed to load article",
             "networkError": "Network error or server exception",
-            "editorPlaceholder": "Begin writing..."
+            "editorPlaceholder": "Begin writing...",
+            "selectToView": "Select an article to start editing"
         },
         "set": {
             "title": "Settings",

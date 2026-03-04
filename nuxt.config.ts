@@ -28,9 +28,13 @@ export default defineNuxtConfig({
 
   devtools: {
     enabled: true
-  }, app: {
+  },
+  app: {
     head: {
-      script: []
+      script: [],
+      link: [
+        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap' }
+      ]
     }
   },
 
@@ -81,6 +85,11 @@ export default defineNuxtConfig({
     '/api/**': {
       cors: true
     }
+  },
+
+  sourcemap: {
+    server: false,
+    client: false
   },
 
   devServer: {

@@ -13,15 +13,14 @@
         ]"
         @click="selectedArticle = article"
       >
-
         <div class="flex items-center gap-2 w-full min-w-0">
           <!-- 文章图标 -->
-          <Icon 
-            :name="article.published ? 'i-lucide-file-check' : 'i-lucide-file-edit'" 
+          <Icon
+            :name="article.published ? 'i-lucide-file-check' : 'i-lucide-file-edit'"
             class="w-4 h-4 flex-shrink-0 transition-colors"
             :class="selectedArticle?.path === article.path ? 'text-white' : 'text-primary-500'"
           />
-          
+
           <!-- 文章路径与短号组合 -->
           <div class="flex flex-col flex-1 min-w-0">
             <span class="text-sm font-bold truncate tracking-tight">
@@ -35,15 +34,15 @@
 
           <!-- 状态标识 -->
           <div class="flex items-center gap-1.5 flex-shrink-0">
-            <UBadge 
-              size="xs" 
-              variant="subtle" 
-              :color="article.published ? 'success' : 'warning'" 
+            <UBadge
+              size="xs"
+              variant="subtle"
+              :color="article.published ? 'success' : 'warning'"
               class="status-badge-mini"
             >
               {{ article.published ? t('admin.art.published') : t('admin.art.draft') }}
             </UBadge>
-            
+
             <!-- 元数据告警 -->
             <UTooltip v-if="!article.isSaved" :text="t('admin.art.unsavedMetadata') || '元数据未保存'">
               <Icon name="i-lucide-alert-circle" class="w-3 h-3 text-amber-500 animate-pulse" />
@@ -134,7 +133,6 @@ const selectedArticle = defineModel<Article | null>()
   transform: translateX(4px);
   z-index: 10;
 }
-
 
 .status-online {
   background: #22c55e;

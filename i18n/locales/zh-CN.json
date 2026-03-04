@@ -116,6 +116,7 @@
             "shortId": "短链 ID",
             "shortIdPlaceholder": "输入或自动生成...",
             "shortIdGenerated": "已自动生成短链 ID",
+            "options": "更多选项",
             "collapseMetadata": "收起元数据",
             "expandMetadata": "展开元数据",
             "wysiwyg": "所见即所得",
@@ -139,7 +140,8 @@
             "coverUploadFailed": "封面图上传失败",
             "loadFailed": "读取文章失败",
             "networkError": "网络错误或服务器异常",
-            "editorPlaceholder": "开始写作"
+            "editorPlaceholder": "开始写作",
+            "selectToView": "选择一篇文章开始编辑"
         },
         "set": {
             "title": "设置",

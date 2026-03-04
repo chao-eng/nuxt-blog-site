@@ -63,7 +63,14 @@ const rangeOptions = computed(() => [
 
 // 获取 Umami 统计数据
 // useFetch 会自动监听 computed query 的变化并重新请求，无需手动 watch
-const { data: umamiStats } = await useFetch<any>('/api/umami/stats', {
+const { data: umamiStats } = await useFetch<{
+  success: boolean
+  data?: {
+    visitors: number
+    visits: number
+    pageViews: number
+  }
+}>('/api/umami/stats', {
   lazy: true,
   server: false,
   query: computed(() => ({ range: selectedRange.value }))
@@ -72,7 +79,9 @@ const { data: umamiStats } = await useFetch<any>('/api/umami/stats', {
 
 <template>
   <footer class="footer-modern">
-    <UContainer class="max-w-6xl py-8"
+    <UContainer
+      class="max-w-6xl py-8"
+    >
       <!-- 主要内容区 -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <!-- 左侧信息 -->

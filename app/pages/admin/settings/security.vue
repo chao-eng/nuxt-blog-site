@@ -59,13 +59,17 @@ const repassword = async () => {
     <div class="space-y-6">
       <div class="flex items-center gap-2 px-2">
         <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1]" />
-        <h2 class="text-sm font-black text-gray-400 uppercase tracking-widest">{{ t('admin.set.security.password') }}</h2>
+        <h2 class="text-sm font-black text-gray-400 uppercase tracking-widest">
+          {{ t('admin.set.security.password') }}
+        </h2>
       </div>
 
       <div class="settings-section-card glass-morphism p-6 lg:p-10">
         <div class="flex flex-col md:flex-row gap-10">
           <div class="flex-1 space-y-2">
-            <h3 class="text-lg font-black text-gray-900 dark:text-white">{{ t('admin.set.security.setNewPassword') }}</h3>
+            <h3 class="text-lg font-black text-gray-900 dark:text-white">
+              {{ t('admin.set.security.setNewPassword') }}
+            </h3>
             <p class="text-xs text-gray-500 font-medium leading-relaxed">
               请确保您的新密码具有足够的复杂度，包含大写字母、数字和特殊符号。
             </p>
@@ -101,7 +105,7 @@ const repassword = async () => {
             </UFormField>
 
             <div class="pt-2">
-              <UButton 
+              <UButton
                 type="submit"
                 color="primary"
                 class="action-btn-glow h-11 px-8 rounded-xl font-bold uppercase tracking-widest transition-all"
@@ -118,19 +122,23 @@ const repassword = async () => {
     <div class="space-y-6">
       <div class="flex items-center gap-2 px-2">
         <div class="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]" />
-        <h2 class="text-sm font-black text-red-400 uppercase tracking-widest">Danger Zone</h2>
+        <h2 class="text-sm font-black text-red-400 uppercase tracking-widest">
+          Danger Zone
+        </h2>
       </div>
 
       <div class="danger-section-card p-6 lg:p-10 border border-red-500/20 bg-red-500/5 backdrop-blur-md rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-8">
         <div class="space-y-2 text-center md:text-left">
-          <h3 class="text-lg font-black text-red-500">{{ t('admin.set.security.deleteAccount') }}</h3>
+          <h3 class="text-lg font-black text-red-500">
+            {{ t('admin.set.security.deleteAccount') }}
+          </h3>
           <p class="text-xs text-red-400/80 font-medium max-w-md">
             {{ t('admin.set.security.deleteAccountDesc') }}
           </p>
         </div>
-        <UButton 
-          :label="t('admin.set.security.deleteAccountButton')" 
-          color="error" 
+        <UButton
+          :label="t('admin.set.security.deleteAccountButton')"
+          color="error"
           variant="soft"
           class="h-11 px-8 rounded-xl font-bold uppercase tracking-widest border border-red-500/20 hover:bg-red-500 hover:text-white transition-all shadow-lg shadow-red-500/10"
         />

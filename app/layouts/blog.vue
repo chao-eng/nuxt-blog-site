@@ -24,10 +24,10 @@ let bufferTimer: ReturnType<typeof setTimeout> | null = null
 const handleKeyPress = (e: KeyboardEvent) => {
   // 检查是否在输入框中
   const target = e.target as HTMLElement
-  const isInputElement = 
-    target.tagName === 'INPUT' || 
-    target.tagName === 'TEXTAREA' || 
-    target.isContentEditable
+  const isInputElement
+    = target.tagName === 'INPUT'
+      || target.tagName === 'TEXTAREA'
+      || target.isContentEditable
 
   // 如果在输入框中,不处理
   if (isInputElement) {

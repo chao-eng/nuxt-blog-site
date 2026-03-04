@@ -24,7 +24,12 @@ async function loadConfig() {
   try {
     const response = await $fetch<Result<Record<string, unknown>>>('/api/umami/config')
     if (response.success && response.data) {
-      const config = response.data as any
+      const config = response.data as {
+        enableUmami: boolean
+        scriptUrl: string
+        websiteId: string
+        shareUrl?: string
+      }
       enableUmami.value = config.enableUmami
       scriptUrl.value = config.scriptUrl
       websiteId.value = config.websiteId
@@ -90,8 +95,12 @@ onMounted(() => {
     <!-- 顶部操作栏 -->
     <div class="flex items-center justify-between px-2">
       <div class="flex flex-col gap-1">
-        <h2 class="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">{{ t('admin.set.umami.title') }}</h2>
-        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider opacity-70">Analytics Platform Integration</p>
+        <h2 class="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">
+          {{ t('admin.set.umami.title') }}
+        </h2>
+        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider opacity-70">
+          Analytics Platform Integration
+        </p>
       </div>
       <div class="flex items-center gap-3">
         <UButton
@@ -139,7 +148,9 @@ onMounted(() => {
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
-            <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">{{ t('admin.set.umami.basicConfig') }}</h3>
+            <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">
+              {{ t('admin.set.umami.basicConfig') }}
+            </h3>
           </div>
           <a href="https://umami.is/" target="_blank" class="flex items-center gap-1.5 text-xs font-bold text-indigo-500 hover:text-indigo-400 transition-colors uppercase tracking-widest bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20">
             {{ t('admin.set.umami.officialWebsite') }}
@@ -148,29 +159,51 @@ onMounted(() => {
         </div>
 
         <div class="p-4 rounded-2xl bg-indigo-500/5 border border-dashed border-indigo-500/20">
-           <div class="flex items-start gap-3">
-             <UIcon name="i-lucide-info" class="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
-             <div class="space-y-1">
-               <h4 class="text-sm font-black text-indigo-500 uppercase tracking-tight">{{ t('admin.set.umami.configInstructions') }}</h4>
-               <p class="text-xs text-gray-500 font-medium leading-relaxed">{{ t('admin.set.umami.configInstructionsDesc') }}</p>
-             </div>
-           </div>
+          <div class="flex items-start gap-3">
+            <UIcon name="i-lucide-info" class="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
+            <div class="space-y-1">
+              <h4 class="text-sm font-black text-indigo-500 uppercase tracking-tight">
+                {{ t('admin.set.umami.configInstructions') }}
+              </h4>
+              <p class="text-xs text-gray-500 font-medium leading-relaxed">
+                {{ t('admin.set.umami.configInstructionsDesc') }}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <UFormField :label="t('admin.set.umami.scriptUrl')" :required="enableUmami" class="md:col-span-2 cyber-field">
-            <UInput v-model="scriptUrl" :placeholder="t('admin.set.umami.scriptUrlPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="scriptUrl"
+              :placeholder="t('admin.set.umami.scriptUrlPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
 
           <UFormField :label="t('admin.set.umami.websiteId')" :required="enableUmami" class="cyber-field">
-            <UInput v-model="websiteId" :placeholder="t('admin.set.umami.websiteIdPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="websiteId"
+              :placeholder="t('admin.set.umami.websiteIdPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
 
           <UFormField :label="t('admin.set.umami.shareUrl')" class="cyber-field">
             <template #description>
               <span class="text-[10px] text-gray-400 font-medium">{{ t('admin.set.umami.shareUrlDesc') }}</span>
             </template>
-            <UInput v-model="shareUrl" :placeholder="t('admin.set.umami.shareUrlPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="shareUrl"
+              :placeholder="t('admin.set.umami.shareUrlPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
         </div>
       </section>

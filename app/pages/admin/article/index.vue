@@ -87,7 +87,8 @@ const createArticle = async () => {
       isSticky: false,
       author: '',
       avatar: '',
-      newBlog: true
+      newBlog: true,
+      shortId: ''
     }
 
     // 模拟创建延迟
@@ -158,7 +159,7 @@ watch(newArticlePath, () => {
           <UDashboardSidebarCollapse />
           <div class="flex items-center gap-2.5 ml-1">
             <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center shadow-inner">
-               <UIcon name="i-lucide-library" class="w-4 h-4 text-indigo-500" />
+              <UIcon name="i-lucide-library" class="w-4 h-4 text-indigo-500" />
             </div>
             <span class="text-base font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
               {{ t('admin.articles') }}
@@ -213,7 +214,9 @@ watch(newArticlePath, () => {
       <div class="empty-icon-pulse">
         <Icon name="i-lucide-scroll-text" class="w-12 h-12 text-primary-500/50" />
       </div>
-      <p class="mt-4 text-sm text-gray-400 font-medium tracking-wider">{{ t('admin.art.selectToView') || '选择一篇文章开始编辑' }}</p>
+      <p class="mt-4 text-sm text-gray-400 font-medium tracking-wider">
+        {{ t('admin.art.selectToView') || '选择一篇文章开始编辑' }}
+      </p>
     </div>
   </div>
 
@@ -273,7 +276,7 @@ watch(newArticlePath, () => {
               <span class="text-[10px] font-black text-primary-500 tracking-wider uppercase">{{ t('admin.art.pathRules') }}</span>
             </div>
             <ul class="space-y-2">
-              <li v-for="i in [1,2,3]" :key="i" class="flex items-start gap-2">
+              <li v-for="i in [1, 2, 3]" :key="i" class="flex items-start gap-2">
                 <Icon name="i-lucide-check-circle-2" class="w-3.5 h-3.5 text-green-500 mt-0.5" />
                 <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">{{ t(`admin.art.rule${i}`) }}</span>
               </li>

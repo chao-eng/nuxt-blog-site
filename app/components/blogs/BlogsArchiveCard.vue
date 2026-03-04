@@ -11,7 +11,7 @@ interface Props {
   published?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   path: '/',
   title: 'no-title',
   date: 'no-date',
@@ -164,6 +164,7 @@ const formatDate = (dateString: string) => {
   color: #64748b;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   font-weight: 500;

@@ -43,11 +43,11 @@ export function initSettingsTables(): void {
   createUmamiConfigTable.run()
 
   // 检查是否已有 share_url 列（用于迁移）
-  const umamiTableInfo = db.prepare("PRAGMA table_info('umami_config')").all() as any[]
+  const umamiTableInfo = db.prepare('PRAGMA table_info(\'umami_config\')').all() as { name: string }[]
   const hasShareUrl = umamiTableInfo.some(col => col.name === 'share_url')
   if (!hasShareUrl) {
     console.log('⚠️ umami_config 表缺少 share_url 列，正在添加...')
-    db.prepare("ALTER TABLE umami_config ADD COLUMN share_url TEXT DEFAULT ''").run()
+    db.prepare('ALTER TABLE umami_config ADD COLUMN share_url TEXT DEFAULT \'\'').run()
     console.log('✅ 已添加 share_url 列')
   }
 
@@ -81,11 +81,11 @@ export function initSettingsTables(): void {
   createS3ConfigTable.run()
 
   // 检查是否已有 path 列（用于迁移）
-  const s3TableInfo = db.prepare("PRAGMA table_info('s3_config')").all() as any[]
+  const s3TableInfo = db.prepare('PRAGMA table_info(\'s3_config\')').all() as { name: string }[]
   const hasS3Path = s3TableInfo.some(col => col.name === 'path')
   if (!hasS3Path) {
     console.log('⚠️ s3_config 表缺少 path 列，正在添加...')
-    db.prepare("ALTER TABLE s3_config ADD COLUMN path TEXT DEFAULT ''").run()
+    db.prepare('ALTER TABLE s3_config ADD COLUMN path TEXT DEFAULT \'\'').run()
     console.log('✅ 已添加 path 列')
   }
 

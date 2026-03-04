@@ -32,3 +32,4 @@ static/
 .env*
 # 但允许示例文件提交
 !.env*.example
+deploy-acr.sh

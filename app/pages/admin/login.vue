@@ -72,9 +72,10 @@ const formErrors = reactive({
   password: ''
 })
 
-function onError(event: any) {
-  const errors = event.errors || []
-  if (errors.length > 0) {
+function onError(event: unknown) {
+  const e = event as { errors?: { path: string }[] }
+  const errors = e.errors || []
+  if (errors.length > 0 && errors[0]?.path) {
     const element = document.getElementById(errors[0].path)
     element?.focus()
     element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -175,8 +176,12 @@ async function handleLogin(event: FormSubmitEvent<Schema>) {
             <div class="brand-icon-wrapper">
               <Icon name="i-lucide-sparkles" class="brand-icon" />
             </div>
-            <h1 class="brand-title">{{ t('login.title') }}</h1>
-            <p class="brand-subtitle">{{ t('login.subtitle') }}</p>
+            <h1 class="brand-title">
+              {{ t('login.title') }}
+            </h1>
+            <p class="brand-subtitle">
+              {{ t('login.subtitle') }}
+            </p>
           </div>
 
           <!-- 特性列表 -->
@@ -202,8 +207,12 @@ async function handleLogin(event: FormSubmitEvent<Schema>) {
         <div class="login-card">
           <!-- 表单头部 -->
           <div class="form-header">
-            <h2 class="form-title">{{ t('login.welcomeBack') }}</h2>
-            <p class="form-description">{{ t('login.enterCredentials') }}</p>
+            <h2 class="form-title">
+              {{ t('login.welcomeBack') }}
+            </h2>
+            <p class="form-description">
+              {{ t('login.enterCredentials') }}
+            </p>
           </div>
 
           <!-- 登录表单 -->
@@ -277,7 +286,7 @@ async function handleLogin(event: FormSubmitEvent<Schema>) {
           <!-- 表单底部 -->
           <div class="form-footer">
             <p class="footer-text">
-              {{ t('login.poweredBy') }} 
+              {{ t('login.poweredBy') }}
               <span class="gradient-text font-bold">Nuxt 3</span>
             </p>
           </div>

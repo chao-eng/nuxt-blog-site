@@ -219,8 +219,8 @@ onMounted(async () => {
         collapsible
         resizable
         class="admin-sidebar"
-        :ui="{ 
-          footer: 'lg:border-t lg:border-gray-200/50 dark:lg:border-gray-800/50' 
+        :ui="{
+          footer: 'lg:border-t lg:border-gray-200/50 dark:lg:border-gray-800/50'
         }"
       >
         <template #header="{ collapsed }">
@@ -255,7 +255,6 @@ onMounted(async () => {
             class="admin-nav-menu"
           />
         </template>
-        
         <template #footer="{ collapsed }">
           <div class="footer-glass py-2 px-1">
             <UserMenu :collapsed="collapsed" />
@@ -279,13 +278,14 @@ onMounted(async () => {
 
 /* 侧边栏玻璃态 */
 .admin-sidebar {
-  background: rgba(255, 255, 255, 0.4) !important;
-  backdrop-filter: blur(15px);
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) saturate(180%);
   border-right: 1px solid rgba(0, 0, 0, 0.05) !important;
 }
 
 .dark .admin-sidebar {
   background: rgba(10, 10, 15, 0.6) !important;
+  backdrop-filter: blur(24px) saturate(180%);
   border-right-color: rgba(255, 255, 255, 0.05) !important;
 }
 
@@ -294,31 +294,43 @@ onMounted(async () => {
   flex-shrink: 0;
   width: 2.25rem;
   height: 2.25rem;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.brand-logo:hover {
+  transform: scale(1.05);
 }
 
 .brand-logo::after {
   content: '';
   position: absolute;
   inset: -2px;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
   border-radius: 0.85rem;
   z-index: -1;
-  opacity: 0.3;
-  filter: blur(4px);
+  opacity: 0.35;
+  filter: blur(6px);
+  transition: opacity 0.3s ease;
+}
+
+.brand-logo:hover::after {
+  opacity: 0.5;
 }
 
 /* 搜索按钮美化 */
 .sidebar-search-btn {
-  background: rgba(0, 0, 0, 0.03) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
   border: 1px solid rgba(0, 0, 0, 0.05) !important;
   border-radius: 0.75rem !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer;
 }
 
 .dark .sidebar-search-btn {
@@ -329,11 +341,13 @@ onMounted(async () => {
 .sidebar-search-btn:hover {
   background: white !important;
   border-color: #6366f1 !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1) !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.12) !important;
+  transform: translateY(-1px);
 }
 
 .dark .sidebar-search-btn:hover {
-  background: rgba(30, 41, 59, 0.6) !important;
+  background: rgba(30, 41, 59, 0.8) !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15) !important;
 }
 
 /* 垂直导航菜单美化 */
@@ -345,15 +359,16 @@ onMounted(async () => {
   border-radius: 0.75rem !important;
   margin-bottom: 0.25rem !important;
   font-weight: 600 !important;
-  padding: 0.6rem 0.75rem !important;
-  transition: all 0.2s ease !important;
+  padding: 0.65rem 0.8rem !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer;
 }
 
 :deep(.admin-nav-menu [aria-current="page"]),
 :deep(.admin-nav-menu .router-link-active) {
   background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
   color: white !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+  box-shadow: 0 8px 16px -4px rgba(99, 102, 241, 0.4) !important;
 }
 
 :deep(.admin-nav-menu [aria-current="page"] .lucide),
@@ -361,13 +376,30 @@ onMounted(async () => {
   color: white !important;
 }
 
+:deep(.admin-nav-menu [role="menuitem"]:not(.router-link-active):hover) {
+  background: rgba(99, 102, 241, 0.08) !important;
+  transform: translateX(4px);
+}
+
 .footer-glass {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(0, 0, 0, 0.03);
+  backdrop-filter: blur(4px);
   border-radius: 1rem;
   margin: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
 }
 
 .dark .footer-glass {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.footer-glass:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.dark .footer-glass:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 </style>

@@ -30,7 +30,8 @@ spec/
 *.tar.gz
 yarn-error.log
 npm-debug.log
-.yarnrc.yml
+# .yarnrc.yml 需要被包含进 Docker 构建上下文（Yarn 4 配置）
+.yarnrc
 .yarn/cache
 .yarn/unplugged
 .yarn/build-state.yml

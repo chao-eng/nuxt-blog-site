@@ -49,7 +49,7 @@ export interface Article {
 }
 
 // 保存文章的入参类型（兼容新增和编辑）
-type SaveArticleParams = Omit<Article, 'tags' | 'modifyTime' | 'content' | 'isSaved' | 'author' | 'avatar' | 'newBlog'> & {
+export type SaveArticleParams = Omit<Article, 'tags' | 'modifyTime' | 'content' | 'isSaved' | 'author' | 'avatar' | 'newBlog' | 'shortId'> & {
   tags: string[]
   // 编辑时可选字段，新增时必传核心字段（title/date/content）
   title?: string
