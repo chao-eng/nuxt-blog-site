@@ -26,7 +26,7 @@ export function initArticleTable(): void {
   // 架构演进：添加 shortId 字段（如果不存在）
   try {
     console.log('📬 正在检查 articles 表架构更新...')
-    const tableInfo = db.prepare("PRAGMA table_info('articles')").all() as any[]
+    const tableInfo = db.prepare('PRAGMA table_info(\'articles\')').all() as { name: string }[]
     const hasShortId = tableInfo.some(col => col.name === 'shortId')
 
     if (!hasShortId) {
@@ -34,13 +34,13 @@ export function initArticleTable(): void {
       db.prepare('ALTER TABLE articles ADD COLUMN shortId TEXT').run()
       console.log('✅ shortId 字段添加完成')
     }
-  } catch (e: any) {
-    console.error('❌ 数据库迁移阶段1失败:', e.message)
+  } catch (e: unknown) {
+    console.error('❌ 数据库迁移阶段1失败:', (e as Error).message)
   }
 
   // 历史数据处理：为没有 shortId 的文章生成短 ID
   // 仅在 shortId 字段确实存在时才运行（二次确认）
-  const tableCheck = db.prepare("PRAGMA table_info('articles')").all() as any[]
+  const tableCheck = db.prepare('PRAGMA table_info(\'articles\')').all() as { name: string }[]
   if (tableCheck.some(col => col.name === 'shortId')) {
     const articlesWithoutShortId = dbCommon.all<{ path: string }>('SELECT path FROM articles WHERE shortId IS NULL OR shortId = \'\'')
     if (articlesWithoutShortId.length > 0) {
@@ -51,7 +51,7 @@ export function initArticleTable(): void {
       // 使用事务提高效率
       const transaction = db.transaction((articles) => {
         for (const art of articles) {
-          let sid = generateShortId()
+          const sid = generateShortId()
           // 简单冲突检查（小规模数据够用）
           updateStmt.run(sid, art.path)
         }
@@ -66,8 +66,8 @@ export function initArticleTable(): void {
     console.log('📇 正在检查并创建 shortId 索引...')
     db.prepare('CREATE UNIQUE INDEX IF NOT EXISTS idx_articles_shortId ON articles(shortId)').run()
     console.log('✅ shortId 索引创建/检查完成')
-  } catch (e: any) {
-    console.error('❌ 创建索引失败:', e.message)
+  } catch (e: unknown) {
+    console.error('❌ 创建索引失败:', (e as Error).message)
   }
 }
 
@@ -106,9 +106,9 @@ export const dbArticle = {
     if (!isEditMode) {
       const { title, date, published } = params
       // 核心字段校验：published 可能是布尔值 false（草稿），所以不能用 !published 直接判断
-      if (title === undefined || title === null || title === '' ||
-        date === undefined || date === null || date === '' ||
-        published === undefined || published === null) {
+      if (title === undefined || title === null || title === ''
+        || date === undefined || date === null || date === ''
+        || published === undefined || published === null) {
         throw new Error('新增文章必须传入 标题、创建时间、发布状态等核心字段')
       }
       const sql = `

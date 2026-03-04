@@ -93,8 +93,12 @@ function onFileClick() {
     <!-- 顶部操作栏 -->
     <div class="flex items-center justify-between px-2">
       <div class="flex flex-col gap-1">
-        <h2 class="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">{{ t('admin.set.account.config') }}</h2>
-        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider opacity-70">{{ t('admin.set.account.publicInfo') }}</p>
+        <h2 class="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">
+          {{ t('admin.set.account.config') }}
+        </h2>
+        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider opacity-70">
+          {{ t('admin.set.account.publicInfo') }}
+        </p>
       </div>
       <UButton
         form="settings"
@@ -122,10 +126,14 @@ function onFileClick() {
             <UIcon name="i-lucide-camera" class="w-4 h-4 text-white" />
           </div>
         </div>
-        
+
         <div class="flex flex-col gap-3 flex-1">
-          <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">{{ t('admin.set.account.avatar') }}</h3>
-          <p class="text-xs text-gray-500 font-medium max-w-sm">{{ t('admin.set.account.avatarDesc') }}</p>
+          <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">
+            {{ t('admin.set.account.avatar') }}
+          </h3>
+          <p class="text-xs text-gray-500 font-medium max-w-sm">
+            {{ t('admin.set.account.avatarDesc') }}
+          </p>
           <div class="flex items-center gap-3 mt-1">
             <UButton
               :label="t('admin.set.account.select')"

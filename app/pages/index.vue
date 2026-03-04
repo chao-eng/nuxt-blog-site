@@ -4,7 +4,7 @@ import { useHead } from 'nuxt/app'
 import { useBlogsPage } from '../data'
 
 const localePath = useLocalePath()
-const { t } = useI18n()
+
 const route = useRoute()
 
 // 配置页面布局
@@ -62,14 +62,6 @@ const totalPage = computed(() => {
   const total = blogsData.value?.total || 0
   return Math.ceil(total / elementPerPage.value)
 })
-
-// 每页显示数量选项
-const pageSizeOptions = computed(() => [
-  { label: `12 ${t('blog.itemsPerPage')}`, value: 12 },
-  { label: `16 ${t('blog.itemsPerPage')}`, value: 16 },
-  { label: `24 ${t('blog.itemsPerPage')}`, value: 24 },
-  { label: `48 ${t('blog.itemsPerPage')}`, value: 48 }
-])
 
 // 搜索状态计算属性
 const searchStats = computed(() => {

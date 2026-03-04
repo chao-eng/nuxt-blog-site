@@ -37,9 +37,10 @@ export function initDB(): void {
     console.log('✅ [DB] 设置系统就绪')
 
     console.log('✨ [DB] 数据库全部就绪')
-  } catch (error: any) {
-    console.error('❌ [DB] 初始化致命错误:', error.message)
-    console.error('堆栈跟踪:', error.stack)
+  } catch (error: unknown) {
+    const err = error as Error
+    console.error('❌ [DB] 初始化致命错误:', err.message)
+    console.error('堆栈跟踪:', err.stack)
   }
 }
 

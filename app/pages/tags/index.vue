@@ -46,7 +46,7 @@ const getTagSizeClass = (count: number) => {
   const min = Math.min(...counts)
   const range = max - min || 1
   const ratio = (count - min) / range
-  
+
   if (ratio > 0.8) return 'level-5'
   if (ratio > 0.6) return 'level-4'
   if (ratio > 0.4) return 'level-3'
@@ -86,7 +86,7 @@ useHead({
         <h1 class="tags-hero-title">
           {{ tagsPage.title }}
         </h1>
-        
+
         <p class="text-lg text-gray-500 dark:text-gray-400 font-medium max-w-2xl mx-auto leading-relaxed">
           {{ t('blog.exploreTags', { count: tags.length, total: totalArticles }) }}
         </p>
@@ -126,7 +126,7 @@ useHead({
             <div class="card-glass-content">
               <!-- 装饰背景 -->
               <div class="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-primary-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              
+
               <div class="flex items-center justify-between w-full">
                 <div class="flex items-center gap-4">
                   <div class="tag-icon-box">
@@ -141,13 +141,13 @@ useHead({
                     </span>
                   </div>
                 </div>
-                
+
                 <div class="go-button opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300">
                   <UIcon name="i-lucide-arrow-right" class="w-5 h-5 text-primary-500" />
                 </div>
               </div>
             </div>
-            
+
             <!-- 悬浮光影 -->
             <div class="absolute inset-0 bg-gradient-to-br from-primary-500/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           </NuxtLink>

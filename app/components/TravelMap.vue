@@ -135,7 +135,7 @@ async function initMap() {
       throw new Error(mapResponse.error || 'Failed to load map data')
     }
 
-    echarts.registerMap('china', mapResponse.data as any)
+    echarts.registerMap('china', mapResponse.data as Parameters<typeof echarts.registerMap>[1])
 
     loading.value = false
     await nextTick()
@@ -156,7 +156,7 @@ async function initMap() {
         label: { show: false },
         emphasis: {
           label: { show: false },
-          itemStyle: { 
+          itemStyle: {
             areaColor: colors.areaEmphasisColor,
             borderColor: '#4f46e5',
             borderWidth: 1.2
@@ -211,7 +211,7 @@ async function initMap() {
           data: travelCities.value,
           symbolSize: 12,
           rippleEffect: { brushType: 'stroke', scale: 3.5, period: 4 },
-          itemStyle: { 
+          itemStyle: {
             color: colors.markerColor
           },
           zlevel: 1
@@ -292,7 +292,7 @@ onUnmounted(() => {
         {{ t('nav.loading') }}
       </p>
     </div>
-    
+
     <div v-else-if="error" class="error-container">
       <p class="text-red-500 font-bold text-sm">
         {{ error }}
@@ -318,7 +318,9 @@ onUnmounted(() => {
                 <UIcon name="i-lucide-map-pin" class="w-5 h-5 text-indigo-600" />
               </div>
               <div>
-                <h3 class="text-slate-900 dark:text-white font-black text-lg leading-tight">{{ hoveredCity.name }}</h3>
+                <h3 class="text-slate-900 dark:text-white font-black text-lg leading-tight">
+                  {{ hoveredCity.name }}
+                </h3>
                 <span class="text-xs font-bold text-slate-400 tracking-wider">{{ hoveredCity.time }}</span>
               </div>
             </div>
@@ -338,10 +340,10 @@ onUnmounted(() => {
                     :key="currentPhotoIndex"
                     :src="hoveredCity.photos[currentPhotoIndex]"
                     class="w-full h-full object-cover"
-                    @error="(e: any) => e.target.style.display = 'none'"
+                    @error="(e: Event) => (e.target as HTMLImageElement).style.display = 'none'"
                   >
                 </Transition>
-                
+
                 <!-- 切换 -->
                 <div v-if="hoveredCity.photos.length > 1" class="absolute inset-0 flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button class="nav-btn" @click.stop="prevPhoto">

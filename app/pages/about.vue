@@ -69,7 +69,9 @@ useHead({
         <div class="content-section">
           <div class="section-header">
             <Icon name="i-lucide-user" class="section-icon" />
-            <h2 class="section-title">关于我</h2>
+            <h2 class="section-title">
+              关于我
+            </h2>
           </div>
 
           <p class="content-text">
@@ -82,8 +84,12 @@ useHead({
           <div class="contact-card">
             <Icon name="i-lucide-mail" class="contact-icon" />
             <div class="contact-content">
-              <h3 class="contact-title">随时欢迎交流与合作</h3>
-              <p class="contact-description">如果你对我的工作感兴趣，或者想要一起探讨技术话题，欢迎通过社交媒体联系我。</p>
+              <h3 class="contact-title">
+                随时欢迎交流与合作
+              </h3>
+              <p class="contact-description">
+                如果你对我的工作感兴趣，或者想要一起探讨技术话题，欢迎通过社交媒体联系我。
+              </p>
             </div>
           </div>
         </div>

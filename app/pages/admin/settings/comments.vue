@@ -25,7 +25,13 @@ async function loadConfig() {
   try {
     const response = await $fetch<Result<Record<string, unknown>>>('/api/comments/config')
     if (response.success && response.data) {
-      const config = response.data as any
+      const config = response.data as {
+        enableComments: boolean
+        repo: string
+        repoId: string
+        category: string
+        categoryId: string
+      }
       enableComments.value = config.enableComments
       repo.value = config.repo
       repoId.value = config.repoId
@@ -95,8 +101,12 @@ onMounted(() => {
     <!-- 顶部操作栏 -->
     <div class="flex items-center justify-between px-2">
       <div class="flex flex-col gap-1">
-        <h2 class="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">{{ t('admin.set.comments.title') }}</h2>
-        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider opacity-70">Configuration for Giscus</p>
+        <h2 class="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">
+          {{ t('admin.set.comments.title') }}
+        </h2>
+        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider opacity-70">
+          Configuration for Giscus
+        </p>
       </div>
       <div class="flex items-center gap-3">
         <UButton
@@ -144,7 +154,9 @@ onMounted(() => {
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
-            <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">Giscus Details</h3>
+            <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">
+              Giscus Details
+            </h3>
           </div>
           <a href="https://giscus.app/zh-CN" target="_blank" class="flex items-center gap-1.5 text-xs font-bold text-indigo-500 hover:text-indigo-400 transition-colors uppercase tracking-widest bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20">
             {{ t('admin.set.comments.getConfigInfo') }}
@@ -153,30 +165,58 @@ onMounted(() => {
         </div>
 
         <div class="p-4 rounded-2xl bg-indigo-500/5 border border-dashed border-indigo-500/20">
-           <div class="flex items-start gap-3">
-             <UIcon name="i-lucide-info" class="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
-             <div class="space-y-1">
-               <h4 class="text-sm font-black text-indigo-500 uppercase tracking-tight">{{ t('admin.set.comments.configInstructions') }}</h4>
-               <p class="text-xs text-gray-500 font-medium leading-relaxed">{{ t('admin.set.comments.configInstructionsDesc') }}</p>
-             </div>
-           </div>
+          <div class="flex items-start gap-3">
+            <UIcon name="i-lucide-info" class="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
+            <div class="space-y-1">
+              <h4 class="text-sm font-black text-indigo-500 uppercase tracking-tight">
+                {{ t('admin.set.comments.configInstructions') }}
+              </h4>
+              <p class="text-xs text-gray-500 font-medium leading-relaxed">
+                {{ t('admin.set.comments.configInstructionsDesc') }}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <UFormField :label="t('admin.set.comments.repository')" required class="cyber-field">
-            <UInput v-model="repo" :placeholder="t('admin.set.comments.repoPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="repo"
+              :placeholder="t('admin.set.comments.repoPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
 
           <UFormField :label="t('admin.set.comments.repositoryId')" required class="cyber-field">
-            <UInput v-model="repoId" :placeholder="t('admin.set.comments.repoIdPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="repoId"
+              :placeholder="t('admin.set.comments.repoIdPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
 
           <UFormField :label="t('admin.set.comments.category')" required class="cyber-field">
-            <UInput v-model="category" :placeholder="t('admin.set.comments.categoryPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="category"
+              :placeholder="t('admin.set.comments.categoryPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
 
           <UFormField :label="t('admin.set.comments.categoryId')" required class="cyber-field">
-            <UInput v-model="categoryId" :placeholder="t('admin.set.comments.categoryIdPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="categoryId"
+              :placeholder="t('admin.set.comments.categoryIdPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
         </div>
       </section>

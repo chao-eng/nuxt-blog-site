@@ -81,7 +81,6 @@
       <div class="metadata-console p-4">
         <div v-show="isMetadataVisible" class="mb-6 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900/50 backdrop-blur-sm shadow-sm transition-all">
           <div class="flex flex-col divide-y divide-gray-100 dark:divide-gray-800">
-            
             <!-- Title Row -->
             <div class="flex items-center group hover:bg-gray-50/50 dark:hover:bg-white/5 transition-colors">
               <div class="w-24 md:w-32 shrink-0 px-4 py-3.5 text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider select-none">
@@ -123,13 +122,13 @@
               </div>
               <div class="flex-1 px-4 py-2 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
-                   <div class="relative flex h-2 w-2">
-                      <span v-if="metadata.published" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2 w-2" :class="metadata.published ? 'bg-green-500' : 'bg-amber-500'"></span>
-                   </div>
-                   <span class="text-sm font-medium" :class="metadata.published ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'">
-                     {{ metadata.published ? $t('admin.art.published') : $t('admin.art.draft') }}
-                   </span>
+                  <div class="relative flex h-2 w-2">
+                    <span v-if="metadata.published" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                    <span class="relative inline-flex rounded-full h-2 w-2" :class="metadata.published ? 'bg-green-500' : 'bg-amber-500'" />
+                  </div>
+                  <span class="text-sm font-medium" :class="metadata.published ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'">
+                    {{ metadata.published ? $t('admin.art.published') : $t('admin.art.draft') }}
+                  </span>
                 </div>
                 <USwitch
                   v-model="metadata.published"
@@ -201,19 +200,19 @@
                 {{ $t('admin.art.shortId') }}
               </div>
               <div class="flex-1 px-4 py-2 flex items-center justify-between">
-                 <div class="font-mono text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">
-                   {{ metadata.shortId || '-' }}
-                 </div>
-                 <UTooltip text="Regenerate ID">
-                   <UButton
-                      icon="i-lucide-refresh-cw"
-                      color="neutral"
-                      variant="ghost"
-                      size="xs"
-                      class="opacity-0 group-hover:opacity-100 transition-opacity"
-                      @click="metadata.shortId = Math.random().toString(36).substring(2, 8).toUpperCase()"
-                   />
-                 </UTooltip>
+                <div class="font-mono text-sm text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded">
+                  {{ metadata.shortId || '-' }}
+                </div>
+                <UTooltip text="Regenerate ID">
+                  <UButton
+                    icon="i-lucide-refresh-cw"
+                    color="neutral"
+                    variant="ghost"
+                    size="xs"
+                    class="opacity-0 group-hover:opacity-100 transition-opacity"
+                    @click="metadata.shortId = Math.random().toString(36).substring(2, 8).toUpperCase()"
+                  />
+                </UTooltip>
               </div>
             </div>
 
@@ -223,90 +222,89 @@
                 {{ $t('admin.art.cover') }}
               </div>
               <div class="flex-1 px-2 py-1 flex items-center gap-3">
-                 <UInput
-                    v-model="metadata.image"
-                    placeholder="https://..."
-                    size="sm"
-                    variant="none"
-                    :ui="{ base: 'p-2 text-sm  dark:text-gray-400 bg-transparent focus:ring-0 shadow-none !text-left' }"
-                    class="flex-1"
-                  />
-                  <div v-if="metadata.image" class="relative items-center justify-center hidden sm:flex">
-                     <div class="relative h-8 w-12 rounded overflow-hidden bg-gray-100 border border-gray-200 dark:border-gray-700 shrink-0 group/preview">
-                       <img :src="metadata.image" class="h-full w-full object-cover" />
-                       <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" @click="metadata.image = ''">
-                          <UIcon name="i-lucide-x" class="w-3 h-3 text-white" />
-                       </div>
-                     </div>
+                <UInput
+                  v-model="metadata.image"
+                  placeholder="https://..."
+                  size="sm"
+                  variant="none"
+                  :ui="{ base: 'p-2 text-sm  dark:text-gray-400 bg-transparent focus:ring-0 shadow-none !text-left' }"
+                  class="flex-1"
+                />
+                <div v-if="metadata.image" class="relative items-center justify-center hidden sm:flex">
+                  <div class="relative h-8 w-12 rounded overflow-hidden bg-gray-100 border border-gray-200 dark:border-gray-700 shrink-0 group/preview">
+                    <img :src="metadata.image" class="h-full w-full object-cover">
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center cursor-pointer" @click="metadata.image = ''">
+                      <UIcon name="i-lucide-x" class="w-3 h-3 text-white" />
+                    </div>
                   </div>
-                  <UButton
-                    icon="i-lucide-image"
-                    color="neutral"
-                    variant="ghost"
-                    size="xs"
-                    class="mr-2"
-                    @click="uploadCoverImage"
-                 />
+                </div>
+                <UButton
+                  icon="i-lucide-image"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  class="mr-2"
+                  @click="uploadCoverImage"
+                />
               </div>
             </div>
 
             <!-- Options Row -->
             <div class="flex items-center justify-between px-4 py-2 bg-gray-50/30 dark:bg-gray-800/20">
-               <div class="flex items-center gap-3">
-                 <span class="text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider">{{ $t('admin.art.options') }}</span>
-                 <div class="h-4 w-px bg-gray-200 dark:bg-gray-700 mx-1"></div>
-                 <div class="flex items-center gap-2">
-                   <USwitch v-model="metadata.isSticky" size="xs" color="primary" />
-                   <span class="text-xs  dark:text-gray-400">{{ $t('admin.art.homeSticky') }}</span>
-                 </div>
-               </div>
-               
-               <UButton   
-                  :label="$t('admin.art.collapseMetadata')"
-                  icon="i-lucide-chevron-up"
-                  color="neutral"
-                  variant="ghost"
-                  size="xs"
-                  class=" hover:text-gray-900 dark:hover:text-white"
-                  @click="isMetadataVisible = false"
-                />
-            </div>
+              <div class="flex items-center gap-3">
+                <span class="text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider">{{ $t('admin.art.options') }}</span>
+                <div class="h-4 w-px bg-gray-200 dark:bg-gray-700 mx-1" />
+                <div class="flex items-center gap-2">
+                  <USwitch v-model="metadata.isSticky" size="xs" color="primary" />
+                  <span class="text-xs  dark:text-gray-400">{{ $t('admin.art.homeSticky') }}</span>
+                </div>
+              </div>
 
+              <UButton
+                :label="$t('admin.art.collapseMetadata')"
+                icon="i-lucide-chevron-up"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                class=" hover:text-gray-900 dark:hover:text-white"
+                @click="isMetadataVisible = false"
+              />
+            </div>
           </div>
         </div>
 
         <!-- Collapsed state (simplified bar) -->
         <div v-show="!isMetadataVisible" class="flex items-center justify-between p-3 border border-gray-200/60 dark:border-gray-800/60 rounded-xl mb-4 bg-primary-50/10 dark:bg-primary-950/10 backdrop-blur-md shadow-sm transition-all hover:bg-primary-50/20 dark:hover:bg-primary-950/20 group/bar">
-           <div class="flex items-center gap-6 px-2">
-              <div class="flex items-center gap-3">
-               <div class="w-24 md:w-32 shrink-0 px-4 py-3.5 text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider select-none">
+          <div class="flex items-center gap-6 px-2">
+            <div class="flex items-center gap-3">
+              <div class="w-24 md:w-32 shrink-0 px-4 py-3.5 text-xs font-semibold  dark:text-gray-400 uppercase tracking-wider select-none">
                 {{ $t('admin.art.editorMode') }}
               </div>
-                <URadioGroup
-                  v-model="currentMode"
-                  orientation="horizontal"
-                  :items="items"
-                  class="scale-90 origin-left"
-                />
-              </div>
-           </div>
-           
-           <UButton
-              icon="i-lucide-chevron-down"
-              color="neutral"
-              variant="ghost"
-              size="xs"
-              class=" hover:text-gray-900 dark:hover:text-white"
-              :label="$t('admin.art.expandMetadata')" 
-              @click="isMetadataVisible = true"
-            />
+              <URadioGroup
+                v-model="currentMode"
+                orientation="horizontal"
+                :items="items"
+                class="scale-90 origin-left"
+              />
+            </div>
+          </div>
+
+          <UButton
+            icon="i-lucide-chevron-down"
+            color="neutral"
+            variant="ghost"
+            size="xs"
+            class=" hover:text-gray-900 dark:hover:text-white"
+            :label="$t('admin.art.expandMetadata')"
+            @click="isMetadataVisible = true"
+          />
         </div>
       </div>
     </div>
 
     <div class="flex-1 min-h-0 overflow-hidden dark:bg-gray-900/50 px-4 pb-4">
-      <div 
-        id="editor-canvas" 
+      <div
+        id="editor-canvas"
         class="w-full h-full bg-white dark:bg-slate-950   overflow-hidden flex flex-col"
       >
         <iframe
@@ -502,12 +500,12 @@ const loadMetadata = (frontMatter: FrontMatter) => {
   // 智能显隐逻辑：检查核心元数据是否全部存在
   // 如果缺少 标题、日期、描述、封面、标签 中的任何一个，则默认展示面板，否则隐藏
   const isComplete = !!(
-    frontMatter.title &&
-    frontMatter.date &&
-    frontMatter.description &&
-    frontMatter.image &&
-    Array.isArray(frontMatter.tags) &&
-    frontMatter.tags.length > 0
+    frontMatter.title
+    && frontMatter.date
+    && frontMatter.description
+    && frontMatter.image
+    && Array.isArray(frontMatter.tags)
+    && frontMatter.tags.length > 0
   )
   isMetadataVisible.value = !isComplete
 }
@@ -919,7 +917,6 @@ watchDeep(
   background: rgba(15, 10, 10, 0.6) !important;
 }
 
-
 /* 工具栏图标大小 */
 :deep(.vditor-toolbar svg) {
   width: 16px !important;
@@ -989,8 +986,6 @@ watchDeep(
 
 :deep(.vditor-reset ol:not([class])) { list-style-type: decimal !important; }
 :deep(.vditor-reset ul:not([class])) { list-style-type: disc !important; }
-
-
 
 .dark :deep(.vditor-reset pre) {
   background: rgba(0, 0, 0, 0.25) !important;

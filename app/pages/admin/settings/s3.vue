@@ -26,9 +26,18 @@ const toast = useToast()
 async function loadConfig() {
   loading.value = true
   try {
-    const response = await $fetch<Result<Record<string, any>>>('/api/s3/config')
+    const response = await $fetch<Result<Record<string, unknown>>>('/api/s3/config')
     if (response.success && response.data) {
-      const config = response.data
+      const config = response.data as {
+        enableS3?: boolean
+        accessKeyId?: string
+        secretAccessKey?: string
+        region?: string
+        bucket?: string
+        endpoint?: string
+        publicUrl?: string
+        path?: string
+      }
       enableS3.value = !!config.enableS3
       accessKeyId.value = config.accessKeyId || ''
       secretAccessKey.value = config.secretAccessKey || ''
@@ -94,7 +103,7 @@ async function saveConfig() {
   } catch (error: unknown) {
     toast.add({
       title: t('admin.set.s3.saveFailed'),
-      description: (error as any).data?.err || (error as Error).message || t('admin.set.s3.saveError'),
+      description: (error as { data?: { err?: string } }).data?.err || (error as Error).message || t('admin.set.s3.saveError'),
       color: 'error'
     })
   } finally {
@@ -112,8 +121,12 @@ onMounted(() => {
     <!-- 顶部操作栏 -->
     <div class="flex items-center justify-between px-2">
       <div class="flex flex-col gap-1">
-        <h2 class="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">{{ t('admin.set.s3.title') }}</h2>
-        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider opacity-70">Obect Storage Service Settings</p>
+        <h2 class="text-xl font-black tracking-tight text-gray-900 dark:text-white uppercase">
+          {{ t('admin.set.s3.title') }}
+        </h2>
+        <p class="text-xs text-gray-500 font-bold uppercase tracking-wider opacity-70">
+          Obect Storage Service Settings
+        </p>
       </div>
       <div class="flex items-center gap-3">
         <UButton
@@ -161,47 +174,96 @@ onMounted(() => {
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <div class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
-            <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">{{ t('admin.set.s3.basicConfig') }}</h3>
+            <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest">
+              {{ t('admin.set.s3.basicConfig') }}
+            </h3>
           </div>
         </div>
 
         <div class="p-4 rounded-2xl bg-indigo-500/5 border border-dashed border-indigo-500/20">
-           <div class="flex items-start gap-3">
-             <UIcon name="i-lucide-info" class="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
-             <div class="space-y-1">
-               <h4 class="text-sm font-black text-indigo-500 uppercase tracking-tight">{{ t('admin.set.s3.configInstructions') }}</h4>
-               <p class="text-xs text-gray-500 font-medium leading-relaxed">{{ t('admin.set.s3.configInstructionsDesc') }}</p>
-             </div>
-           </div>
+          <div class="flex items-start gap-3">
+            <UIcon name="i-lucide-info" class="w-5 h-5 text-indigo-500 mt-0.5 shrink-0" />
+            <div class="space-y-1">
+              <h4 class="text-sm font-black text-indigo-500 uppercase tracking-tight">
+                {{ t('admin.set.s3.configInstructions') }}
+              </h4>
+              <p class="text-xs text-gray-500 font-medium leading-relaxed">
+                {{ t('admin.set.s3.configInstructionsDesc') }}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
           <UFormField :label="t('admin.set.s3.accessKeyId')" required class="cyber-field">
-            <UInput v-model="accessKeyId" :placeholder="t('admin.set.s3.accessKeyIdPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="accessKeyId"
+              :placeholder="t('admin.set.s3.accessKeyIdPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
 
           <UFormField :label="t('admin.set.s3.secretAccessKey')" required class="cyber-field">
-            <UInput v-model="secretAccessKey" type="password" :placeholder="t('admin.set.s3.secretAccessKeyPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="secretAccessKey"
+              type="password"
+              :placeholder="t('admin.set.s3.secretAccessKeyPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
 
           <UFormField :label="t('admin.set.s3.endpoint')" required class="cyber-field">
-            <UInput v-model="endpoint" :placeholder="t('admin.set.s3.endpointPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="endpoint"
+              :placeholder="t('admin.set.s3.endpointPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
 
           <UFormField :label="t('admin.set.s3.region')" required class="cyber-field">
-            <UInput v-model="region" :placeholder="t('admin.set.s3.regionPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="region"
+              :placeholder="t('admin.set.s3.regionPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
 
           <UFormField :label="t('admin.set.s3.bucket')" required class="cyber-field">
-            <UInput v-model="bucket" :placeholder="t('admin.set.s3.bucketPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="bucket"
+              :placeholder="t('admin.set.s3.bucketPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
 
           <UFormField :label="t('admin.set.s3.publicUrl')" required class="cyber-field">
-            <UInput v-model="publicUrl" :placeholder="t('admin.set.s3.publicUrlPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="publicUrl"
+              :placeholder="t('admin.set.s3.publicUrlPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
 
           <UFormField :label="t('admin.set.s3.path')" class="md:col-span-2 cyber-field">
-            <UInput v-model="path" :placeholder="t('admin.set.s3.pathPlaceholder')" size="xl" variant="none" class="cyber-input-minimal" />
+            <UInput
+              v-model="path"
+              :placeholder="t('admin.set.s3.pathPlaceholder')"
+              size="xl"
+              variant="none"
+              class="cyber-input-minimal"
+            />
           </UFormField>
         </div>
       </section>

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, h, resolveComponent } from 'vue'
-import type { TableColumn, TableRow, ContextMenuItem } from '@nuxt/ui'
+import type { TableColumn } from '@nuxt/ui'
 import type { Result } from '~/types'
-import { useClipboard } from '@vueuse/core'
 
 const { t } = useI18n()
 const localePath = useLocalePath()
@@ -14,7 +13,6 @@ definePageMeta({
 
 // --- 1. Component Resolution (Required for h() render function) ---
 const UButton = resolveComponent('UButton')
-// Simple html tags like 'img' or 'div' don't need resolution
 
 // --- 2. Types & State ---
 interface TravelCity {
@@ -30,7 +28,6 @@ const visible = ref(true)
 const loading = ref(false)
 const saving = ref(false)
 const toast = useToast()
-const { copy } = useClipboard()
 
 const tableData = ref<TravelCity[]>([])
 const rowSelection = ref<Record<string, boolean>>({}) // For Checkboxes
@@ -147,47 +144,6 @@ const columns: TableColumn<TravelCity>[] = [
   }
 ]
 
-// --- 5. Context Menu Logic ---
-const contextMenuItems = ref<ContextMenuItem[]>([])
-
-function getRowItems(row: TableRow<TravelCity>) {
-  return [
-    {
-      type: 'label' as const,
-      label: t('admin.tra.actions')
-    },
-    {
-      label: t('admin.tra.copyName'),
-      icon: 'i-lucide-copy',
-      onSelect() {
-        copy(row.original.name)
-        toast.add({ title: t('admin.tra.copied'), color: 'success' })
-      }
-    },
-    {
-      label: t('admin.tra.edit'),
-      icon: 'i-lucide-pencil',
-      onSelect() {
-        const index = tableData.value.indexOf(row.original)
-        editRecord(index)
-      }
-    },
-    { type: 'separator' as const },
-    {
-      label: t('admin.tra.copyJson'),
-      icon: 'i-lucide-code',
-      onSelect() {
-        copy(JSON.stringify(row.original, null, 2))
-        toast.add({ title: t('admin.tra.copied'), color: 'success' })
-      }
-    }
-  ]
-}
-
-function onContextmenu(_e: Event, row: TableRow<TravelCity>) {
-  contextMenuItems.value = getRowItems(row)
-}
-
 // --- 6. Data Loading ---
 async function loadData() {
   loading.value = true
@@ -263,15 +219,15 @@ onMounted(() => {
     <UDashboardNavbar class="navbar-modern">
       <template #leading>
         <div class="flex items-center gap-2">
-           <UDashboardSidebarCollapse />
-           <div class="flex items-center gap-2.5 ml-1">
-             <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center shadow-inner">
-                <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-indigo-500" />
-             </div>
-             <span class="text-base font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
-               {{ t('admin.tra.management') }}
-             </span>
-           </div>
+          <UDashboardSidebarCollapse />
+          <div class="flex items-center gap-2.5 ml-1">
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center shadow-inner">
+              <UIcon name="i-lucide-map-pin" class="w-4 h-4 text-indigo-500" />
+            </div>
+            <span class="text-base font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
+              {{ t('admin.tra.management') }}
+            </span>
+          </div>
         </div>
       </template>
 
@@ -318,7 +274,7 @@ onMounted(() => {
         <div class="flex flex-col">
           <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">{{ t('admin.tra.records') }}</span>
           <span class="text-lg font-black tracking-tighter text-indigo-500">
-            {{ tableData.length }} 
+            {{ tableData.length }}
             <small class="text-[10px] font-bold text-gray-400 ml-1">UNITS</small>
           </span>
         </div>
@@ -330,31 +286,36 @@ onMounted(() => {
       <section class="space-y-4">
         <div class="flex items-center gap-2 px-1">
           <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_#6366f1]" />
-          <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">{{ t('admin.tra.preview') }}</h3>
+          <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">
+            {{ t('admin.tra.preview') }}
+          </h3>
         </div>
 
         <div class="travel-table-card overflow-hidden">
-          <UContextMenu :items="contextMenuItems">
-            <UTable
-              v-model:row-selection="rowSelection"
-              :data="tableData"
-              :columns="columns"
-              :loading="loading"
-              class="travel-table"
-            >
-              <template #empty-state>
-                <div class="flex flex-col items-center justify-center py-12 gap-4">
-                  <div class="w-16 h-16 rounded-3xl bg-gray-50 dark:bg-white/5 flex items-center justify-center border border-dashed border-gray-200 dark:border-gray-700">
-                    <UIcon name="i-lucide-map" class="w-8 h-8 text-gray-300 dark:text-gray-600" />
-                  </div>
-                  <span class="text-sm font-bold text-gray-400 tracking-wide">{{ t('admin.tra.empty') }}</span>
-                  <UButton icon="i-lucide-plus" size="sm" class="action-btn-glow" @click="addRecord">
-                    {{ t('admin.tra.add') }}
-                  </UButton>
+          <UTable
+            v-model:row-selection="rowSelection"
+            :data="tableData"
+            :columns="columns"
+            :loading="loading"
+            class="travel-table"
+          >
+            <template #empty-state>
+              <div class="flex flex-col items-center justify-center py-12 gap-4">
+                <div class="w-16 h-16 rounded-3xl bg-gray-50 dark:bg-white/5 flex items-center justify-center border border-dashed border-gray-200 dark:border-gray-700">
+                  <UIcon name="i-lucide-map" class="w-8 h-8 text-gray-300 dark:text-gray-600" />
                 </div>
-              </template>
-            </UTable>
-          </UContextMenu>
+                <span class="text-sm font-bold text-gray-400 tracking-wide">{{ t('admin.tra.empty') }}</span>
+                <UButton
+                  icon="i-lucide-plus"
+                  size="sm"
+                  class="action-btn-glow"
+                  @click="addRecord"
+                >
+                  {{ t('admin.tra.add') }}
+                </UButton>
+              </div>
+            </template>
+          </UTable>
         </div>
       </section>
 
@@ -363,13 +324,27 @@ onMounted(() => {
         <div class="flex items-center justify-between px-1">
           <div class="flex items-center gap-2">
             <div class="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_#a855f7]" />
-            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">{{ t('admin.tra.jsonData') }}</h3>
+            <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">
+              {{ t('admin.tra.jsonData') }}
+            </h3>
           </div>
           <div class="flex gap-2">
-            <UButton size="xs" variant="soft" color="neutral" class="rounded-lg font-bold" @click="formatJson">
+            <UButton
+              size="xs"
+              variant="soft"
+              color="neutral"
+              class="rounded-lg font-bold"
+              @click="formatJson"
+            >
               {{ t('admin.tra.format') }}
             </UButton>
-            <UButton size="xs" variant="ghost" color="neutral" class="rounded-lg font-bold" @click="resetToExample">
+            <UButton
+              size="xs"
+              variant="ghost"
+              color="neutral"
+              class="rounded-lg font-bold"
+              @click="resetToExample"
+            >
               {{ t('admin.tra.example') }}
             </UButton>
           </div>
@@ -389,17 +364,17 @@ onMounted(() => {
       </section>
 
       <div class="flex justify-end gap-3 pt-4 pb-12">
-        <UButton 
-          variant="ghost" 
-          color="neutral" 
+        <UButton
+          variant="ghost"
+          color="neutral"
           class="h-11 px-6 rounded-xl font-bold uppercase tracking-widest transition-all hover:bg-gray-100 dark:hover:bg-white/5"
           @click="loadData"
         >
           {{ t('admin.tra.cancel') }}
         </UButton>
-        <UButton 
-          color="primary" 
-          :loading="saving" 
+        <UButton
+          color="primary"
+          :loading="saving"
           class="h-11 px-8 rounded-xl font-bold uppercase tracking-widest action-btn-glow"
           @click="saveData"
         >

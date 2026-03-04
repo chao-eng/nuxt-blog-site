@@ -67,7 +67,8 @@ const getArticles = async (): Promise<Result<Article[]>> => {
               author: '',
               avatar: '',
               newBlog: false,
-              isSticky: false
+              isSticky: false,
+              shortId: ''
             })
           }
         } catch (statError: unknown) {
@@ -86,7 +87,8 @@ const getArticles = async (): Promise<Result<Article[]>> => {
             author: '',
             avatar: '',
             newBlog: false,
-            isSticky: false
+            isSticky: false,
+            shortId: ''
           })
         }
       }

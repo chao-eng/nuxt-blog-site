@@ -85,11 +85,11 @@ const { data: articleData, error } = await useAsyncData(
         /!\[(.*?)\]\(\1\)/g, // 匹配 ![xxx](xxx) 格式（[]和()内容相同）
         `![$1](${prefix}$1)` // 替换为 ![xxx](前缀/xxx)
       ),
-      published: (res?.data?.frontMatter?.published as any) ?? false,
+      published: (res?.data?.frontMatter?.published as boolean) ?? false,
       author: res?.data?.author?.author || '',
       avatar: res?.data?.author?.avatar || '',
       adjacent: res?.data?.adjacent || { prev: null, next: null },
-      shortId: (res?.data?.frontMatter?.shortId as any) || ''
+      shortId: (res?.data?.frontMatter?.shortId as string) || ''
     }
   }
 )
@@ -114,15 +114,15 @@ let scrollEndTimer: ReturnType<typeof setTimeout> | null = null
 const scrollToHeading = (id: string) => {
   // 立即设置激活状态,避免从第一个目录滑动到目标的动画
   activeAnchorId.value = id
-  
+
   // 设置滚动锁定,防止滚动过程中自动更新激活状态
   isScrollingToTarget.value = true
-  
+
   // 清除之前的定时器
   if (scrollEndTimer) {
     clearTimeout(scrollEndTimer)
   }
-  
+
   const element = document.getElementById(id)
   if (element) {
     const navbarHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navbar-height') || '64')
@@ -144,7 +144,7 @@ const checkScrollEnd = () => {
   if (scrollEndTimer) {
     clearTimeout(scrollEndTimer)
   }
-  
+
   // 如果正在锁定状态,等待滚动停止后解锁
   if (isScrollingToTarget.value) {
     scrollEndTimer = setTimeout(() => {
@@ -326,7 +326,7 @@ onMounted(() => {
       if (codeElement) {
         try {
           await navigator.clipboard.writeText(codeElement.textContent || '')
-          
+
           // 成功反馈
           const originalHTML = btn.innerHTML
           // 切换为 Check 图标
@@ -457,10 +457,10 @@ const copyShortLink = () => {
   const host = window.location.origin
   // 确保从 computed 属性中正确取值
   const currentArticle = article.value
-  const shareUrl = currentArticle?.shortId 
+  const shareUrl = currentArticle?.shortId
     ? `${host}/s/${currentArticle.shortId}`
     : window.location.href
-  
+
   navigator.clipboard.writeText(shareUrl).then(() => {
     toast.add({
       title: t('blog.shortLinkCopied'),
@@ -468,17 +468,17 @@ const copyShortLink = () => {
       color: 'primary',
       icon: 'i-lucide-check-circle'
     })
-  }).catch(err => {
+  }).catch((err) => {
     console.error('Copy failed:', err)
     // 降级处理：手动模拟复制
-    const textArea = document.createElement("textarea")
+    const textArea = document.createElement('textarea')
     textArea.value = shareUrl
     document.body.appendChild(textArea)
     textArea.select()
     try {
       document.execCommand('copy')
       toast.add({ title: t('blog.shortLinkCopied'), color: 'primary' })
-    } catch (e) {
+    } catch {
       toast.add({ title: '复制失败', color: 'error' })
     }
     document.body.removeChild(textArea)
@@ -612,12 +612,16 @@ const copyShortLink = () => {
               <!-- 结束语 -->
               <div class="flex flex-col items-center mb-12 text-center opacity-70">
                 <div class="w-24 h-1 bg-gradient-to-r from-transparent via-primary-500/50 to-transparent mb-6 transition-all hover:w-32" />
-                <p class="text-[10px] font-black uppercase tracking-[0.4em] font-outfit text-gray-400">End of Article</p>
+                <p class="text-[10px] font-black uppercase tracking-[0.4em] font-outfit text-gray-400">
+                  End of Article
+                </p>
               </div>
 
               <!-- 底部分享区：更有仪式感的呼吁 -->
               <div class="flex flex-col items-center mb-16 px-4">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">{{ $t('blog.shareShortLink') || 'Share this Article' }}</p>
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-6">
+                  {{ $t('blog.shareShortLink') || 'Share this Article' }}
+                </p>
                 <button
                   class="group relative flex items-center justify-center gap-4 px-12 py-4 rounded-3xl overflow-hidden transition-all duration-500 hover:scale-105 active:scale-95"
                   @click="copyShortLink"
@@ -625,7 +629,7 @@ const copyShortLink = () => {
                   <!-- 动态玻璃背景 -->
                   <div class="absolute inset-0 bg-primary-500/5 dark:bg-white/5 backdrop-blur-md transition-colors group-hover:bg-primary-500/10" />
                   <div class="absolute inset-0 border border-primary-500/10 dark:border-white/10 transition-all duration-500 group-hover:border-primary-500/30 group-hover:shadow-[0_0_40px_-10px_rgba(99,102,241,0.2)]" />
-                  
+
                   <UIcon name="i-lucide-share-2" class="relative z-10 w-5 h-5 text-primary-500 group-hover:rotate-12 transition-transform duration-500" />
                   <span class="relative z-10 text-sm font-black uppercase tracking-[0.1em] text-gray-700 dark:text-gray-200 group-hover:text-primary-500 transition-colors">
                     {{ article.shortId ? $t('blog.copyShortLink') : $t('blog.shareShortLink') }}
@@ -638,7 +642,12 @@ const copyShortLink = () => {
 
               <!-- 相关标签 -->
               <div v-if="article.tags?.length" class="mb-12 flex flex-wrap gap-4 justify-center">
-                <span v-for="tag in article.tags" :key="`footer-${tag}`" class="text-xs font-bold text-gray-400 hover:text-primary-500 cursor-pointer transition-colors" @click="navigateToTag(tag)">
+                <span
+                  v-for="tag in article.tags"
+                  :key="`footer-${tag}`"
+                  class="text-xs font-bold text-gray-400 hover:text-primary-500 cursor-pointer transition-colors"
+                  @click="navigateToTag(tag)"
+                >
                   #{{ tag }}
                 </span>
               </div>
@@ -728,7 +737,9 @@ const copyShortLink = () => {
                 </div>
                 <div v-else class="empty-toc py-12 text-center opacity-20">
                   <UIcon name="i-lucide-bookmark" class="w-8 h-8 mx-auto mb-2" />
-                  <p class="text-[10px] font-bold uppercase tracking-widest">{{ $t('blog.tocGenerating') }}</p>
+                  <p class="text-[10px] font-bold uppercase tracking-widest">
+                    {{ $t('blog.tocGenerating') }}
+                  </p>
                 </div>
               </div>
             </nav>
@@ -794,9 +805,9 @@ const copyShortLink = () => {
   box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.15);
   border: 1px solid rgba(0, 0, 0, 0.05);
   transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-  
+
   /* 比例与高度约束：防止长图灾难 */
-  aspect-ratio: 16 / 9; 
+  aspect-ratio: 16 / 9;
   min-height: 240px;
   max-height: 600px;
   width: 100%;
@@ -1085,7 +1096,7 @@ const copyShortLink = () => {
   border-radius: 0.5rem;
   border-left: 2px solid transparent;
   cursor: pointer;
-  
+
   /* 超出文本省略号截断 */
   white-space: nowrap;
   overflow: hidden;
@@ -1115,8 +1126,8 @@ const copyShortLink = () => {
   background: rgba(255, 255, 255, 0.02);
 }
 
-.toc-body { 
-  overflow-y: auto; 
+.toc-body {
+  overflow-y: auto;
   overflow-x: hidden; /* 强制隐藏横向滑块 */
 }
 

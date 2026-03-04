@@ -220,8 +220,12 @@ const quickLinks = [
                 <Icon :name="stat.icon" class="stat-icon" />
               </div>
               <div class="stat-content">
-                <p class="stat-label">{{ stat.label }}</p>
-                <p class="stat-value">{{ stat.value }}</p>
+                <p class="stat-label">
+                  {{ stat.label }}
+                </p>
+                <p class="stat-value">
+                  {{ stat.value }}
+                </p>
               </div>
             </div>
             <div class="stat-glow" :class="`bg-${stat.color}-500/20`" />
@@ -234,7 +238,7 @@ const quickLinks = [
             <Icon name="i-lucide-zap" class="section-icon" />
             {{ t('admin.dash.systemFeatures') }}
           </h2>
-          
+
           <div class="features-grid">
             <div
               v-for="(feature, index) in features"
@@ -246,7 +250,9 @@ const quickLinks = [
                 <div class="feature-icon-wrapper">
                   <Icon :name="feature.icon" class="feature-icon" />
                 </div>
-                <h3 class="feature-title">{{ feature.title }}</h3>
+                <h3 class="feature-title">
+                  {{ feature.title }}
+                </h3>
               </div>
               <ul class="feature-list">
                 <li v-for="item in feature.items" :key="item" class="feature-item">
@@ -264,7 +270,7 @@ const quickLinks = [
             <Icon name="i-lucide-code-2" class="section-icon" />
             {{ t('admin.dash.techStack') }}
           </h2>
-          
+
           <div class="tech-grid">
             <div
               v-for="(tech, index) in techStack"
@@ -284,7 +290,7 @@ const quickLinks = [
             <Icon name="i-lucide-rocket" class="section-icon" />
             {{ t('admin.dash.quickLinks') }}
           </h2>
-          
+
           <div class="quick-links-grid">
             <NuxtLink
               v-for="(link, index) in quickLinks"
