@@ -31,7 +31,13 @@ export default defineNuxtConfig({
   },
   app: {
     head: {
-      script: [],
+      script: [
+        {
+          async: true,
+          src: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7467235717306510',
+          crossorigin: 'anonymous'
+        }
+      ],
       link: [
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap' }
       ]
