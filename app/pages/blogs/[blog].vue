@@ -969,7 +969,7 @@ const copyShortLink = () => {
   }
 }
 
-.dark :deep(.markdown-body) {
+:deep(.markdown-body[data-color-mode="dark"]) {
   color: #cbd5e1;
   h1, h2, h3, h4, h5, h6 { color: #f8fafc !important; border-bottom-color: rgba(255,255,255,0.05) !important; }
   blockquote {
@@ -990,7 +990,7 @@ const copyShortLink = () => {
   border: 1px solid #e5e7eb !important;
 }
 
-.dark :deep(.markdown-body code:not(pre code)) {
+:deep(.markdown-body[data-color-mode="dark"] code:not(pre code)) {
   background-color: #1f2937 !important;
   color: #f87171 !important;
   border-color: #374151 !important;
@@ -1006,7 +1006,7 @@ const copyShortLink = () => {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
 }
 
-.dark :deep(.markdown-body pre) {
+:deep(.markdown-body[data-color-mode="dark"] pre) {
   background-color: #0f172a !important;
   border-color: #1e293b !important;
   box-shadow: none !important;
@@ -1021,35 +1021,75 @@ const copyShortLink = () => {
   border: 1px solid #f1f5f9;
 }
 
-.dark :deep(.premium-markdown-body img) { border-color: rgba(255, 255, 255, 0.05); }
+:deep(.premium-markdown-body[data-color-mode="dark"] img) { border-color: rgba(255, 255, 255, 0.05); }
 
 /* 表格 */
 :deep(.premium-markdown-body table) {
-  width: 100%;
+  width: 100% !important;
+  display: table !important;
   border-collapse: separate;
   border-spacing: 0;
-  margin: 2rem 0;
+  margin: 2.5rem 0;
   border: 1px solid #f1f5f9;
-  border-radius: 1.25rem;
-  overflow: hidden;
+  border-radius: 0 !important;
+  overflow: visible !important;
+  table-layout: auto;
+  background-color: transparent !important;
 }
 
-.dark :deep(.premium-markdown-body table) { border-color: rgba(255, 255, 255, 0.1); }
+/* 强制清除 github-markdown-css 默认的白色背景 */
+:deep(.premium-markdown-body tr),
+:deep(.premium-markdown-body th),
+:deep(.premium-markdown-body td) {
+  background-color: transparent !important;
+}
+
+/* 暗黑模式适配 - 强化选择器以匹配 HTML 结构 */
+:deep(.premium-markdown-body[data-color-mode="dark"] table) {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #f1f5f9 !important;
+  background-color: transparent !important;
+}
 
 :deep(.premium-markdown-body th) {
-  background: #f8fafc;
-  padding: 1rem;
+  background-color: #f8fafc !important;
+  padding: 1rem 1.25rem;
   font-weight: 800;
+  text-align: left;
+  border-right: 1px solid #f1f5f9;
 }
 
-.dark :deep(.premium-markdown-body th) { background: rgba(255, 255, 255, 0.05); }
+:deep(.premium-markdown-body[data-color-mode="dark"] th) {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-right-color: rgba(255, 255, 255, 0.2) !important;
+  color: #f8fafc !important;
+}
 
 :deep(.premium-markdown-body td) {
-  padding: 1rem;
+  padding: 1rem 1.25rem;
   border-top: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
 }
 
-.dark :deep(.premium-markdown-body td) { border-top-color: rgba(255, 255, 255, 0.1); }
+:deep(.premium-markdown-body[data-color-mode="dark"] td) {
+  border-top-color: rgba(255, 255, 255, 0.2) !important;
+  border-right-color: rgba(255, 255, 255, 0.2) !important;
+  color: #e2e8f0 !important;
+  background-color: transparent !important;
+}
+
+:deep(.premium-markdown-body tr) {
+  background-color: transparent !important;
+}
+
+/* 斑马纹效果 */
+:deep(.premium-markdown-body tr:nth-child(even)) {
+  background-color: rgba(248, 250, 252, 0.5) !important;
+}
+
+:deep(.premium-markdown-body[data-color-mode="dark"] tr:nth-child(even)) {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
 
 /* 底部导航卡片 */
 .nav-link-premium {
