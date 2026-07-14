@@ -640,7 +640,8 @@ const articleContent = async () => {
 
   // 只返回正文（不含 frontMatter）
   const prefix = '/api/article/fetch?path=' + encodeURIComponent(props.article.path + '/')
-  return result.data.content.replace(/!\[(.*?)\]\(\1\)/g, `![$1](${prefix}$1)`)
+  const cleanContent = result.data.content.replace(/!\[(.*?)\]\(\1\)(?:\s+|%20)?(?:.*?(?:%2[fF]|\/)\1\))?/g, '![$1]($1)')
+  return cleanContent.replace(/!\[(.*?)\]\(\1\)/g, `![$1](${prefix}$1)`)
 }
 
 /* 计算编辑器高度 */
@@ -779,7 +780,7 @@ const saveArticle = async () => {
   try {
     const frontmatter = generateFrontmatter()
     const fullContent = `${frontmatter}\n\n${body}`
-    const payload = fullContent.replace(/!\[(.*?)\]\((?:https?:\/\/[^\/]+)?\/api\/article\/fetch\?path=(.*?)(?:%2[fF]|\/)((?:(?!%2[fF])[^\/])+)\)/g, '![$1]($3)')
+    const payload = fullContent.replace(/!\[(.*?)\]\((?:https?:\/\/[^\/]+)?\/api\/article\/fetch\?path=(?:(.*?)(?:%2[fF]|\/))?((?:(?!%2[fF])[^\/)])+)\)(?:\s+|%20)?(?:.*?(?:%2[fF]|\/)\3\))?/g, '![$1]($3)')
 
     const res = await $fetch('/api/article/save', {
       method: 'PUT',

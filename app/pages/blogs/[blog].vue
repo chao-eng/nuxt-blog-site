@@ -72,7 +72,8 @@ const { data: articleData, error } = await useAsyncData(
 
     // 图片字符串替换
     const prefix = '/api/article/fetch?path=' + encodeURIComponent(blogPath + '/')
-    const content = res?.data?.content ?? ''
+    const rawContent = res?.data?.content ?? ''
+    const cleanContent = rawContent.replace(/!\[(.*?)\]\(\1\)(?:\s+|%20)?(?:.*?(?:%2[fF]|\/)\1\))?/g, '![$1]($1)')
 
     return {
       path: blogPath,
@@ -81,7 +82,7 @@ const { data: articleData, error } = await useAsyncData(
       description: res?.data?.frontMatter?.description ?? null,
       image: res?.data?.frontMatter?.image ?? null,
       tags: res?.data?.frontMatter?.tags ?? [],
-      content: content.replace(
+      content: cleanContent.replace(
         /!\[(.*?)\]\(\1\)/g, // 匹配 ![xxx](xxx) 格式（[]和()内容相同）
         `![$1](${prefix}$1)` // 替换为 ![xxx](前缀/xxx)
       ),
