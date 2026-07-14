@@ -779,7 +779,7 @@ const saveArticle = async () => {
   try {
     const frontmatter = generateFrontmatter()
     const fullContent = `${frontmatter}\n\n${body}`
-    const payload = fullContent.replace(/!\[(.*?)\]\(.*?\/api\/article\/fetch\?path=.*?\)/g, '![$1]($1)')
+    const payload = fullContent.replace(/!\[(.*?)\]\((?:https?:\/\/[^\/]+)?\/api\/article\/fetch\?path=(.*?)(?:%2[fF]|\/)((?:(?!%2[fF])[^\/])+)\)/g, '![$1]($3)')
 
     const res = await $fetch('/api/article/save', {
       method: 'PUT',
